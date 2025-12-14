@@ -1,0 +1,65 @@
+{
+    "name": "vibe-engine",
+    "version": "1.0.0",
+    "description": "VibeEngine 🌊 - TypeScript ECS Game Engine with Visual Editor",
+    "author": "Halil Emre",
+    "license": "SEE LICENSE FILE",
+    "type": "module",
+    "main": "electron/main.js",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "build:protected": "npm run build && npm run obfuscate",
+        "obfuscate": "javascript-obfuscator dist --output dist-protected --config obfuscator.config.json",
+        "electron": "npm run build && electron .",
+        "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+        "package": "npm run build:protected && electron-builder",
+        "package:win": "npm run build:protected && electron-builder --win",
+        "pack:sdk": "npm run build:protected && npm pack"
+    },
+    "dependencies": {
+        "three": "^0.160.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "@types/react": "^18.2.0",
+        "@types/react-dom": "^18.2.0",
+        "@types/three": "^0.160.0",
+        "@vitejs/plugin-react": "^4.2.0",
+        "concurrently": "^8.2.0",
+        "electron": "^28.0.0",
+        "electron-builder": "^24.9.0",
+        "javascript-obfuscator": "^4.1.0",
+        "lucide-react": "^0.294.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-resizable-panels": "^1.0.0",
+        "typescript": "^5.3.0",
+        "vite": "^5.0.0",
+        "wait-on": "^7.2.0",
+        "zustand": "^4.4.0"
+    },
+    "build": {
+        "appId": "com.vibeengine.editor",
+        "productName": "VibeEngine",
+        "directories": {
+            "output": "release",
+            "buildResources": "assets"
+        },
+        "files": [
+            "dist-protected/**/*",
+            "electron/**/*"
+        ],
+        "win": {
+            "target": "nsis",
+            "icon": "assets/icon.png"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true
+        },
+        "asar": true,
+        "asarUnpack": []
+    }
+}

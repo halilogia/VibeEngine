@@ -1,0 +1,220 @@
+/**
+ * Scene Store - Manages scene data for the editor
+ */
+
+import { create } from 'zustand';
+
+export interface EntityData {
+    id: number;
+    name: string;
+    parentId: number | null;
+    children: number[];
+    components: ComponentData[];
+    enabled: boolean;
+    tags: string[];
+}
+
+export interface ComponentData {
+    type: string;
+    data: Record<string, any>;
+    enabled: boolean;
+}
+
+interface SceneState {
+    // Entities
+    entities: Map<number, EntityData>;
+    rootEntityIds: number[];
+
+    // Counter for unique IDs
+    nextEntityId: number;
+
+    // Scene metadata
+    sceneName: string;
+    isDirty: boolean;
+
+    // Actions
+    addEntity: (name?: string, parentId?: number | null) => number;
+    removeEntity: (id: number) => void;
+    renameEntity: (id: number, name: string) => void;
+    setParent: (entityId: number, parentId: number | null) => void;
+    addComponent: (entityId: number, component: ComponentData) => void;
+    removeComponent: (entityId: number, componentType: string) => void;
+    updateComponent: (entityId: number, componentType: string, data: Record<string, any>) => void;
+    getEntity: (id: number) => EntityData | undefined;
+    clear: () => void;
+    markDirty: () => void;
+    markClean: () => void;
+}
+
+export const useSceneStore = create<SceneState>((set, get) => ({
+    entities: new Map(),
+    rootEntityIds: [],
+    nextEntityId: 1,
+    sceneName: 'Untitled Scene',
+    isDirty: false,
+
+    addEntity: (name = 'New Entity', parentId = null) => {
+        const id = get().nextEntityId;
+        const entity: EntityData = {
+            id,
+            name,
+            parentId,
+            children: [],
+            components: [
+                { type: 'Transform', data: { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }, enabled: true }
+            ],
+            enabled: true,
+            tags: []
+        };
+
+        set((state) => {
+            const newEntities = new Map(state.entities);
+            newEntities.set(id, entity);
+
+            let newRoots = [...state.rootEntityIds];
+            if (parentId === null) {
+                newRoots.push(id);
+            } else {
+                const parent = newEntities.get(parentId);
+                if (parent) {
+                    parent.children.push(id);
+                }
+            }
+
+            return {
+                entities: newEntities,
+                rootEntityIds: newRoots,
+                nextEntityId: id + 1,
+                isDirty: true
+            };
+        });
+
+        return id;
+    },
+
+    removeEntity: (id) => set((state) => {
+        const entity = state.entities.get(id);
+        if (!entity) return state;
+
+        const newEntities = new Map(state.entities);
+
+        // Remove from parent's children
+        if (entity.parentId !== null) {
+            const parent = newEntities.get(entity.parentId);
+            if (parent) {
+                parent.children = parent.children.filter(cid => cid !== id);
+            }
+        }
+
+        // Recursively remove children
+        const removeRecursive = (entityId: number) => {
+            const e = newEntities.get(entityId);
+            if (e) {
+                e.children.forEach(removeRecursive);
+                newEntities.delete(entityId);
+            }
+        };
+        removeRecursive(id);
+
+        // Remove from roots if applicable
+        const newRoots = state.rootEntityIds.filter(rid => rid !== id);
+
+        return { entities: newEntities, rootEntityIds: newRoots, isDirty: true };
+    }),
+
+    renameEntity: (id, name) => set((state) => {
+        const entity = state.entities.get(id);
+        if (!entity) return state;
+
+        const newEntities = new Map(state.entities);
+        newEntities.set(id, { ...entity, name });
+
+        return { entities: newEntities, isDirty: true };
+    }),
+
+    setParent: (entityId, parentId) => set((state) => {
+        const entity = state.entities.get(entityId);
+        if (!entity) return state;
+
+        const newEntities = new Map(state.entities);
+
+        // Remove from old parent
+        if (entity.parentId !== null) {
+            const oldParent = newEntities.get(entity.parentId);
+            if (oldParent) {
+                oldParent.children = oldParent.children.filter(id => id !== entityId);
+            }
+        }
+
+        // Update roots
+        let newRoots = state.rootEntityIds.filter(id => id !== entityId);
+
+        // Add to new parent
+        if (parentId === null) {
+            newRoots.push(entityId);
+        } else {
+            const newParent = newEntities.get(parentId);
+            if (newParent) {
+                newParent.children.push(entityId);
+            }
+        }
+
+        // Update entity
+        newEntities.set(entityId, { ...entity, parentId });
+
+        return { entities: newEntities, rootEntityIds: newRoots, isDirty: true };
+    }),
+
+    addComponent: (entityId, component) => set((state) => {
+        const entity = state.entities.get(entityId);
+        if (!entity) return state;
+
+        const newEntities = new Map(state.entities);
+        newEntities.set(entityId, {
+            ...entity,
+            components: [...entity.components, component]
+        });
+
+        return { entities: newEntities, isDirty: true };
+    }),
+
+    removeComponent: (entityId, componentType) => set((state) => {
+        const entity = state.entities.get(entityId);
+        if (!entity) return state;
+
+        const newEntities = new Map(state.entities);
+        newEntities.set(entityId, {
+            ...entity,
+            components: entity.components.filter(c => c.type !== componentType)
+        });
+
+        return { entities: newEntities, isDirty: true };
+    }),
+
+    updateComponent: (entityId, componentType, data) => set((state) => {
+        const entity = state.entities.get(entityId);
+        if (!entity) return state;
+
+        const newEntities = new Map(state.entities);
+        newEntities.set(entityId, {
+            ...entity,
+            components: entity.components.map(c =>
+                c.type === componentType ? { ...c, data: { ...c.data, ...data } } : c
+            )
+        });
+
+        return { entities: newEntities, isDirty: true };
+    }),
+
+    getEntity: (id) => get().entities.get(id),
+
+    clear: () => set({
+        entities: new Map(),
+        rootEntityIds: [],
+        nextEntityId: 1,
+        isDirty: false
+    }),
+
+    markDirty: () => set({ isDirty: true }),
+    markClean: () => set({ isDirty: false }),
+}));

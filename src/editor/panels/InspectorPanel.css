@@ -1,0 +1,178 @@
+/**
+ * InspectorPanel Styles v2
+ */
+
+.inspector-panel {
+    height: 100%;
+}
+
+.entity-header {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.entity-name-input {
+    width: 100%;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.entity-enabled {
+    font-size: 12px;
+    color: var(--editor-text-secondary);
+}
+
+.components-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.component-section {
+    background: var(--editor-bg-tertiary);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.component-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--editor-bg-hover);
+    font-weight: 500;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.component-header:hover {
+    background: var(--editor-bg-active);
+}
+
+.component-name {
+    flex: 1;
+}
+
+.component-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--editor-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition: var(--editor-transition);
+}
+
+.component-header:hover .component-remove {
+    opacity: 1;
+}
+
+.component-remove:hover {
+    background: var(--editor-error);
+    color: white;
+}
+
+.component-body {
+    padding: 12px;
+}
+
+/* Checkbox */
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.checkbox-wrapper input {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--editor-border);
+    border-radius: 4px;
+    background: var(--editor-bg-primary);
+    transition: var(--editor-transition);
+    position: relative;
+}
+
+.checkbox-wrapper input:checked+.checkbox-custom {
+    background: var(--editor-accent);
+    border-color: var(--editor-accent);
+}
+
+.checkbox-wrapper input:checked+.checkbox-custom::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Color input */
+.editor-input-color {
+    width: 100%;
+    height: 28px;
+    padding: 2px;
+    cursor: pointer;
+}
+
+/* Select */
+.editor-select {
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Add component */
+.add-component-wrapper {
+    position: relative;
+    margin-top: 12px;
+}
+
+.add-component-btn {
+    width: 100%;
+}
+
+.add-component-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--editor-bg-secondary);
+    border: 1px solid var(--editor-border);
+    border-radius: 6px;
+    padding: 4px;
+    margin-top: 4px;
+    z-index: 100;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.add-component-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--editor-transition);
+}
+
+.add-component-item:hover {
+    background: var(--editor-bg-hover);
+}

@@ -1,0 +1,72 @@
+/**
+ * HierarchyPanel Styles
+ */
+
+.hierarchy-panel {
+    height: 100%;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.panel-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--editor-text-secondary);
+    cursor: pointer;
+    transition: var(--editor-transition);
+}
+
+.panel-action-btn:hover {
+    background: var(--editor-bg-hover);
+    color: var(--editor-text-primary);
+}
+
+.panel-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    height: 100%;
+    color: var(--editor-text-muted);
+}
+
+.tree-view {
+    user-select: none;
+}
+
+.tree-node {
+    /* Container */
+}
+
+.tree-expand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    color: var(--editor-text-muted);
+    cursor: pointer;
+}
+
+.tree-expand:hover {
+    color: var(--editor-text-primary);
+}
+
+.tree-expand-placeholder {
+    width: 16px;
+}

@@ -1,0 +1,243 @@
+/**
+ * AssetsPanel Styles v2
+ */
+
+.assets-panel {
+    height: 100%;
+    position: relative;
+}
+
+.assets-panel.dragging {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.assets-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--editor-border);
+}
+
+.assets-search {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--editor-bg-primary);
+    border: 1px solid var(--editor-border);
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: var(--editor-text-muted);
+}
+
+.assets-search input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--editor-text-primary);
+    font-size: var(--editor-font-size);
+}
+
+.drop-zone-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(99, 102, 241, 0.2);
+    border: 2px dashed var(--editor-accent);
+    z-index: 10;
+    color: var(--editor-accent);
+    font-weight: 500;
+}
+
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    background: var(--editor-accent);
+    color: white;
+    font-size: 12px;
+}
+
+.loading-indicator .spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty-assets {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 100%;
+    color: var(--editor-text-muted);
+    padding: 20px;
+}
+
+.empty-assets .hint {
+    font-size: 11px;
+}
+
+.assets-content {
+    padding: 12px;
+    overflow: auto;
+    height: calc(100% - 80px);
+}
+
+.assets-content.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+}
+
+.assets-content.list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.asset-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--editor-transition);
+}
+
+.assets-content.list .asset-item {
+    flex-direction: row;
+    padding: 6px 8px;
+}
+
+.asset-item:hover {
+    background: var(--editor-bg-hover);
+}
+
+.asset-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--editor-bg-tertiary);
+    border-radius: 8px;
+    color: var(--editor-text-secondary);
+    overflow: hidden;
+}
+
+.asset-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.assets-content.list .asset-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.asset-icon.folder {
+    color: #f59e0b;
+}
+
+.asset-icon.model {
+    color: #6366f1;
+}
+
+.asset-icon.texture {
+    color: #22c55e;
+}
+
+.asset-icon.audio {
+    color: #ec4899;
+}
+
+.asset-icon.script {
+    color: #3b82f6;
+}
+
+.asset-name {
+    font-size: 11px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.asset-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 4px;
+    background: var(--editor-error);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    transition: var(--editor-transition);
+}
+
+.asset-item:hover .asset-delete {
+    opacity: 1;
+}
+
+.assets-content.list .asset-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.asset-icon.folder {
+    color: #f59e0b;
+}
+
+.asset-icon.model {
+    color: #6366f1;
+}
+
+.asset-icon.texture {
+    color: #22c55e;
+}
+
+.asset-icon.audio {
+    color: #ec4899;
+}
+
+.asset-icon.script {
+    color: #3b82f6;
+}
+
+.asset-name {
+    font-size: 11px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
