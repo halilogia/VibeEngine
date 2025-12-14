@@ -41,9 +41,20 @@ interface SceneState {
     removeComponent: (entityId: number, componentType: string) => void;
     updateComponent: (entityId: number, componentType: string, data: Record<string, any>) => void;
     getEntity: (id: number) => EntityData | undefined;
+    loadScene: (sceneData: SceneFileData) => void;
+    setSceneName: (name: string) => void;
     clear: () => void;
     markDirty: () => void;
     markClean: () => void;
+}
+
+// Scene file format
+export interface SceneFileData {
+    sceneName: string;
+    version: string;
+    nextEntityId: number;
+    entities: EntityData[];
+    rootEntityIds: number[];
 }
 
 export const useSceneStore = create<SceneState>((set, get) => ({
@@ -208,10 +219,31 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
     getEntity: (id) => get().entities.get(id),
 
+    loadScene: (sceneData) => set(() => {
+        const newEntities = new Map<number, EntityData>();
+        
+        for (const entity of sceneData.entities) {
+            newEntities.set(entity.id, entity);
+        }
+
+        console.log(`✅ Scene loaded: ${sceneData.sceneName} (${sceneData.entities.length} entities)`);
+        
+        return {
+            entities: newEntities,
+            rootEntityIds: sceneData.rootEntityIds,
+            nextEntityId: sceneData.nextEntityId,
+            sceneName: sceneData.sceneName,
+            isDirty: false
+        };
+    }),
+
+    setSceneName: (name) => set({ sceneName: name, isDirty: true }),
+
     clear: () => set({
         entities: new Map(),
         rootEntityIds: [],
         nextEntityId: 1,
+        sceneName: 'Untitled Scene',
         isDirty: false
     }),
 

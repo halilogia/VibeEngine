@@ -8,3 +8,4 @@ export { PhysicsSystem } from './PhysicsSystem';
 export { AnimationSystem } from './AnimationSystem';
 export { AudioSystem } from './AudioSystem';
 export { RenderSystem } from './RenderSystem';
+export { ParticleSystem } from './ParticleSystem';

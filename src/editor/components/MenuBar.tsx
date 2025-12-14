@@ -6,10 +6,10 @@ import React, { useState, useRef } from 'react';
 import {
     Save, FolderOpen, FilePlus, Settings, Download,
     Undo, Redo, Copy, Clipboard, Trash2,
-    Grid3X3, Axis3D
+    Grid3X3, Axis3D, Package
 } from 'lucide-react';
 import { useEditorStore, useSceneStore } from '../stores';
-import { downloadScene, loadSceneFromFile, createDefaultScene } from '../serialization';
+import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '../serialization';
 import './MenuBar.css';
 
 interface MenuItem {
@@ -59,12 +59,26 @@ export const MenuBar: React.FC = () => {
         useSceneStore.setState({ isDirty: false });
     };
 
+    const loadSampleScene = async (scenePath: string) => {
+        try {
+            const response = await fetch(scenePath);
+            const sceneData = await response.json();
+            useSceneStore.getState().loadScene(sceneData);
+        } catch (error) {
+            console.error('Failed to load sample scene:', error);
+            alert('Failed to load sample scene');
+        }
+    };
+
     const menus: MenuSection[] = [
         {
             label: 'File',
             items: [
                 { label: 'New Scene', icon: <FilePlus size={14} />, shortcut: 'Ctrl+N', action: handleNewScene },
                 { label: 'Open...', icon: <FolderOpen size={14} />, shortcut: 'Ctrl+O', action: handleOpen },
+                { divider: true, label: '' },
+                { label: '📂 Open MobRunner Project', action: () => loadSampleScene('/projects/MobRunner/Scenes/main.scene.json') },
+                { divider: true, label: '' },
                 { label: 'Save', icon: <Download size={14} />, shortcut: 'Ctrl+S', action: handleSave },
                 { divider: true, label: '' },
                 { label: 'Settings', icon: <Settings size={14} /> },
@@ -86,6 +100,12 @@ export const MenuBar: React.FC = () => {
             items: [
                 { label: showGrid ? 'Hide Grid' : 'Show Grid', icon: <Grid3X3 size={14} />, action: toggleGrid },
                 { label: showAxes ? 'Hide Axes' : 'Show Axes', icon: <Axis3D size={14} />, action: toggleAxes },
+            ]
+        },
+        {
+            label: 'Build',
+            items: [
+                { label: 'Export as HTML', icon: <Package size={14} />, action: () => exportToHTML(sceneName) },
             ]
         },
     ];

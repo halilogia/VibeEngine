@@ -11,3 +11,5 @@ export {
     type SerializedScene,
     type SerializedEntity
 } from './SceneSerializer';
+
+export { exportToHTML, getExportFormats } from './GameExporter';

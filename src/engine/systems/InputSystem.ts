@@ -23,6 +23,14 @@ export interface InputState {
     keysPressed: Set<string>;
     /** Keys released this frame */
     keysReleased: Set<string>;
+    /** Swipe direction detected this frame */
+    swipe: 'left' | 'right' | 'up' | 'down' | null;
+    /** Tap detected this frame */
+    tapped: boolean;
+    /** Double tap detected this frame */
+    doubleTapped: boolean;
+    /** Whether currently touching */
+    isTouching: boolean;
 }
 
 export class InputSystem extends System {
@@ -38,12 +46,25 @@ export class InputSystem extends System {
         keysDown: new Set(),
         keysPressed: new Set(),
         keysReleased: new Set(),
+        swipe: null,
+        tapped: false,
+        doubleTapped: false,
+        isTouching: false,
     };
 
     /** Touch movement state */
     private touchStartX = 0;
     private touchStartY = 0;
-    private isTouching = false;
+    private touchStartTime = 0;
+    private lastTapTime = 0;
+    private touchMoved = false;
+
+    /** Swipe threshold in pixels */
+    private readonly SWIPE_THRESHOLD = 50;
+    /** Tap max duration in ms */
+    private readonly TAP_DURATION = 200;
+    /** Double tap max gap in ms */
+    private readonly DOUBLE_TAP_GAP = 300;
 
     /** Axis mapping for keyboard */
     private keyAxisMapping = {
@@ -80,6 +101,9 @@ export class InputSystem extends System {
         // Clear per-frame states
         this.state.keysPressed.clear();
         this.state.keysReleased.clear();
+        this.state.swipe = null;
+        this.state.tapped = false;
+        this.state.doubleTapped = false;
     }
 
     destroy(): void {
@@ -124,7 +148,7 @@ export class InputSystem extends System {
         const hPositive = mapping.horizontal.positive.some(k => this.state.keysDown.has(k));
         const hNegative = mapping.horizontal.negative.some(k => this.state.keysDown.has(k));
 
-        if (!this.isTouching) {
+        if (!this.state.isTouching) {
             this.state.horizontal = (hPositive ? 1 : 0) - (hNegative ? 1 : 0);
         }
 
@@ -132,7 +156,7 @@ export class InputSystem extends System {
         const vPositive = mapping.vertical.positive.some(k => this.state.keysDown.has(k));
         const vNegative = mapping.vertical.negative.some(k => this.state.keysDown.has(k));
 
-        if (!this.isTouching) {
+        if (!this.state.isTouching) {
             this.state.vertical = (vPositive ? 1 : 0) - (vNegative ? 1 : 0);
         }
     }
@@ -167,14 +191,42 @@ export class InputSystem extends System {
             const touch = e.touches[0];
             this.touchStartX = touch.clientX;
             this.touchStartY = touch.clientY;
-            this.isTouching = true;
+            this.touchStartTime = Date.now();
+            this.touchMoved = false;
+            this.state.isTouching = true;
             this.state.isPointerDown = true;
             this.updateMousePosition(touch.clientX, touch.clientY);
         }
     };
 
-    private onTouchEnd = (): void => {
-        this.isTouching = false;
+    private onTouchEnd = (e: TouchEvent): void => {
+        const touchEndX = e.changedTouches[0]?.clientX ?? this.touchStartX;
+        const touchEndY = e.changedTouches[0]?.clientY ?? this.touchStartY;
+        const dx = touchEndX - this.touchStartX;
+        const dy = touchEndY - this.touchStartY;
+        const duration = Date.now() - this.touchStartTime;
+
+        // Detect swipe
+        if (!this.touchMoved || Math.abs(dx) > this.SWIPE_THRESHOLD || Math.abs(dy) > this.SWIPE_THRESHOLD) {
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > this.SWIPE_THRESHOLD) {
+                this.state.swipe = dx > 0 ? 'right' : 'left';
+            } else if (Math.abs(dy) > this.SWIPE_THRESHOLD) {
+                this.state.swipe = dy > 0 ? 'down' : 'up';
+            }
+        }
+
+        // Detect tap (short touch without much movement)
+        if (duration < this.TAP_DURATION && !this.touchMoved && Math.abs(dx) < 20 && Math.abs(dy) < 20) {
+            const now = Date.now();
+            if (now - this.lastTapTime < this.DOUBLE_TAP_GAP) {
+                this.state.doubleTapped = true;
+            } else {
+                this.state.tapped = true;
+            }
+            this.lastTapTime = now;
+        }
+
+        this.state.isTouching = false;
         this.state.isPointerDown = false;
         this.state.horizontal = 0;
         this.state.vertical = 0;
@@ -184,6 +236,7 @@ export class InputSystem extends System {
         if (e.touches.length > 0) {
             const touch = e.touches[0];
             this.updateMousePosition(touch.clientX, touch.clientY);
+            this.touchMoved = true;
 
             // Calculate virtual joystick from touch drag
             const dx = touch.clientX - this.touchStartX;

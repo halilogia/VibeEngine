@@ -22,8 +22,16 @@ export {
     Component,
     System,
     Scene,
+    SceneManager,
+    sceneManager,
+    StorageManager,
+    storage,
     type ComponentClass,
     type ApplicationOptions,
+    type GameState,
+    type StateConfig,
+    type GameData,
+    type GameSettings,
 } from './core';
 
 // Components
@@ -52,6 +60,7 @@ export {
     AnimationSystem,
     AudioSystem,
     RenderSystem,
+    ParticleSystem,
     type InputState,
 } from './systems';
 
@@ -66,8 +75,20 @@ export {
     Cooldown,
     Repeater,
     delay,
+    ObjectPool,
+    EntityPool,
     type LoadedModel,
+    type PrefabFactory,
 } from './utils';
 
+// UI
+export {
+    UIManager,
+    ui,
+    type UIElementConfig,
+    type UIElementStyle,
+    type UIElementType,
+} from './ui';
+
 // Version
-export const ENGINE_VERSION = '1.0.0';
+export const ENGINE_VERSION = '1.1.0';

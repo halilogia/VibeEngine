@@ -8,6 +8,7 @@ import {
     Grid, List, Upload, FolderPlus, Search, Trash2, Loader
 } from 'lucide-react';
 import { useAssetManager, type AssetEntry } from '../assets';
+import { useSceneStore, useEditorStore } from '../stores';
 import './AssetsPanel.css';
 
 type AssetType = 'folder' | 'model' | 'texture' | 'audio' | 'script' | 'other';
@@ -53,6 +54,8 @@ export const AssetsPanel: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { assets, loading, importModel, importTexture, removeAsset } = useAssetManager();
+    const { addEntity, addComponent } = useSceneStore();
+    const { selectEntity } = useEditorStore();
 
     // Convert Map to array
     const assetList = Array.from(assets.values());
@@ -60,6 +63,28 @@ export const AssetsPanel: React.FC = () => {
     const filteredAssets = assetList.filter(a =>
         a.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    // Double-click to add asset to scene
+    const addAssetToScene = useCallback((asset: AssetEntry) => {
+        const baseName = asset.name.replace(/\.[^/.]+$/, '');
+        const entityId = addEntity(baseName, null);
+
+        // Add Render component based on asset type
+        if (asset.type === 'model') {
+            addComponent(entityId, {
+                type: 'Render',
+                data: {
+                    meshType: 'cube',
+                    color: '#6366f1',
+                    modelPath: asset.url
+                },
+                enabled: true
+            });
+        }
+
+        selectEntity(entityId);
+        console.log(`✅ Added ${asset.name} to scene as entity #${entityId}`);
+    }, [addEntity, addComponent, selectEntity]);
 
     const handleImport = useCallback(async (files: FileList) => {
         for (let i = 0; i < files.length; i++) {
@@ -180,7 +205,12 @@ export const AssetsPanel: React.FC = () => {
                     </div>
                 ) : (
                     filteredAssets.map((asset) => (
-                        <div key={asset.id} className="asset-item">
+                        <div
+                            key={asset.id}
+                            className="asset-item"
+                            onDoubleClick={() => addAssetToScene(asset)}
+                            title="Double-click to add to scene"
+                        >
                             <div className={`asset-icon ${asset.type}`}>
                                 {asset.thumbnail ? (
                                     <img src={asset.thumbnail} alt={asset.name} />
@@ -191,7 +221,7 @@ export const AssetsPanel: React.FC = () => {
                             <span className="asset-name">{asset.name}</span>
                             <button
                                 className="asset-delete"
-                                onClick={() => removeAsset(asset.id)}
+                                onClick={(e) => { e.stopPropagation(); removeAsset(asset.id); }}
                                 title="Delete"
                             >
                                 <Trash2 size={12} />

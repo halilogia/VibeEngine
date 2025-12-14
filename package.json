@@ -2,10 +2,15 @@
     "name": "vibe-engine",
     "version": "1.0.0",
     "description": "VibeEngine 🌊 - TypeScript ECS Game Engine with Visual Editor",
-    "author": "Halil Emre",
+    "author": {
+        "name": "HEK Interactive",
+        "email": "hek.interactive@gmail.com",
+        "url": "https://hekinteractive.com"
+    },
+    "copyright": "Copyright © 2025 HEK Interactive",
     "license": "SEE LICENSE FILE",
     "type": "module",
-    "main": "electron/main.js",
+    "main": "electron/main.cjs",
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
@@ -41,25 +46,48 @@
         "zustand": "^4.4.0"
     },
     "build": {
-        "appId": "com.vibeengine.editor",
+        "appId": "com.hekinteractive.vibeengine",
         "productName": "VibeEngine",
+        "buildVersion": "1.0.0",
         "directories": {
             "output": "release",
             "buildResources": "assets"
         },
         "files": [
-            "dist-protected/**/*",
+            "dist/**/*",
             "electron/**/*"
         ],
         "win": {
-            "target": "nsis",
-            "icon": "assets/icon.png"
+            "target": [
+                {
+                    "target": "portable",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "icon": "assets/icon.png",
+            "publisherName": "HEK Interactive"
         },
         "nsis": {
             "oneClick": false,
-            "allowToChangeInstallationDirectory": true
+            "allowToChangeInstallationDirectory": true,
+            "installerIcon": "assets/icon.png",
+            "uninstallerIcon": "assets/icon.png",
+            "installerHeaderIcon": "assets/icon.png",
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "VibeEngine Standalone",
+            "license": "LICENSE"
         },
         "asar": true,
-        "asarUnpack": []
+        "asarUnpack": [],
+        "extraMetadata": {
+            "homepage": "https://hekinteractive.com",
+            "author": {
+                "name": "HEK Interactive",
+                "email": "hek.interactive@gmail.com"
+            }
+        }
     }
 }

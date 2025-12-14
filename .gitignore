@@ -3,6 +3,8 @@ node_modules/
 
 # Build output
 dist/
+dist-protected/
+release/
 
 # IDE
 .idea/
@@ -23,3 +25,27 @@ npm-debug.log*
 # Temp
 *.tmp
 *.temp
+
+# ========================================
+# GAME/PROJECT FILES - Not part of engine
+# ========================================
+
+# All static assets (projects create their own)
+public/
+
+# Game source code
+src/game/
+
+# Examples (demos, not core engine)
+src/examples/
+
+# 3D model files
+*.glb
+*.gltf
+*.fbx
+*.obj
+
+# Audio files  
+*.mp3
+*.wav
+*.ogg

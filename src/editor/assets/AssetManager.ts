@@ -23,10 +23,21 @@ interface AssetManagerState {
     // Actions
     importModel: (file: File) => Promise<AssetEntry | null>;
     importTexture: (file: File) => Promise<AssetEntry | null>;
+    loadAssetsFromDirectory: (basePath: string, files: string[]) => void;
     getAsset: (id: string) => AssetEntry | undefined;
     removeAsset: (id: string) => void;
     clear: () => void;
 }
+
+// Known asset files in public/models
+const KNOWN_ASSETS = [
+    { path: '/models/buildings/building1.glb', type: 'model' as const },
+    { path: '/models/buildings/building2.glb', type: 'model' as const },
+    { path: '/models/buildings/building3.glb', type: 'model' as const },
+    { path: '/models/roads/road_straight.glb', type: 'model' as const },
+    { path: '/models/vegetation/tree.glb', type: 'model' as const },
+    { path: '/ui/logo.png', type: 'texture' as const },
+];
 
 // Cache for loaded Three.js objects
 const loadedModels = new Map<string, THREE.Group>();
@@ -132,6 +143,38 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
         });
     },
 
+    loadAssetsFromDirectory: (basePath, files) => {
+        set((state) => {
+            const newAssets = new Map(state.assets);
+
+            for (const file of files) {
+                const id = generateId();
+                const name = file.split('/').pop() || file;
+                const ext = name.split('.').pop()?.toLowerCase();
+
+                let type: 'model' | 'texture' | 'audio' | 'script' = 'model';
+                if (['png', 'jpg', 'jpeg', 'webp'].includes(ext || '')) {
+                    type = 'texture';
+                } else if (['mp3', 'wav', 'ogg'].includes(ext || '')) {
+                    type = 'audio';
+                }
+
+                const entry: AssetEntry = {
+                    id,
+                    name,
+                    type,
+                    url: basePath + file,
+                    thumbnail: type === 'texture' ? basePath + file : undefined
+                };
+
+                newAssets.set(id, entry);
+            }
+
+            console.log(`✅ Loaded ${files.length} assets from ${basePath}`);
+            return { assets: newAssets };
+        });
+    },
+
     clear: () => {
         const { assets } = get();
         assets.forEach((asset) => URL.revokeObjectURL(asset.url));
@@ -140,6 +183,20 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
         set({ assets: new Map() });
     }
 }));
+
+// Auto-load known assets on import
+setTimeout(() => {
+    useAssetManager.getState().loadAssetsFromDirectory('', [
+        '/models/buildings/ModernBuilding1.glb',
+        '/models/buildings/ModernBuilding2.glb',
+        '/models/buildings/ModernBuilding3.glb',
+        '/models/roads/RoadStraight.glb',
+        '/models/vegetation/Tree1.glb',
+        '/audio/shoot.mp3',
+        '/audio/hit.mp3',
+        '/ui/logo.png',
+    ]);
+}, 100);
 
 /**
  * Get a cloned model from cache

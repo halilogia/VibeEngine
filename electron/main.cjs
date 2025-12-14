@@ -32,8 +32,8 @@ function createWindow() {
         mainWindow.loadURL('http://localhost:5173/editor.html');
         mainWindow.webContents.openDevTools();
     } else {
-        // Load obfuscated/protected build
-        mainWindow.loadFile(path.join(__dirname, '../dist-protected/editor.html'));
+        // Load build
+        mainWindow.loadFile(path.join(__dirname, '../dist/editor.html'));
     }
 
     // Show when ready
