@@ -143,6 +143,9 @@ export const AssetsPanel: React.FC = () => {
 
             <div className="editor-panel-header">
                 <span>Assets</span>
+                <span style={{ fontSize: '10px', color: '#888', marginLeft: '8px' }}>
+                    📂 Documents/VibeProjects/MobRunner
+                </span>
                 <div className="panel-actions">
                     <button
                         className={`panel-action-btn ${viewMode === 'grid' ? 'active' : ''}`}

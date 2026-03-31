@@ -66,22 +66,25 @@
                     ]
                 }
             ],
-            "icon": "assets/icon.png",
+            "icon": "assets/icon1.png",
             "publisherName": "HEK Interactive"
         },
         "nsis": {
             "oneClick": false,
             "allowToChangeInstallationDirectory": true,
-            "installerIcon": "assets/icon.png",
-            "uninstallerIcon": "assets/icon.png",
-            "installerHeaderIcon": "assets/icon.png",
+            "installerIcon": "assets/icon1.png",
+            "uninstallerIcon": "assets/icon1.png",
+            "installerHeaderIcon": "assets/icon1.png",
             "createDesktopShortcut": true,
             "createStartMenuShortcut": true,
             "shortcutName": "VibeEngine Standalone",
             "license": "LICENSE"
         },
-        "asar": true,
-        "asarUnpack": [],
+        "asar": false,
+        "asarUnpack": [
+            "**/*.dll",
+            "**/*.node"
+        ],
         "extraMetadata": {
             "homepage": "https://hekinteractive.com",
             "author": {

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeEngine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+            -webkit-app-region: drag;
+        }
+
+        .splash-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Circular glow effect behind logo */
+        .glow-effect {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                    rgba(138, 43, 226, 0.4) 0%,
+                    rgba(0, 191, 255, 0.3) 30%,
+                    rgba(138, 43, 226, 0.2) 50%,
+                    transparent 70%);
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+            filter: blur(20px);
+        }
+
+        .logo {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            animation: logo-appear 0.8s ease-out forwards, logo-breathe 2s ease-in-out infinite 0.8s;
+            z-index: 1;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.6));
+        }
+
+        @keyframes logo-appear {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes logo-breathe {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes glow-pulse {
+            0% {
+                opacity: 0.5;
+                transform: scale(0.9);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="splash-container">
+        <!-- Circular glow behind logo -->
+        <div class="glow-effect"></div>
+        <!-- Logo -->
+        <div class="logo">
+            <img src="./assets/icon1.png" alt="VibeEngine">
+        </div>
+    </div>
+    <script>
+        // Play startup sound
+        try {
+            const audio = new Audio('./assets/start.mp3');
+            audio.volume = 0.6;
+            audio.play().catch(() => { });
+        } catch (e) { }
+    </script>
+</body>
+
+</html>

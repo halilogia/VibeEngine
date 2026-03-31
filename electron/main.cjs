@@ -1,6 +1,6 @@
 /**
  * Electron Main Process
- * VibeEngine 🌊 - Desktop Application
+ * VibeEngine - Desktop Application with Splash Screen
  */
 
 const { app, BrowserWindow, Menu, shell } = require('electron');
@@ -9,16 +9,46 @@ const path = require('path');
 // Determine if in development
 const isDev = !app.isPackaged;
 
+let splashWindow = null;
 let mainWindow = null;
 
-function createWindow() {
+// Create splash screen first
+function createSplashWindow() {
+    splashWindow = new BrowserWindow({
+        width: 300,
+        height: 300,
+        frame: false,           // No window frame
+        transparent: true,      // Transparent background
+        alwaysOnTop: true,
+        center: true,
+        resizable: false,
+        skipTaskbar: true,      // Don't show in taskbar
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true
+        }
+    });
+
+    // Load splash HTML
+    if (isDev) {
+        splashWindow.loadURL('http://localhost:5173/splash.html');
+    } else {
+        splashWindow.loadFile(path.join(__dirname, '../dist/splash.html'));
+    }
+
+    splashWindow.once('ready-to-show', () => {
+        splashWindow.show();
+    });
+}
+
+function createMainWindow() {
     mainWindow = new BrowserWindow({
         width: 1600,
         height: 900,
         minWidth: 1200,
         minHeight: 700,
-        title: 'VibeEngine 🌊',
-        icon: path.join(__dirname, '../assets/icon.png'),
+        title: 'VibeEngine',
+        icon: path.join(__dirname, '../assets/icon1.png'),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true
@@ -32,13 +62,20 @@ function createWindow() {
         mainWindow.loadURL('http://localhost:5173/editor.html');
         mainWindow.webContents.openDevTools();
     } else {
-        // Load build
         mainWindow.loadFile(path.join(__dirname, '../dist/editor.html'));
     }
 
-    // Show when ready
+    // Show main window when ready, close splash
     mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
+        // Wait for splash animation to complete (10 seconds)
+        setTimeout(() => {
+            if (splashWindow) {
+                splashWindow.close();
+                splashWindow = null;
+            }
+            mainWindow.show();
+            mainWindow.focus();
+        }, 10000);
     });
 
     // Create menu
@@ -91,7 +128,7 @@ function createWindow() {
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
                             title: 'About VibeEngine',
-                            message: 'VibeEngine 🌊',
+                            message: 'VibeEngine',
                             detail: 'Version 1.0.0\n\nA TypeScript ECS Game Engine with Visual Editor.\n\nBuilt with Three.js, React, and ❤️'
                         });
                     }
@@ -114,8 +151,11 @@ function sendToRenderer(channel, data) {
     }
 }
 
-// App events
-app.whenReady().then(createWindow);
+// App events - Start with splash, then main window
+app.whenReady().then(() => {
+    createSplashWindow();
+    createMainWindow();
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -125,6 +165,6 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
+        createMainWindow();
     }
 });

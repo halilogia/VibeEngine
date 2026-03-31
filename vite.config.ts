@@ -17,7 +17,8 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: path.resolve(__dirname, 'index.html'),
-                editor: path.resolve(__dirname, 'editor.html')
+                editor: path.resolve(__dirname, 'editor.html'),
+                splash: path.resolve(__dirname, 'splash.html')
             }
         }
     },
