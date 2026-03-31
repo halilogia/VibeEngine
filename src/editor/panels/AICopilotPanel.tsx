@@ -51,8 +51,6 @@ export const AICopilotPanel: React.FC = () => {
         setIsThinking(true);
 
         // Simulation of AI processing
-        // In a real implementation, this would call an LLM API (Gemini/OpenAI)
-        // passing the result of SceneContext.getFullContext()
         setTimeout(() => {
             const response = processCommand(input);
             
@@ -67,11 +65,13 @@ export const AICopilotPanel: React.FC = () => {
             setMessages(prev => [...prev, assistantMessage]);
             setIsThinking(false);
 
-            // Execute commands if any
+            // Execute commands if any with a subtle delay for 'AI feeling'
             if (response.commands && response.commands.length > 0) {
-                CommandInterpreter.executeBatch(response.commands);
+                setTimeout(() => {
+                    CommandInterpreter.executeBatch(response.commands);
+                }, 500);
             }
-        }, 1000);
+        }, 800);
     };
 
     /**

@@ -75,11 +75,18 @@ export class Application {
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             antialias: options.antialias ?? true,
+            alpha: true,
+            powerPreference: 'high-performance'
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // AAA Quality Settings
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.0;
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         // Initialize ECS Scene
         this.scene = new Scene('MainScene');

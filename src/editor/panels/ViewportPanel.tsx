@@ -71,10 +71,18 @@ export const ViewportPanel: React.FC = () => {
 
         const renderer = new THREE.WebGLRenderer({
             canvas: canvasRef.current,
-            antialias: true
+            antialias: true,
+            powerPreference: 'high-performance'
         });
         renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
         rendererRef.current = renderer;
+
+        // Scene Atmosphere
+        scene.fog = new THREE.FogExp2(0x1a1a2e, 0.02);
 
         // Orbit controls
         const orbit = new OrbitControls(camera, canvasRef.current);

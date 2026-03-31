@@ -133,7 +133,10 @@ export const MenuBar: React.FC = () => {
             />
 
             <div className="menu-bar-left">
-                <div className="menu-logo">🌊 VibeEngine</div>
+                <div className="menu-logo">
+                    <img src="/assets/icon1.png" alt="VibeEngine" className="logo-img" />
+                    <span>VibeEngine</span>
+                </div>
 
                 {menus.map(menu => (
                     <div

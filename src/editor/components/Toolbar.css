@@ -22,10 +22,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     background: transparent;
     color: var(--editor-text-secondary);
     cursor: pointer;
@@ -35,27 +35,38 @@
 .toolbar-btn:hover {
     background: var(--editor-bg-hover);
     color: var(--editor-text-primary);
+    transform: translateY(-1px);
 }
 
 .toolbar-btn.active {
     background: var(--editor-accent);
     color: var(--editor-text-primary);
+    box-shadow: var(--editor-glow);
+}
+
+.toolbar-btn.ai-copilot-toggle.active {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white;
 }
 
 .toolbar-btn.play-btn {
     color: var(--editor-success);
+    background: rgba(16, 185, 129, 0.1);
 }
 
 .toolbar-btn.play-btn:hover {
-    background: rgba(34, 197, 94, 0.2);
+    background: rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
 }
 
 .toolbar-btn.stop-btn {
     color: var(--editor-error);
+    background: rgba(244, 63, 94, 0.1);
 }
 
 .toolbar-btn.stop-btn:hover {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(244, 63, 94, 0.2);
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
 }
 
 .toolbar-divider {

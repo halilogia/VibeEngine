@@ -3,45 +3,51 @@
  */
 
 :root {
-  /* Colors */
-  --editor-bg-primary: #1e1e2e;
-  --editor-bg-secondary: #252536;
-  --editor-bg-tertiary: #2d2d42;
-  --editor-bg-hover: #3a3a52;
-  --editor-bg-active: #4a4a6a;
+  /* Colors - Deep Space Elite Palette */
+  --editor-bg-primary: #0a0a0f;
+  --editor-bg-secondary: #0f0f1a;
+  --editor-bg-tertiary: #161625;
+  --editor-bg-hover: #1e1e32;
+  --editor-bg-active: #2a2a45;
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(15, 15, 26, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(12px);
   
   /* Text */
-  --editor-text-primary: #ffffff;
-  --editor-text-secondary: #a0a0b0;
-  --editor-text-muted: #6a6a7a;
+  --editor-text-primary: #f8fafc;
+  --editor-text-secondary: #94a3b8;
+  --editor-text-muted: #475569;
   
-  /* Accent */
+  /* Accent - Vibrant Indigo Neon */
   --editor-accent: #6366f1;
   --editor-accent-hover: #818cf8;
   --editor-accent-active: #4f46e5;
+  --editor-glow: 0 0 15px rgba(99, 102, 241, 0.3);
   
   /* Status colors */
-  --editor-success: #22c55e;
+  --editor-success: #10b981;
   --editor-warning: #f59e0b;
-  --editor-error: #ef4444;
-  --editor-info: #3b82f6;
+  --editor-error: #f43f5e;
+  --editor-info: #0ea5e9;
   
   /* Borders */
-  --editor-border: #3a3a4a;
-  --editor-border-light: #4a4a5a;
+  --editor-border: #1e1e2e;
+  --editor-border-light: #2d2d42;
   
   /* Sizes */
-  --editor-header-height: 40px;
-  --editor-toolbar-height: 36px;
+  --editor-header-height: 44px;
+  --editor-toolbar-height: 48px;
   --editor-panel-min-width: 200px;
   
   /* Fonts */
-  --editor-font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --editor-font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  --editor-font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --editor-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --editor-font-size: 13px;
   
   /* Transitions */
-  --editor-transition: 150ms ease;
+  --editor-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Reset */
@@ -162,13 +168,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: var(--editor-bg-tertiary);
   border-bottom: 1px solid var(--editor-border);
-  font-weight: 500;
-  font-size: 12px;
+  font-weight: 600;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   color: var(--editor-text-secondary);
 }
 

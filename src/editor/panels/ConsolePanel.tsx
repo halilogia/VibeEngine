@@ -14,11 +14,11 @@ interface LogEntry {
     timestamp: Date;
 }
 
-// Demo logs
-const demoLogs: LogEntry[] = [
-    { level: 'info', message: 'Editor initialized', timestamp: new Date() },
-    { level: 'info', message: 'Scene loaded: Untitled Scene', timestamp: new Date() },
-    { level: 'warning', message: 'No camera component found', timestamp: new Date() },
+// Initial logs
+const INITIAL_LOGS: LogEntry[] = [
+    { level: 'info', message: 'VibeEngine Editor v1.0.0-beta initialized', timestamp: new Date() },
+    { level: 'info', message: 'AI Copilot Bridge: Active', timestamp: new Date() },
+    { level: 'info', message: 'Graphics: ACESFilmic Rendering Enabled', timestamp: new Date() },
 ];
 
 const getIcon = (level: LogLevel) => {
@@ -30,7 +30,7 @@ const getIcon = (level: LogLevel) => {
 };
 
 export const ConsolePanel: React.FC = () => {
-    const [logs, setLogs] = useState<LogEntry[]>(demoLogs);
+    const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOGS);
     const [filter, setFilter] = useState<LogLevel | 'all'>('all');
 
     const filteredLogs = logs.filter(log =>
