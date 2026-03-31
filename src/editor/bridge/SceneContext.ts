@@ -80,6 +80,14 @@ export class SceneContext {
             availableMaterials: ['standard']
         };
     }
+
+    /**
+     * Clears any cached context data.
+     * Since this is a static utility, this is primarily for interface consistency.
+     */
+    static destroy(): void {
+        console.log('🧹 SceneContext: Cleanup completed');
+    }
 }
 
 /**

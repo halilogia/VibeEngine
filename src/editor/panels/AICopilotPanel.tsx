@@ -3,8 +3,9 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Wand2, Trash2 } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Wand2, Trash2, Grid } from 'lucide-react';
 import { CommandInterpreter, SceneContext } from '../bridge';
+import { useEditorStore } from '../stores';
 import './AICopilotPanel.css';
 
 interface Message {
@@ -198,6 +199,20 @@ export const AICopilotPanel: React.FC = () => {
             </div>
 
             <div className="panel-footer chat-input-area">
+                <div className="quick-actions">
+                    <button className="chip" onClick={() => { setInput('Add a sun light'); handleSend(); }}>
+                        <Sparkles size={12} /> Add Sun
+                    </button>
+                    <button className="chip" onClick={() => { setInput('Create a pirate scene'); handleSend(); }}>
+                        <Wand2 size={12} /> Pirate Scene
+                    </button>
+                    <button className="chip" onClick={() => { setInput('Make it spin'); handleSend(); }}>
+                        <Grid size={12} /> Spin Selected
+                    </button>
+                    <button className="chip" onClick={() => { setInput('Add a player'); handleSend(); }}>
+                        <User size={12} /> Add Player
+                    </button>
+                </div>
                 <div className="input-wrapper">
                     <input
                         type="text"

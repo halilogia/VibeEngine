@@ -88,13 +88,47 @@
     border-top: 1px solid var(--border-color, #2a2a3e);
 }
 
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.chip {
+    background: var(--editor-bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    color: var(--editor-text-secondary);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.chip:hover {
+    background: var(--editor-accent);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+}
+
 .input-wrapper {
     display: flex;
     gap: 8px;
-    background-color: var(--input-bg, #090912);
-    border: 1px solid var(--border-color, #2a2a3e);
+    background-color: var(--editor-bg-primary);
+    border: 1px solid var(--editor-border);
     border-radius: 8px;
-    padding: 4px 4px 4px 12px;
+    padding: 6px 6px 6px 14px;
+    transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--editor-accent);
 }
 
 .input-wrapper input {

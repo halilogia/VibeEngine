@@ -53,16 +53,33 @@ export const ConsolePanel: React.FC = () => {
             <div className="editor-panel-header">
                 <span>Console</span>
                 <div className="panel-actions">
-                    <select
-                        className="console-filter"
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value as LogLevel | 'all')}
-                    >
-                        <option value="all">All</option>
-                        <option value="info">Info</option>
-                        <option value="warning">Warnings</option>
-                        <option value="error">Errors</option>
-                    </select>
+                    <div className="console-filters">
+                        <button 
+                            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+                            onClick={() => setFilter('all')}
+                        >
+                            All
+                        </button>
+                        <button 
+                            className={`filter-btn info ${filter === 'info' ? 'active' : ''}`}
+                            onClick={() => setFilter('info')}
+                        >
+                            Info
+                        </button>
+                        <button 
+                            className={`filter-btn warn ${filter === 'warning' ? 'active' : ''}`}
+                            onClick={() => setFilter('warning')}
+                        >
+                            Warn
+                        </button>
+                        <button 
+                            className={`filter-btn error ${filter === 'error' ? 'active' : ''}`}
+                            onClick={() => setFilter('error')}
+                        >
+                            Error
+                        </button>
+                    </div>
+                    <div className="v-separator" />
                     <button className="panel-action-btn" onClick={clearLogs} title="Clear">
                         <Trash2 size={14} />
                     </button>

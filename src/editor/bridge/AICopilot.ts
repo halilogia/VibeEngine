@@ -35,13 +35,16 @@ export interface CommandResult {
 }
 
 /**
- * CommandInterpreter - Parses and executes AI commands
+ * CommandInterpreter - Parses and executes AI commands against the global Scene Store.
+ * It serves as the primary execution engine for 'AI Copilot' requests, supporting
+ * single command execution and atomic batching for complex operations.
  */
 export class CommandInterpreter {
     /**
-     * Executes a batch of commands in sequence
-     * @param commands List of commands to execute
-     * @returns Array of results for each command
+     * Executes a batch of commands in sequence.
+     * Use this for atomic scene authoring (e.g., spawning a prefab + attaching scripts).
+     * @param commands - List of AICommand objects to execute.
+     * @returns An array of CommandResult objects, one for each input command.
      */
     static executeBatch(commands: AICommand[]): CommandResult[] {
         const results: CommandResult[] = [];
@@ -65,7 +68,10 @@ export class CommandInterpreter {
     }
 
     /**
-     * Executes a single command
+     * Internal execution logic for a single command.
+     * @param cmd - The command to process.
+     * @param store - Reference to the Zustand store (SceneStore).
+     * @returns A success/fail message with metadata.
      */
     private static execute(cmd: AICommand, store: any): CommandResult {
         try {

@@ -14,34 +14,39 @@ import { Component, type ComponentClass } from './Component';
 let entityIdCounter = 0;
 
 export class Entity {
-    /** Unique identifier */
+    /** Unique identifier for the entity */
     readonly id: number;
 
-    /** Human-readable name */
+    /** Human-readable name used in the editor hierarchy */
     name: string;
 
-    /** Whether entity is active in scene */
+    /** Internal enabled state */
     private _enabled: boolean = true;
 
-    /** Parent entity (null if root) */
+    /** Parent entity in the scene hierarchy. Null if this is a root entity. */
     parent: Entity | null = null;
 
-    /** Child entities */
+    /** List of direct child entities */
     readonly children: Entity[] = [];
 
-    /** Attached components by type */
+    /** Map of attached components, keyed by their unique type string */
     private readonly components: Map<string, Component> = new Map();
 
-    /** Tags for filtering/querying */
+    /** Set of strings used for identifying groups of entities (e.g., 'Player', 'Enemy') */
     readonly tags: Set<string> = new Set();
 
+    /**
+     * Creates a new Entity instance.
+     * @param name - The initial name of the entity. Defaults to 'Entity'.
+     */
     constructor(name: string = 'Entity') {
         this.id = ++entityIdCounter;
         this.name = name;
     }
 
     /**
-     * Whether this entity is enabled
+     * Gets or sets the enabled state of the entity.
+     * When disabled, the entity and its components are ignored by systems.
      */
     get enabled(): boolean {
         return this._enabled;
@@ -51,7 +56,7 @@ export class Entity {
         if (this._enabled === value) return;
         this._enabled = value;
 
-        // Notify components
+        // Notify components of the state change
         this.components.forEach(component => {
             if (value && component.onEnable) component.onEnable();
             if (!value && component.onDisable) component.onDisable();
@@ -59,7 +64,8 @@ export class Entity {
     }
 
     /**
-     * Check if entity is active (enabled and all parents enabled)
+     * Checks if the entity is active in the global hierarchy.
+     * Returns true only if this entity and all its ancestors are enabled.
      */
     get activeInHierarchy(): boolean {
         if (!this._enabled) return false;
@@ -70,8 +76,9 @@ export class Entity {
     // ============ COMPONENT MANAGEMENT ============
 
     /**
-     * Add a component to this entity
-     * @returns The added component
+     * Adds a component to this entity. If a component of the same type already exists, it will be replaced.
+     * @param component - The component instance to add.
+     * @returns The added component instance.
      */
     addComponent<T extends Component>(component: T): T {
         const type = component.type;
@@ -91,21 +98,27 @@ export class Entity {
     }
 
     /**
-     * Get a component by type
+     * Retrieves a component of the specified class from the entity.
+     * @param type - The class of the component to retrieve.
+     * @returns The component instance if found, or null otherwise.
      */
     getComponent<T extends Component>(type: ComponentClass<T>): T | null {
         return (this.components.get(type.TYPE) as T) ?? null;
     }
 
     /**
-     * Check if entity has a component
+     * Checks if the entity has a component of the specified class.
+     * @param type - The class of the component to check for.
+     * @returns True if the component exists, false otherwise.
      */
     hasComponent(type: ComponentClass): boolean {
         return this.components.has(type.TYPE);
     }
 
     /**
-     * Remove a component by type
+     * Removes a component of the specified class from the entity.
+     * @param type - The class of the component to remove.
+     * @returns True if the component was found and removed, false otherwise.
      */
     removeComponent(type: ComponentClass): boolean {
         const component = this.components.get(type.TYPE);
@@ -119,7 +132,7 @@ export class Entity {
     }
 
     /**
-     * Get all components
+     * Returns an array of all components currently attached to this entity.
      */
     getAllComponents(): Component[] {
         return Array.from(this.components.values());
@@ -128,7 +141,9 @@ export class Entity {
     // ============ HIERARCHY MANAGEMENT ============
 
     /**
-     * Add a child entity
+     * Sets another entity as a child of this entity.
+     * Handles removal from the previous parent automatically.
+     * @param entity - The entity to add as a child.
      */
     addChild(entity: Entity): void {
         if (entity.parent === this) return;
@@ -143,7 +158,9 @@ export class Entity {
     }
 
     /**
-     * Remove a child entity
+     * Removes a child entity from this entity's hierarchy.
+     * @param entity - The child entity to remove.
+     * @returns True if the entity was a child and was successfully removed.
      */
     removeChild(entity: Entity): boolean {
         const index = this.children.indexOf(entity);
@@ -155,7 +172,9 @@ export class Entity {
     }
 
     /**
-     * Find child by name (recursive)
+     * Recursively searches for an entity with the given name in the hierarchy.
+     * @param name - The name of the entity to find.
+     * @returns The found entity or null.
      */
     findByName(name: string): Entity | null {
         if (this.name === name) return this;
@@ -169,7 +188,9 @@ export class Entity {
     }
 
     /**
-     * Find child by tag
+     * Recursively searches for the first entity with the given tag in the hierarchy.
+     * @param tag - The tag to search for.
+     * @returns The first matching entity or null.
      */
     findByTag(tag: string): Entity | null {
         if (this.tags.has(tag)) return this;
@@ -183,7 +204,9 @@ export class Entity {
     }
 
     /**
-     * Get all entities with tag (recursive)
+     * Recursively searches for all entities with the given tag in the hierarchy.
+     * @param tag - The tag to search for.
+     * @returns An array of matching entities.
      */
     findAllByTag(tag: string): Entity[] {
         const result: Entity[] = [];
@@ -200,7 +223,8 @@ export class Entity {
     // ============ LIFECYCLE ============
 
     /**
-     * Destroy this entity and all children
+     * Completely destroys the entity, its components, and all its children.
+     * This triggers onDestroy hooks for all attached components.
      */
     destroy(): void {
         // Destroy children first
@@ -225,7 +249,9 @@ export class Entity {
     }
 
     /**
-     * Clone this entity (deep clone with all components and children)
+     * Creates a deep copy of the entity, including all components, tags, and children.
+     * @param newName - Optional new name for the cloned entity. Defaults to original + '_clone'.
+     * @returns A new Entity instance that is a deep clone of this one.
      */
     clone(newName?: string): Entity {
         const cloned = new Entity(newName ?? `${this.name}_clone`);

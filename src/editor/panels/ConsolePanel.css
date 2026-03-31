@@ -1,19 +1,43 @@
-/**
- * ConsolePanel Styles
- */
-
-.console-panel {
-    height: 100%;
+.console-filters {
+    display: flex;
+    gap: 2px;
+    background: var(--editor-bg-secondary);
+    padding: 2px;
+    border-radius: 4px;
+    margin-right: 8px;
 }
 
-.console-filter {
-    background: var(--editor-bg-primary);
-    border: 1px solid var(--editor-border);
-    border-radius: 4px;
+.filter-btn {
+    background: transparent;
+    border: none;
     padding: 2px 8px;
+    color: var(--editor-text-muted);
+    font-size: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    background: var(--editor-bg-hover);
     color: var(--editor-text-primary);
-    font-size: 11px;
-    outline: none;
+}
+
+.filter-btn.active {
+    background: var(--editor-bg-primary);
+    color: var(--editor-text-primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.filter-btn.active.info { color: var(--editor-info); }
+.filter-btn.active.warn { color: var(--editor-warning); }
+.filter-btn.active.error { color: var(--editor-error); }
+
+.v-separator {
+    width: 1px;
+    height: 14px;
+    background: var(--editor-border);
+    margin: 0 8px;
 }
 
 .console-content {

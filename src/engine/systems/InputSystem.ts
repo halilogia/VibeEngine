@@ -33,10 +33,19 @@ export interface InputState {
     isTouching: boolean;
 }
 
+/**
+ * InputSystem - Provides a unified interface for keyboard, mouse, and touch interactions.
+ * It translates raw browser events into a clean, frame-synced state that scripts
+ * can easily query for movement, actions, and UI interaction.
+ */
 export class InputSystem extends System {
-    readonly priority = 0; // Run first
+    /** 
+     * Priority is 0 to ensure input is processed at the very beginning of the frame,
+     * allowing all other systems and scripts to use the latest input state.
+     */
+    readonly priority = 0;
 
-    /** Current input state */
+    /** Current snapshot of all input devices */
     readonly state: InputState = {
         horizontal: 0,
         vertical: 0,
@@ -52,53 +61,52 @@ export class InputSystem extends System {
         isTouching: false,
     };
 
-    /** Touch movement state */
+    /** Internal state for gesture detection (swipes/taps) */
     private touchStartX = 0;
     private touchStartY = 0;
     private touchStartTime = 0;
     private lastTapTime = 0;
     private touchMoved = false;
 
-    /** Swipe threshold in pixels */
+    /** Configuration constants for gesture sensitivity */
     private readonly SWIPE_THRESHOLD = 50;
-    /** Tap max duration in ms */
     private readonly TAP_DURATION = 200;
-    /** Double tap max gap in ms */
     private readonly DOUBLE_TAP_GAP = 300;
 
-    /** Axis mapping for keyboard */
+    /** Maps physical keys to virtual movement axes */
     private keyAxisMapping = {
         horizontal: { positive: ['d', 'D', 'ArrowRight'], negative: ['a', 'A', 'ArrowLeft'] },
         vertical: { positive: ['w', 'W', 'ArrowUp'], negative: ['s', 'S', 'ArrowDown'] },
     };
 
+    /**
+     * Attaches global window listeners for input events.
+     */
     initialize(): void {
-        // Keyboard events
         window.addEventListener('keydown', this.onKeyDown);
         window.addEventListener('keyup', this.onKeyUp);
-
-        // Mouse events
         window.addEventListener('mousedown', this.onPointerDown);
         window.addEventListener('mouseup', this.onPointerUp);
         window.addEventListener('mousemove', this.onMouseMove);
-
-        // Touch events
         window.addEventListener('touchstart', this.onTouchStart, { passive: false });
         window.addEventListener('touchend', this.onTouchEnd);
         window.addEventListener('touchmove', this.onTouchMove, { passive: false });
 
-        console.log('✅ InputSystem initialized');
+        console.log('✅ InputSystem: Unified input listener attached');
     }
 
+    /**
+     * Updates axis values from keyboard state.
+     * @param _deltaTime - Standard delta time.
+     */
     update(_deltaTime: number, _entities: Entity[]): void {
-        // Update axis values from keyboard
         this.updateAxisFromKeyboard();
-
-        // Clear per-frame events at end of frame (in postUpdate)
     }
 
+    /**
+     * Clears transient input states (taps, swipes, 'pressed' flags) at the end of every frame.
+     */
     postUpdate(): void {
-        // Clear per-frame states
         this.state.keysPressed.clear();
         this.state.keysReleased.clear();
         this.state.swipe = null;
@@ -106,6 +114,9 @@ export class InputSystem extends System {
         this.state.doubleTapped = false;
     }
 
+    /**
+     * Detaches all global listeners to prevent memory leaks.
+     */
     destroy(): void {
         window.removeEventListener('keydown', this.onKeyDown);
         window.removeEventListener('keyup', this.onKeyUp);
@@ -119,32 +130,44 @@ export class InputSystem extends System {
 
     // ============ QUERY METHODS ============
 
-    /** Check if key is currently held */
+    /** 
+     * Checks if a specific key is currently being held down. 
+     * Case-insensitive.
+     */
     isKeyDown(key: string): boolean {
         return this.state.keysDown.has(key) || this.state.keysDown.has(key.toLowerCase());
     }
 
-    /** Check if key was pressed this frame */
+    /** 
+     * Checks if a specific key was first pressed in the current frame. 
+     */
     isKeyPressed(key: string): boolean {
         return this.state.keysPressed.has(key) || this.state.keysPressed.has(key.toLowerCase());
     }
 
-    /** Check if key was released this frame */
+    /** 
+     * Checks if a specific key was released in the current frame. 
+     */
     isKeyReleased(key: string): boolean {
         return this.state.keysReleased.has(key) || this.state.keysReleased.has(key.toLowerCase());
     }
 
-    /** Get axis value (keyboard or touch) */
+    /** 
+     * Returns the value of a virtual movement axis (-1.0 to 1.0). 
+     */
     getAxis(name: 'horizontal' | 'vertical'): number {
         return name === 'horizontal' ? this.state.horizontal : this.state.vertical;
     }
 
     // ============ PRIVATE HANDLERS ============
 
+    /**
+     * Converts keyboard state into normalized axis values.
+     */
     private updateAxisFromKeyboard(): void {
         const mapping = this.keyAxisMapping;
 
-        // Horizontal
+        // Horizontal axis calculation
         const hPositive = mapping.horizontal.positive.some(k => this.state.keysDown.has(k));
         const hNegative = mapping.horizontal.negative.some(k => this.state.keysDown.has(k));
 
@@ -152,7 +175,7 @@ export class InputSystem extends System {
             this.state.horizontal = (hPositive ? 1 : 0) - (hNegative ? 1 : 0);
         }
 
-        // Vertical
+        // Vertical axis calculation
         const vPositive = mapping.vertical.positive.some(k => this.state.keysDown.has(k));
         const vNegative = mapping.vertical.negative.some(k => this.state.keysDown.has(k));
 
@@ -206,7 +229,7 @@ export class InputSystem extends System {
         const dy = touchEndY - this.touchStartY;
         const duration = Date.now() - this.touchStartTime;
 
-        // Detect swipe
+        // Gesture analysis for swipe detection
         if (!this.touchMoved || Math.abs(dx) > this.SWIPE_THRESHOLD || Math.abs(dy) > this.SWIPE_THRESHOLD) {
             if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > this.SWIPE_THRESHOLD) {
                 this.state.swipe = dx > 0 ? 'right' : 'left';
@@ -215,7 +238,7 @@ export class InputSystem extends System {
             }
         }
 
-        // Detect tap (short touch without much movement)
+        // Single and Double tap detection logic
         if (duration < this.TAP_DURATION && !this.touchMoved && Math.abs(dx) < 20 && Math.abs(dy) < 20) {
             const now = Date.now();
             if (now - this.lastTapTime < this.DOUBLE_TAP_GAP) {
@@ -226,6 +249,7 @@ export class InputSystem extends System {
             this.lastTapTime = now;
         }
 
+        // Reset state on release
         this.state.isTouching = false;
         this.state.isPointerDown = false;
         this.state.horizontal = 0;
@@ -238,21 +262,24 @@ export class InputSystem extends System {
             this.updateMousePosition(touch.clientX, touch.clientY);
             this.touchMoved = true;
 
-            // Calculate virtual joystick from touch drag
+            // Virtual Joystick Implementation: Calculate movement axes from drag distance
             const dx = touch.clientX - this.touchStartX;
             const dy = touch.clientY - this.touchStartY;
-            const maxDrag = 50; // pixels
+            const maxDrag = 50; // Threshold for full axis value
 
             this.state.horizontal = Math.max(-1, Math.min(1, dx / maxDrag));
-            this.state.vertical = Math.max(-1, Math.min(1, -dy / maxDrag)); // Inverted Y
+            this.state.vertical = Math.max(-1, Math.min(1, -dy / maxDrag)); // Inverted screen vs world Y
         }
     };
 
+    /**
+     * Updates mouse coordinates and calculates Normalized Device Coordinates (NDC).
+     */
     private updateMousePosition(x: number, y: number): void {
         this.state.mousePosition.x = x;
         this.state.mousePosition.y = y;
 
-        // Convert to NDC (-1 to 1)
+        // Convert raw pixels to NDC space (-1.0 to 1.0) for Raycasting/UI scaling
         this.state.mouseNDC.x = (x / window.innerWidth) * 2 - 1;
         this.state.mouseNDC.y = -(y / window.innerHeight) * 2 + 1;
     }
