@@ -7,14 +7,18 @@ import {
     Move, RotateCcw, Expand,
     Play, Pause, Square,
     Grid3X3, Axis3D,
-    Maximize2
+    Maximize2, Sparkles
 } from 'lucide-react';
 import { useEditorStore, type EditorMode } from '../stores';
 import { usePlayModeStore } from '../core';
 import './Toolbar.css';
 
 export const Toolbar: React.FC = () => {
-    const { editorMode, setEditorMode, showGrid, showAxes, toggleGrid, toggleAxes } = useEditorStore();
+    const { 
+        editorMode, setEditorMode, 
+        showGrid, showAxes, toggleGrid, toggleAxes,
+        showAICopilot, togglePanel
+    } = useEditorStore();
     const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
 
     const modes: { mode: EditorMode; icon: React.ReactNode; label: string; key: string }[] = [
@@ -56,6 +60,19 @@ export const Toolbar: React.FC = () => {
                     title="Toggle Axes"
                 >
                     <Axis3D size={16} />
+                </button>
+            </div>
+
+            <div className="toolbar-spacer" />
+
+            {/* AI Co-pilot */}
+            <div className="toolbar-group">
+                <button
+                    className={`toolbar-btn ai-copilot-toggle ${showAICopilot ? 'active' : ''}`}
+                    onClick={() => togglePanel('aiCopilot')}
+                    title="AI Co-pilot Chat"
+                >
+                    <Sparkles size={16} />
                 </button>
             </div>
 

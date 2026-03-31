@@ -9,11 +9,12 @@ import { ViewportPanel } from '../panels/ViewportPanel';
 import { InspectorPanel } from '../panels/InspectorPanel';
 import { AssetsPanel } from '../panels/AssetsPanel';
 import { ConsolePanel } from '../panels/ConsolePanel';
+import { AICopilotPanel } from '../panels/AICopilotPanel';
 import { useEditorStore } from '../stores';
 import './EditorLayout.css';
 
 export const EditorLayout: React.FC = () => {
-    const { showHierarchy, showInspector, showAssets, showConsole } = useEditorStore();
+    const { showHierarchy, showInspector, showAssets, showConsole, showAICopilot } = useEditorStore();
 
     return (
         <div className="editor-layout">
@@ -32,15 +33,25 @@ export const EditorLayout: React.FC = () => {
                         )}
 
                         {/* Viewport (center) */}
-                        <Panel defaultSize={60} minSize={30}>
+                        <Panel defaultSize={45} minSize={30}>
                             <ViewportPanel />
                         </Panel>
+
+                        {/* AI Copilot (right middle) */}
+                        {showAICopilot && (
+                            <>
+                                <PanelResizeHandle />
+                                <Panel defaultSize={20} minSize={15} maxSize={35}>
+                                    <AICopilotPanel />
+                                </Panel>
+                            </>
+                        )}
 
                         {/* Inspector (right) */}
                         {showInspector && (
                             <>
                                 <PanelResizeHandle />
-                                <Panel defaultSize={25} minSize={15} maxSize={40}>
+                                <Panel defaultSize={20} minSize={15} maxSize={40}>
                                     <InspectorPanel />
                                 </Panel>
                             </>
