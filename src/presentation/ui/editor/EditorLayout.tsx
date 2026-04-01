@@ -135,6 +135,22 @@ export const EditorLayout: React.FC = () => {
                 .v-resizer:hover { background: ${VibeTheme.colors.accent}88; }
                 .h-resizer { height: 4px; cursor: row-resize; z-index: 1000; transition: background 0.2s; background: rgba(255,255,255,0.02); }
                 .h-resizer:hover { background: ${VibeTheme.colors.accent}88; }
+                
+                /* 🏛️ Sovereign Elite Global Scrollbar */
+                *::-webkit-scrollbar {
+                    width: 4px;
+                    height: 4px;
+                }
+                *::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                *::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 10px;
+                }
+                *::-webkit-scrollbar-thumb:hover {
+                    background: ${VibeTheme.colors.accent}66;
+                }
             ` }} />
             <StatusBar />
         </div>

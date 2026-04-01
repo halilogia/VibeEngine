@@ -23,8 +23,9 @@ export interface ComponentData {
 export interface AssetData {
     id: string;
     name: string;
-    type: 'model' | 'texture' | 'audio' | 'script';
+    type: 'model' | 'texture' | 'audio' | 'script' | 'folder';
     path: string;
+    parentId?: string | null;
 }
 
 interface SceneState {
@@ -54,6 +55,7 @@ interface SceneState {
     loadScene: (sceneData: SceneFileData) => void;
     setSceneName: (name: string) => void;
     removeAsset: (id: string) => void;
+    setAssets: (assets: AssetData[]) => void;
     clear: () => void;
     markDirty: () => void;
     markClean: () => void;
@@ -272,7 +274,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     removeAsset: (id) => set((state) => ({
         assets: state.assets.filter(a => a.id !== id)
     })),
-
+    setAssets: (assets) => set({ assets }),
     clear: () => set({
         entities: new Map(),
         rootEntityIds: [],

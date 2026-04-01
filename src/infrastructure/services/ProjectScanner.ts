@@ -14,6 +14,7 @@ declare global {
   interface Window {
     ProjectScanner: {
       pickProjectFolder: () => Promise<ProjectInfo | null>;
+      scanProjectAssets: (path: string) => Promise<any[]>;
     };
   }
 }
@@ -26,5 +27,14 @@ export class ProjectScanner {
     }
     
     throw new Error('Project picker bridge not available');
+  }
+
+  static async scanProjectAssets(projectPath: string): Promise<any[]> {
+    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+      const bridge = window.ProjectScanner;
+      return await bridge.scanProjectAssets(projectPath);
+    }
+    
+    return [];
   }
 }

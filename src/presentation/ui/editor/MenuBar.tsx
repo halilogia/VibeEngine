@@ -65,6 +65,15 @@ export const MenuBar: React.FC = () => {
 
     const menus: MenuSection[] = [
         {
+            label: 'VibeEngine',
+            items: [
+                { label: 'About VibeEngine', icon: <VibeIcons name="Activity" size={14} />, action: () => addToast('VibeEngine Studio v1.0 - Sovereign Elite Edition 🏛️', 'info') },
+                { label: 'App Settings', icon: <VibeIcons name="Settings" size={14} />, shortcut: 'Ctrl+,', action: () => { togglePanel('aiCopilot'); addToast('Neural Vault Access Granted.', 'success'); } },
+                { divider: true, label: '' },
+                { label: 'Quit Studio', icon: <VibeIcons name="Pause" size={14} />, action: () => { addToast('Closing Engine Studio...', 'warning'); setTimeout(() => window.close(), 1000); } },
+            ]
+        },
+        {
             label: 'File',
             items: [
                 { label: 'Manage Projects', icon: <VibeIcons name="Layers" size={14} />, shortcut: 'Ctrl+L', action: handleOpenLauncher },
@@ -125,29 +134,6 @@ export const MenuBar: React.FC = () => {
                 ))}
 
                 <div style={styles.dividerVertical} />
-
-                <div style={styles.dividerVertical} />
-
-                {/* 🟢 Transform Tools (Simplified Glowing Icons) */}
-                <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    {transformButtons.map((m: { mode: EditorMode; icon: string; label: string }) => (
-                        <VibeButton
-                            key={m.mode}
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setEditorMode(m.mode)}
-                            style={{ 
-                                width: '32px', height: '32px', padding: 0,
-                                color: editorMode === m.mode ? VibeTheme.colors.accent : 'rgba(255,255,255,0.4)',
-                                background: editorMode === m.mode ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-                                filter: editorMode === m.mode ? `drop-shadow(0 0 5px ${VibeTheme.colors.accent}aa)` : 'none'
-                             }}
-                            title={m.label}
-                        >
-                            <VibeIcons name={m.icon as any} size={14} />
-                        </VibeButton>
-                    ))}
-                </div>
             </div>
 
             {/* CENTER: Playback Controls */}
@@ -162,7 +148,7 @@ export const MenuBar: React.FC = () => {
                             <VibeIcons name="Pause" size={14} />
                         </VibeButton>
                         <VibeButton variant="danger" size="sm" onClick={stop} style={{ background: '#ef4444', height: '24px', borderRadius: '12px' }}>
-                            <VibeIcons name="Square" size={14} />
+                            <VibeIcons name="Square" size={14} color="#fff" />
                         </VibeButton>
                     </div>
                 )}

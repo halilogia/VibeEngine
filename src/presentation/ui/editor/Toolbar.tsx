@@ -57,7 +57,7 @@ export const Toolbar: React.FC = () => {
                             <VibeIcons name="Pause" size={16} />
                         </VibeButton>
                         <VibeButton variant="danger" size="sm" onClick={stop} title="Stop & Restore" style={{ background: '#ef4444' }}>
-                            <VibeIcons name="Square" size={16} />
+                            <VibeIcons name="Square" size={16} color="#fff" />
                         </VibeButton>
                     </>
                 )}

@@ -1,7 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('ProjectScanner', {
-    pickProjectFolder: () => ipcRenderer.invoke('pick-project-folder')
+    pickProjectFolder: () => ipcRenderer.invoke('pick-project-folder'),
+    scanProjectAssets: (path) => ipcRenderer.invoke('scan-project-assets', path)
 });
 
 contextBridge.exposeInMainWorld('windowControls', {

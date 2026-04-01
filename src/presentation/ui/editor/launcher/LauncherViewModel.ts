@@ -1,7 +1,9 @@
 import { useProjectStore, ProjectInfo } from '@infrastructure/store/useProjectStore';
 import { ProjectScanner } from '@infrastructure/services/ProjectScanner';
+import { useSceneStore } from '@infrastructure/store/sceneStore';
 
 export const useLauncherViewModel = () => {
+  const { setAssets } = useSceneStore();
   const { 
     projects, 
     selectedProject, 
@@ -46,10 +48,22 @@ export const useLauncherViewModel = () => {
     console.log(`Proje kütüphaneden kaldırıldı: ${path}`);
   };
 
-  const launchActiveProject = () => {
+  const launchActiveProject = async () => {
     if (selectedProject) {
-      launchProject(selectedProject);
-      console.log(`Motor başlatılıyor: ${selectedProject.name}`);
+      setLoading(true);
+      try {
+        // 🟢 Elite Asset Sync: Scan project src folder
+        const assets = await ProjectScanner.scanProjectAssets(selectedProject.path);
+        setAssets(assets);
+        
+        launchProject(selectedProject);
+        console.log(`Motor ve Assets senkronize edildi: ${selectedProject.name} (${assets.length} varlık)`);
+      } catch (e) {
+        console.error('Asset tarama hatası:', e);
+        launchProject(selectedProject);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

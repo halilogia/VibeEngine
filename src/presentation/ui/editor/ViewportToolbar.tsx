@@ -36,8 +36,11 @@ const styles = createVibeStyles({
     }
 });
 
+import { motion, AnimatePresence } from 'framer-motion';
+
 export const ViewportToolbar: React.FC = () => {
     const { 
+        editorMode, setEditorMode,
         shadingMode, setShadingMode, 
         showGrid, toggleGrid, 
         showAxes, toggleAxes,
@@ -45,39 +48,137 @@ export const ViewportToolbar: React.FC = () => {
         showEnvironment, toggleEnvironment
     } = useEditorStore();
 
+    const [showShadingMenu, setShowShadingMenu] = React.useState(false);
+
+    const shadingOptions: { id: typeof shadingMode; icon: any; label: string }[] = [
+        { id: 'lit', icon: 'Box', label: 'Lit' },
+        { id: 'wireframe', icon: 'Grid', label: 'Wireframe' },
+        { id: 'solid', icon: 'Layers', label: 'Solid' }
+    ];
+
+    const currentShading = shadingOptions.find(o => o.id === shadingMode) || shadingOptions[0];
+
     return (
         <div style={styles.container}>
+            {/* 🔴 Transform Tools (Move, Rotate, Scale) */}
             <div style={styles.group}>
-                <VibeButton variant={shadingMode === 'lit' ? 'primary' : 'ghost'} size="sm" onClick={() => setShadingMode('lit')} title="Lit">
-                    <VibeIcons name="Box" size={14} />
+                {[
+                    { mode: 'translate', icon: 'Move', label: 'Move tools' },
+                    { mode: 'rotate', icon: 'Rotate', label: 'Rotate tools' },
+                    { mode: 'scale', icon: 'Scale', label: 'Scale tools' }
+                ].map((m) => (
+                    <VibeButton
+                        key={m.mode}
+                        variant={editorMode === m.mode ? 'primary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setEditorMode(m.mode as any)}
+                        style={{ 
+                            width: '32px', height: '32px', padding: 0,
+                            borderRadius: '8px',
+                            background: editorMode === m.mode ? `${VibeTheme.colors.accent}22` : 'transparent',
+                            filter: editorMode === m.mode ? `drop-shadow(0 0 8px ${VibeTheme.colors.accent}66)` : 'none'
+                        }}
+                        title={m.label}
+                    >
+                        <VibeIcons name={m.icon as any} size={14} color={editorMode === m.mode ? VibeTheme.colors.accent : 'rgba(255,255,255,0.5)'} />
+                    </VibeButton>
+                ))}
+            </div>
+
+            <div style={styles.divider} />
+            {/* 🟢 Shading Mode Dropdown */}
+            <div style={{ position: 'relative' }}>
+                <VibeButton 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowShadingMenu(!showShadingMenu)}
+                    title={`Shading: ${currentShading.label}`}
+                >
+                    <VibeIcons name={currentShading.icon} size={14} color={VibeTheme.colors.accent} />
+                    <VibeIcons name="ChevronDown" size={10} style={{ marginLeft: 4, opacity: 0.5 }} />
                 </VibeButton>
-                <VibeButton variant={shadingMode === 'wireframe' ? 'primary' : 'ghost'} size="sm" onClick={() => setShadingMode('wireframe')} title="Wireframe">
-                    <VibeIcons name="Grid" size={14} />
+
+                <AnimatePresence>
+                    {showShadingMenu && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 5, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            style={{
+                                position: 'absolute', top: '100%', left: 0,
+                                background: 'rgba(15, 15, 20, 0.95)',
+                                backdropFilter: 'blur(10px)',
+                                border: `1px solid ${VibeTheme.colors.glassBorder}`,
+                                borderRadius: '8px', padding: '4px', zIndex: 1000,
+                                minWidth: '120px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                            }}
+                        >
+                            {shadingOptions.map((opt) => (
+                                <div
+                                    key={opt.id}
+                                    onClick={() => {
+                                        setShadingMode(opt.id);
+                                        setShowShadingMenu(false);
+                                    }}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '8px',
+                                        padding: '6px 10px', borderRadius: '6px',
+                                        cursor: 'pointer', fontSize: '11px',
+                                        background: shadingMode === opt.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                        color: shadingMode === opt.id ? VibeTheme.colors.accent : 'rgba(255,255,255,0.6)',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <VibeIcons name={opt.icon} size={12} />
+                                    {opt.label}
+                                </div>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            <div style={styles.divider} />
+
+            <div style={styles.group}>
+                <VibeButton 
+                    variant={showGrid ? 'primary' : 'ghost'} 
+                    size="sm" 
+                    onClick={toggleGrid} 
+                    title="Toggle Grid"
+                >
+                    <VibeIcons name="Grid" size={14} color={showGrid ? '#fff' : 'rgba(255,255,255,0.5)'} />
                 </VibeButton>
-                <VibeButton variant={shadingMode === 'solid' ? 'primary' : 'ghost'} size="sm" onClick={() => setShadingMode('solid')} title="Solid">
-                    <VibeIcons name="Layers" size={14} />
+                <VibeButton 
+                    variant={showAxes ? 'primary' : 'ghost'} 
+                    size="sm" 
+                    onClick={toggleAxes} 
+                    title="Toggle Axes"
+                >
+                    <VibeIcons name="Axis" size={14} color={showAxes ? '#fff' : 'rgba(255,255,255,0.5)'} />
                 </VibeButton>
             </div>
 
             <div style={styles.divider} />
 
             <div style={styles.group}>
-                <VibeButton variant={showGrid ? 'primary' : 'ghost'} size="sm" onClick={toggleGrid} title="Toggle Grid">
-                    <VibeIcons name="Grid" size={14} />
+                <VibeButton 
+                    variant={showBloom ? 'primary' : 'ghost'} 
+                    size="sm" 
+                    onClick={toggleBloom} 
+                    title="Post-Processing: Bloom"
+                >
+                    <motion.div animate={showBloom ? { scale: [1, 1.2, 1] } : {}} transition={{ repeat: showBloom ? Infinity : 0, duration: 2 }}>
+                        <VibeIcons name="Sparkles" size={14} color={showBloom ? '#fff' : 'rgba(255,255,255,0.5)'} />
+                    </motion.div>
                 </VibeButton>
-                <VibeButton variant={showAxes ? 'primary' : 'ghost'} size="sm" onClick={toggleAxes} title="Toggle Axes">
-                    <VibeIcons name="Axis" size={14} />
-                </VibeButton>
-            </div>
-
-            <div style={styles.divider} />
-
-            <div style={styles.group}>
-                <VibeButton variant={showBloom ? 'primary' : 'ghost'} size="sm" onClick={toggleBloom} title="Bloom Effect">
-                    <VibeIcons name="Sparkles" size={14} />
-                </VibeButton>
-                <VibeButton variant={showEnvironment ? 'primary' : 'ghost'} size="sm" onClick={toggleEnvironment} title="Studio Light">
-                    <VibeIcons name="Sun" size={14} />
+                <VibeButton 
+                    variant={showEnvironment ? 'primary' : 'ghost'} 
+                    size="sm" 
+                    onClick={toggleEnvironment} 
+                    title="Environment Lighting"
+                >
+                    <VibeIcons name="Sun" size={14} color={showEnvironment ? '#fff' : 'rgba(255,255,255,0.5)'} />
                 </VibeButton>
             </div>
         </div>

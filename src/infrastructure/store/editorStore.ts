@@ -154,9 +154,18 @@ export const useEditorStore = create<EditorState>()(
                 showAssets: state.showAssets,
                 showConsole: state.showConsole,
                 showAICopilot: state.showAICopilot,
+                showScriptEditor: state.showScriptEditor,
                 leftWidth: state.leftWidth,
                 rightWidth: state.rightWidth,
-                bottomHeight: state.bottomHeight
+                bottomHeight: state.bottomHeight,
+                activePanelId: state.activePanelId,
+                editorMode: state.editorMode,
+                viewMode: state.viewMode,
+                showGrid: state.showGrid,
+                showAxes: state.showAxes,
+                shadingMode: state.shadingMode,
+                showBloom: state.showBloom,
+                showEnvironment: state.showEnvironment
             }),
         }
     )

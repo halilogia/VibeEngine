@@ -65,6 +65,22 @@ export class VibeErrorBoundary extends Component<Props, State> {
                         {this.props.name || 'This component'} experienced a temporary glitch. 
                         The rest of the engine is safe.
                     </p>
+                    
+                    {/* 🕵️‍♂️ Debug Info (Temporary) */}
+                    <div style={{ 
+                        fontSize: '10px', 
+                        color: '#ef4444', 
+                        background: 'rgba(0,0,0,0.5)', 
+                        padding: '10px', 
+                        borderRadius: '4px', 
+                        textAlign: 'left',
+                        maxWidth: '90%',
+                        overflow: 'auto',
+                        fontFamily: 'monospace'
+                    }}>
+                        {this.state.error?.message}
+                    </div>
+
                     <VibeButton variant="primary" size="sm" onClick={this.handleReset}>
                         <VibeIcons name="RefreshCcw" size={14} /> Restore Panel
                     </VibeButton>

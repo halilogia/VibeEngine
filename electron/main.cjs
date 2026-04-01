@@ -61,6 +61,68 @@ ipcMain.handle('pick-project-folder', async () => {
     return readProjectInfo(filePaths[0]);
 });
 
+ipcMain.handle('scan-project-assets', async (event, projectPath) => {
+    let scanPath = path.join(projectPath, 'src');
+    if (!fs.existsSync(scanPath)) {
+        scanPath = projectPath; // 🟢 Fallback to root if src is missing
+    }
+
+    const assets = [];
+    const scan = (dir, parentId = null) => {
+        const skip = ['node_modules', '.git', '.vscode', '.idea', 'dist', 'build', 'electron'];
+        const files = fs.readdirSync(dir);
+        
+        for (const file of files) {
+            if (skip.includes(file) || file.startsWith('.')) continue;
+
+            const fullPath = path.join(dir, file);
+            const stats = fs.statSync(fullPath);
+            const id = Math.random().toString(36).substr(2, 9);
+            
+            if (stats.isDirectory()) {
+                assets.push({
+                    id,
+                    name: file,
+                    path: fullPath,
+                    type: 'folder',
+                    parentId,
+                    size: 0
+                });
+                scan(fullPath, id); // 🟢 Recurse with current folder as parent
+            } else {
+                const ext = path.extname(file).toLowerCase();
+                let type = 'other';
+                if (['.glb', '.gltf', '.obj'].includes(ext)) type = 'model';
+                else if (['.ts', '.tsx', '.js'].includes(ext)) type = 'script';
+                else if (['.png', '.jpg', '.jpeg'].includes(ext)) type = 'texture';
+                else if (['.mp3', '.wav', '.ogg'].includes(ext)) type = 'audio';
+                
+                if (type === 'other' && !['.json', '.md', '.txt'].includes(ext)) continue;
+
+                assets.push({
+                    id,
+                    name: file,
+                    path: fullPath,
+                    type,
+                    parentId,
+                    size: stats.size,
+                    extension: ext
+                });
+            }
+        }
+    };
+
+    try {
+        console.log(`🔍 Deep scanning assets in: ${scanPath}`);
+        scan(scanPath);
+        console.log(`✅ Hierarchy built: ${assets.length} items.`);
+        return assets;
+    } catch (e) {
+        console.error('Scan error:', e);
+        return [];
+    }
+});
+
 // Window control IPCs
 ipcMain.on('window-minimize', () => mainWindow.minimize());
 ipcMain.on('window-maximize', () => {

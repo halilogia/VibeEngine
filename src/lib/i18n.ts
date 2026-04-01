@@ -52,6 +52,7 @@ const resources = {
         subtitle: 'Projektör: Oyun Evrenini Başlatın',
         library: 'Kitaplığınız',
         import: 'Proje Klasörü Aktar',
+        search_placeholder: 'Varlıklarda ara...',
         start_engine: 'MOTORU BAŞLAT',
         status_ready: 'OYUN HAZIR',
         status_active: 'aktif.',
@@ -75,10 +76,11 @@ const resources = {
         ready: 'VIBEENGINE NEURAL LINK HAZIR',
       },
       panels: {
-        hierarchy: 'HIERARCHY',
-        inspector: 'INSPECTOR',
-        assets: 'VARLIKLAR',
-        console: 'KONSOL',
+        hierarchy: 'Hiyerarşi',
+        inspector: 'Müfettiş',
+        assets: 'Varlıklar',
+        console: 'Konsol',
+        ai_copilot: 'Neural Copilot'
       }
     }
   }
