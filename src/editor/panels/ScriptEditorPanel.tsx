@@ -5,7 +5,8 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import Editor, { type Monaco } from '@monaco-editor/react';
-import { Save, Play, X, FilePlus, Code2 } from 'lucide-react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
+
 import { useEditorStore, useSceneStore } from '../stores';
 import './ScriptEditorPanel.css';
 
@@ -195,20 +196,22 @@ export const ScriptEditorPanel: React.FC = () => {
                             className={`script-tab ${tab.id === activeTabId ? 'active' : ''}`}
                             onClick={() => setActiveTabId(tab.id)}
                         >
-                            <Code2 size={12} />
+                            <VibeIcons name="Code" size={12} />
                             <span>{tab.name}</span>
                             {tab.isDirty && <span className="dirty-dot" />}
                             <button
                                 className="tab-close"
                                 onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}
                             >
-                                <X size={10} />
+                                <VibeIcons name="X" size={10} />
                             </button>
                         </div>
+
                     ))}
                     <button className="new-tab-btn" onClick={() => setShowTemplates(!showTemplates)}>
-                        <FilePlus size={14} />
+                        <VibeIcons name="FolderPlus" size={14} />
                     </button>
+
                     {showTemplates && (
                         <div className="template-menu">
                             {Object.keys(SCRIPT_TEMPLATES).map(name => (
@@ -229,9 +232,10 @@ export const ScriptEditorPanel: React.FC = () => {
                         onClick={saveScript}
                         title="Save Script (Ctrl+S)"
                     >
-                        <Save size={14} />
+                        <VibeIcons name="Save" size={14} />
                         <span>Save</span>
                     </button>
+
                 </div>
             </div>
 
@@ -263,12 +267,13 @@ export const ScriptEditorPanel: React.FC = () => {
                 </div>
             ) : (
                 <div className="script-empty-state">
-                    <Play size={32} style={{ opacity: 0.2 }} />
+                    <VibeIcons name="Play" size={32} style={{ opacity: 0.2 }} />
                     <p>Open or create a script to begin</p>
                     <button className="editor-btn" onClick={() => createTab()}>
-                        <FilePlus size={14} /> New Script
+                        <VibeIcons name="FolderPlus" size={14} /> New Script
                     </button>
                 </div>
+
             )}
         </div>
     );

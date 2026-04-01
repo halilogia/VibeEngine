@@ -32,7 +32,7 @@ describe('PhysicsSystem', () => {
         const rb = entity.addComponent(new RigidbodyComponent());
         
         rb.useGravity = true;
-        rb.gravityScale = 1.0;
+        // gravityScale does not exist; gravity vector is used directly
         
         // Update for 1 second
         physicsSystem.update(1.0, [entity]);
@@ -41,6 +41,7 @@ describe('PhysicsSystem', () => {
         expect(rb.velocity.y).toBeLessThan(0);
         expect(transform.position.y).toBeLessThan(0);
     });
+
 
     it('should detect collisions between overlapping colliders', () => {
         const e1 = new Entity('E1');

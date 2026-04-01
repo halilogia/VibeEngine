@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Wand2, Trash2, Grid, Cpu, ChevronDown, WifiOff, Loader2 } from 'lucide-react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
+
 import { CommandInterpreter } from '../bridge';
 import { OllamaService, type OllamaMessage } from '../bridge/OllamaService';
 import { useEditorStore } from '../stores';
@@ -204,14 +205,15 @@ export const AICopilotPanel: React.FC = () => {
                 <div className="model-selector-container">
                     <button className="model-selector" onClick={() => setShowModelMenu(!showModelMenu)}>
                         {ollamaReady === false
-                            ? <WifiOff size={14} style={{ color: '#ef4444' }} />
+                            ? <VibeIcons name="WifiOff" size={14} style={{ color: '#ef4444' }} />
                             : ollamaReady === null
-                                ? <Loader2 size={14} className="spin" />
-                                : <Cpu size={14} className="model-icon" />
+                                ? <VibeIcons name="Loader" size={14} className="spin" />
+                                : <VibeIcons name="Cpu" size={14} className="model-icon" />
                         }
                         <span className="model-name">{selectedModel.name}</span>
-                        <ChevronDown size={14} className={`chevron ${showModelMenu ? 'rotate' : ''}`} />
+                        <VibeIcons name="ChevronDown" size={14} className={`chevron ${showModelMenu ? 'rotate' : ''}`} />
                     </button>
+
                     {showModelMenu && (
                         <div className="model-menu">
                             {availableModels.map(model => (
@@ -232,9 +234,10 @@ export const AICopilotPanel: React.FC = () => {
                 )}
                 <div className="panel-actions">
                     <button className="panel-action-btn" onClick={clearHistory} title="Clear Chat">
-                        <Trash2 size={14} />
+                        <VibeIcons name="Trash" size={14} />
                     </button>
                 </div>
+
             </div>
 
             <div className="editor-panel-content">
@@ -242,8 +245,9 @@ export const AICopilotPanel: React.FC = () => {
                     {messages.map(msg => (
                         <div key={msg.id} className={`chat-message ${msg.role}`}>
                             <div className="message-icon">
-                                {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
+                                {msg.role === 'assistant' ? <VibeIcons name="Bot" size={16} /> : <VibeIcons name="User" size={16} />}
                             </div>
+
                             <div className="message-bubble">
                                 <div className="message-content">
                                     {msg.content}
@@ -251,18 +255,20 @@ export const AICopilotPanel: React.FC = () => {
                                 </div>
                                 {msg.commands && msg.commands.length > 0 && (
                                     <div className="message-footer">
-                                        <Wand2 size={10} />
+                                        <VibeIcons name="Wand" size={10} />
                                         <span>Executed {msg.commands.length} commands</span>
                                     </div>
                                 )}
+
                             </div>
                         </div>
                     ))}
                     {isThinking && !messages.some(m => m.streaming) && (
                         <div className="chat-message assistant">
-                            <div className="message-icon"><Bot size={16} /></div>
+                            <div className="message-icon"><VibeIcons name="Bot" size={16} /></div>
                             <div className="message-bubble">
                                 <div className="typing-indicator">
+
                                     <span></span><span></span><span></span>
                                 </div>
                             </div>
@@ -275,18 +281,19 @@ export const AICopilotPanel: React.FC = () => {
             <div className="panel-footer chat-input-area">
                 <div className="quick-actions">
                     <button className="chip" onClick={() => { setInput('Add a red cube'); handleSend(); }}>
-                        <Sparkles size={12} /> Red Cube
+                        <VibeIcons name="Sparkles" size={12} /> Red Cube
                     </button>
                     <button className="chip" onClick={() => { setInput('Create a point light'); handleSend(); }}>
-                        <Wand2 size={12} /> Add Light
+                        <VibeIcons name="Wand" size={12} /> Add Light
                     </button>
                     <button className="chip" onClick={() => { setInput('Make the selected entity spin'); handleSend(); }}>
-                        <Grid size={12} /> Spin
+                        <VibeIcons name="Grid" size={12} /> Spin
                     </button>
                     <button className="chip" onClick={() => { setInput('Add a player character with physics'); handleSend(); }}>
-                        <User size={12} /> Player
+                        <VibeIcons name="User" size={12} /> Player
                     </button>
                 </div>
+
                 <div className="input-wrapper">
                     <input
                         type="text"
@@ -296,8 +303,9 @@ export const AICopilotPanel: React.FC = () => {
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     />
                     <button className="send-btn" onClick={handleSend} disabled={!input.trim() || isThinking}>
-                        <Send size={16} />
+                        <VibeIcons name="Send" size={16} />
                     </button>
+
                 </div>
             </div>
         </div>

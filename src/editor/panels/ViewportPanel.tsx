@@ -12,7 +12,8 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { useEditorStore, useSceneStore } from '../stores';
 
-import { Layers, Activity, MousePointer2 } from 'lucide-react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
+
 import { ViewportToolbar } from '../components/ViewportToolbar';
 import './ViewportPanel.css';
 
@@ -482,19 +483,22 @@ export const ViewportPanel: React.FC = () => {
                 
                 <div className="viewport-scene-stats">
                     <div className="stats-item">
-                        <Activity size={12} />
+                        <VibeIcons name="Activity" size={12} />
                         <span>60 FPS</span>
                     </div>
+
                     <div className="stats-item">
-                        <Layers size={12} />
+                        <VibeIcons name="Layers" size={12} />
                         <span>{entities.size} Entities</span>
                     </div>
+
                     {selectedEntityId !== null && (
                         <div className="stats-item highlight">
-                            <MousePointer2 size={12} />
+                            <VibeIcons name="Cursor" size={12} />
                             <span>Entity #{selectedEntityId} Selected</span>
                         </div>
                     )}
+
                 </div>
 
                 <div className="viewport-info">

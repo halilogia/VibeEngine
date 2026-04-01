@@ -52,6 +52,7 @@ interface EditorState {
     togglePanel: (panel: 'hierarchy' | 'inspector' | 'assets' | 'console' | 'aiCopilot' | 'scriptEditor') => void;
     setActivePanel: (id: string | null) => void;
     setShadingMode: (mode: 'lit' | 'wireframe' | 'solid') => void;
+    toggleCommandPalette: (show?: boolean) => void;
     toggleBloom: () => void;
     toggleEnvironment: () => void;
 }
@@ -125,7 +126,7 @@ export const useEditorStore = create<EditorState>((set) => ({
  
     setShadingMode: (mode) => set({ shadingMode: mode }),
 
-    toggleCommandPalette: (show) => set((state) => ({ 
+    toggleCommandPalette: (show?: boolean) => set((state) => ({ 
         showCommandPalette: show !== undefined ? show : !state.showCommandPalette 
     })),
  

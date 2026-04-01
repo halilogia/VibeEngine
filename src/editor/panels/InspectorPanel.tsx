@@ -14,12 +14,13 @@ import './InspectorPanel.css';
 const ICONS: Record<string, React.ReactNode> = {
     Move: <VibeIcons name="Move" size={14} />,
     Box: <VibeIcons name="Box" size={14} />,
-    Camera: <VibeIcons name="Camera" size={14} />,
+    Camera: <VibeIcons name="Video" size={14} />,
     Shield: <VibeIcons name="Shield" size={14} />,
     Magnet: <VibeIcons name="Magnet" size={14} />,
     Code: <VibeIcons name="Code" size={14} />,
     Sun: <VibeIcons name="Sun" size={14} />,
 };
+
 
 // Precision Draggable Label
 const DraggableLabel: React.FC<{
@@ -354,7 +355,7 @@ export const InspectorPanel: React.FC = () => {
 
                         {/* Component Search */}
                         <div className="inspector-search-wrapper">
-                            <Search size={12} className="search-icon" />
+                            <VibeIcons name="Search" size={12} className="search-icon" />
                             <input 
                                 type="text" 
                                 placeholder="Filter components..." 
@@ -363,6 +364,7 @@ export const InspectorPanel: React.FC = () => {
                                 onChange={(e) => setCompSearch(e.target.value)}
                             />
                         </div>
+
 
                         {/* Components */}
                         <div className="components-list">
@@ -384,8 +386,9 @@ export const InspectorPanel: React.FC = () => {
                                 className="editor-btn add-component-btn"
                                 onClick={() => setShowAddMenu(!showAddMenu)}
                             >
-                                <Plus size={14} /> Add Component
+                                <VibeIcons name="Plus" size={14} /> Add Component
                             </button>
+
 
                             {showAddMenu && (
                                 <AddComponentMenu

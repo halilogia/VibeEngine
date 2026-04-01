@@ -107,42 +107,46 @@ export const MenuBar: React.FC = () => {
         {
             label: 'File',
             items: [
-                { label: 'New Scene', icon: <FilePlus size={14} />, shortcut: 'Ctrl+N', action: handleNewScene },
-                { label: 'Open File...', icon: <FolderOpen size={14} />, shortcut: 'Ctrl+O', action: handleOpen },
+                { label: 'New Scene', icon: <VibeIcons name="FolderPlus" size={14} />, shortcut: 'Ctrl+N', action: handleNewScene },
+                { label: 'Open File...', icon: <VibeIcons name="Folder" size={14} />, shortcut: 'Ctrl+O', action: handleOpen },
                 { divider: true, label: '' },
                 { label: '📂 Open MobRunner Project', action: () => loadSampleScene('/projects/MobRunner/Scenes/main.scene.json') },
                 { divider: true, label: '' },
-                { label: 'Save as File', icon: <Download size={14} />, shortcut: 'Ctrl+S', action: handleSave },
-                { label: 'Save to Browser', icon: <Database size={14} />, action: handleSaveToBrowser },
-                { label: 'Load from Browser', icon: <Database size={14} />, action: handleLoadFromBrowser },
+                { label: 'Save as File', icon: <VibeIcons name="Download" size={14} />, shortcut: 'Ctrl+S', action: handleSave },
+                { label: 'Save to Browser', icon: <VibeIcons name="Database" size={14} />, action: handleSaveToBrowser },
+                { label: 'Load from Browser', icon: <VibeIcons name="Database" size={14} />, action: handleLoadFromBrowser },
                 { divider: true, label: '' },
-                { label: 'Settings', icon: <Settings size={14} /> },
+                { label: 'Settings', icon: <VibeIcons name="Settings" size={14} /> },
             ]
         },
+
         {
             label: 'Edit',
             items: [
-                { label: 'Undo', icon: <Undo size={14} />, shortcut: 'Ctrl+Z' },
-                { label: 'Redo', icon: <Redo size={14} />, shortcut: 'Ctrl+Y' },
+                { label: 'Undo', icon: <VibeIcons name="Undo" size={14} />, shortcut: 'Ctrl+Z' },
+                { label: 'Redo', icon: <VibeIcons name="Redo" size={14} />, shortcut: 'Ctrl+Y' },
                 { divider: true, label: '' },
-                { label: 'Copy', icon: <Copy size={14} />, shortcut: 'Ctrl+C' },
-                { label: 'Paste', icon: <Clipboard size={14} />, shortcut: 'Ctrl+V' },
-                { label: 'Delete', icon: <Trash2 size={14} />, shortcut: 'Del' },
+                { label: 'Copy', icon: <VibeIcons name="Copy" size={14} />, shortcut: 'Ctrl+C' },
+                { label: 'Paste', icon: <VibeIcons name="Clipboard" size={14} />, shortcut: 'Ctrl+V' },
+                { label: 'Delete', icon: <VibeIcons name="Trash" size={14} />, shortcut: 'Del' },
             ]
         },
+
         {
             label: 'View',
             items: [
-                { label: showGrid ? 'Hide Grid' : 'Show Grid', icon: <Grid3X3 size={14} />, action: toggleGrid },
-                { label: showAxes ? 'Hide Axes' : 'Show Axes', icon: <Axis3D size={14} />, action: toggleAxes },
+                { label: showGrid ? 'Hide Grid' : 'Show Grid', icon: <VibeIcons name="Grid" size={14} />, action: toggleGrid },
+                { label: showAxes ? 'Hide Axes' : 'Show Axes', icon: <VibeIcons name="Axis" size={14} />, action: toggleAxes },
             ]
         },
+
         {
             label: 'Build',
             items: [
-                { label: 'Export as HTML', icon: <Package size={14} />, action: () => exportToHTML(sceneName) },
+                { label: 'Export as HTML', icon: <VibeIcons name="Package" size={14} />, action: () => exportToHTML(sceneName) },
             ]
         },
+
     ];
 
     const handleMenuClick = (label: string) => {
@@ -219,9 +223,10 @@ export const MenuBar: React.FC = () => {
             <div className="menu-bar-right">
                 {/* Quick save button */}
                 <button className="menu-bar-btn" onClick={handleSave} title="Save Scene">
-                    <Save size={16} />
+                    <VibeIcons name="Save" size={16} />
                 </button>
             </div>
+
         </div>
     );
 };

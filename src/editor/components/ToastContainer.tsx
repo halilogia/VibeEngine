@@ -27,7 +27,7 @@ export const ToastContainer: React.FC = () => {
                     className={`toast-item ${toast.type}`}
                     initial={{ x: 300, opacity: 0, scale: 0.8 }}
                     animate={{ x: 0, opacity: 1, scale: 1 }}
-                    transition={{ tension: 200, friction: 15 }}
+                    transition={{ tension: 200, friction: 15, mass: 1 }}
                 >
                     <div className="toast-icon">{getIcon(toast.type)}</div>
                     <div className="toast-message">{toast.message}</div>

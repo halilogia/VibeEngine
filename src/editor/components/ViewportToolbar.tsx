@@ -1,8 +1,5 @@
-import React from 'react';
-import { 
-    Grid3X3, Axis3d, Boxes, Layout, 
-    Video, Sun, Activity, Maximize2, ShieldCheck, Box
-} from 'lucide-react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
+
 import { useEditorStore } from '../stores';
 import './ViewportToolbar.css';
 
@@ -23,22 +20,25 @@ export const ViewportToolbar: React.FC = () => {
                     onClick={() => setShadingMode('lit')}
                     title="Shaded (Lit)"
                 >
-                    <Box size={14} />
+                    <VibeIcons name="Box" size={14} />
                 </button>
+
                 <button 
                     className={`v-tool-btn ${shadingMode === 'wireframe' ? 'active' : ''}`}
                     onClick={() => setShadingMode('wireframe')}
                     title="Wireframe"
                 >
-                    <Grid3X3 size={14} />
+                    <VibeIcons name="Grid" size={14} />
                 </button>
+
                 <button 
                     className={`v-tool-btn ${shadingMode === 'solid' ? 'active' : ''}`}
                     onClick={() => setShadingMode('solid')}
                     title="Flat (Solid)"
                 >
-                    <Layout size={14} />
+                    <VibeIcons name="Layers" size={14} />
                 </button>
+
             </div>
 
             <div className="v-toolbar-divider" />
@@ -50,15 +50,17 @@ export const ViewportToolbar: React.FC = () => {
                     onClick={toggleGrid}
                     title="Toggle Grid (G)"
                 >
-                    <Grid3X3 size={14} />
+                    <VibeIcons name="Grid" size={14} />
                 </button>
+
                 <button 
                     className={`v-tool-btn ${showAxes ? 'active' : ''}`}
                     onClick={toggleAxes}
                     title="Toggle Axes"
                 >
-                    <Axis3d size={14} />
+                    <VibeIcons name="Axis" size={14} />
                 </button>
+
             </div>
 
             <div className="v-toolbar-divider" />
@@ -66,12 +68,13 @@ export const ViewportToolbar: React.FC = () => {
             {/* Viewport Extras */}
             <div className="v-toolbar-group">
                 <button className="v-tool-btn" title="Stats View">
-                    <Activity size={14} />
+                    <VibeIcons name="Activity" size={14} />
                 </button>
                 <button className="v-tool-btn" title="Focus View (F)">
-                    <Maximize2 size={14} />
+                    <VibeIcons name="Maximize" size={14} />
                 </button>
             </div>
+
 
             {isPlaying && (
                 <div className="v-toolbar-badge">

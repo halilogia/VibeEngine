@@ -6,16 +6,17 @@ import { HierarchyPanel } from '../HierarchyPanel';
 // Mock the stores
 const mockSceneStore = {
     entities: new Map(),
-    rootEntityIds: [],
+    rootEntityIds: [] as number[],
     addEntity: vi.fn().mockReturnValue(1),
     removeEntity: vi.fn(),
 };
 
 const mockEditorStore = {
-    selectedEntityId: null,
+    selectedEntityId: null as number | null,
     selectEntity: vi.fn(),
     clearSelection: vi.fn(),
 };
+
 
 vi.mock('../../stores', () => ({
     useSceneStore: () => mockSceneStore,

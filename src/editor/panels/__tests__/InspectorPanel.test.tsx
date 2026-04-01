@@ -33,7 +33,7 @@ const mockSceneStore = {
 };
 
 const mockEditorStore = {
-    selectedEntityId: null,
+    selectedEntityId: null as number | null,
 };
 
 vi.mock('../../stores', () => ({
