@@ -5,8 +5,8 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { VibeIcons } from './VibeIcons';
-import { VibeButton } from '../atomic/atoms/VibeButton';
-import { VibeTheme } from '../themes/VibeStyles';
+import { VibeButton } from '@ui/atomic/atoms/VibeButton';
+import { VibeTheme } from '@themes/VibeStyles';
 
 /**
  * Props for the VibeErrorBoundary component

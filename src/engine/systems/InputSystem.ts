@@ -3,8 +3,8 @@
  * Updates input state every frame for scripts to query.
  */
 
-import { System } from '../core/System';
-import type { Entity } from '../core/Entity';
+import { System } from '@engine';
+import type { Entity } from '@engine';
 
 export interface InputState {
     /** Horizontal axis (-1 to 1) */

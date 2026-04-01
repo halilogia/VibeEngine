@@ -2,9 +2,9 @@
  * AnimationSystem - Updates animation mixers for all entities
  */
 
-import { System } from '../core/System';
-import type { Entity } from '../core/Entity';
-import { AnimationComponent } from '../components/AnimationComponent';
+import { System } from '@engine';
+import type { Entity } from '@engine';
+import { AnimationComponent } from '@engine';
 
 export class AnimationSystem extends System {
     readonly priority = 30; // After physics

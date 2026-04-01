@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ScriptComponent, Script } from '../ScriptComponent';
-import { Entity } from '../../core/Entity';
+import { Entity } from '@engine';
 
 // Mock concrete script implementation
 class TestScript extends Script {

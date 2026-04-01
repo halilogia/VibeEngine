@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { createVibeStyles, VibeTheme } from '../../themes/VibeStyles';
+import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 
 interface VibeButtonProps {
     onClick?: (e: React.MouseEvent) => void;

@@ -5,9 +5,9 @@
 
 import React from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
-import { useEditorStore, type EditorMode } from '@editor/stores';
-import { useToastStore } from '@editor/stores/toastStore';
-import { usePlayModeStore } from '@editor/core';
+import { useEditorStore, type EditorMode } from '@infrastructure/store';
+import { useToastStore } from '@infrastructure/store/toastStore';
+import { usePlayModeStore } from '@presentation/features/editor/core';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { toolbarStyles as styles } from './Toolbar.styles';
 

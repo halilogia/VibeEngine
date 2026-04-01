@@ -8,11 +8,11 @@
 
 import React, { useState, useRef } from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
-import { useEditorStore, useSceneStore, type EditorMode } from '@editor/stores';
+import { useEditorStore, useSceneStore, type EditorMode } from '@infrastructure/store';
 import { useProjectStore } from '@infrastructure/store/useProjectStore';
-import { useToastStore } from '@editor/stores/toastStore';
-import { usePlayModeStore } from '@editor/core';
-import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '@editor/serialization';
+import { useToastStore } from '@infrastructure/store/toastStore';
+import { usePlayModeStore } from '@presentation/features/editor/core';
+import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '@presentation/features/editor/serialization';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { menuBarStyles as styles } from './MenuBar.styles';

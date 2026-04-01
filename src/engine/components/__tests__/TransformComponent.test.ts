@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { TransformComponent } from '../TransformComponent';
-import { Entity } from '../../core/Entity';
+import { Entity } from '@engine';
 
 describe('TransformComponent', () => {
     let transform: TransformComponent;

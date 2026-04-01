@@ -3,9 +3,9 @@
  * Calls initialize, start, update, and lateUpdate on scripts.
  */
 
-import { System } from '../core/System';
-import type { Entity } from '../core/Entity';
-import { ScriptComponent } from '../components/ScriptComponent';
+import { System } from '@engine';
+import type { Entity } from '@engine';
+import { ScriptComponent } from '@engine';
 
 /**
  * ScriptSystem - Orchestrates the execution of user-defined logic.

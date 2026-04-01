@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { createVibeStyles, VibeTheme } from '../../themes/VibeStyles';
+import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 
 interface VibeInputProps {
     value?: string;

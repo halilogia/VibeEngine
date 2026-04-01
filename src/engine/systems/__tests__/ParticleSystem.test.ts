@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { ParticleSystem } from '../ParticleSystem';
-import { Entity } from '../../core/Entity';
-import { ParticleComponent } from '../../components/ParticleComponent';
-import { TransformComponent } from '../../components/TransformComponent';
+import { Entity } from '@engine';
+import { ParticleComponent } from '@engine';
+import { TransformComponent } from '@engine';
 
 describe('ParticleSystem', () => {
     let particleSystem: ParticleSystem;

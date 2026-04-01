@@ -3,9 +3,9 @@
  * Manages entity lifecycle with Scene integration.
  */
 
-import { Entity } from '../core/Entity';
-import { Scene } from '../core/Scene';
-import { TransformComponent } from '../components/TransformComponent';
+import { Entity } from '@engine';
+import { Scene } from '@engine';
+import { TransformComponent } from '@engine';
 import { ObjectPool } from './ObjectPool';
 import * as THREE from 'three';
 

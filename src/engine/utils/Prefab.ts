@@ -12,9 +12,9 @@
  * const enemy2 = enemyPrefab.instantiate(scene);
  */
 
-import { Entity } from '../core/Entity';
-import type { Scene } from '../core/Scene';
-import { Component, type ComponentClass } from '../core/Component';
+import { Entity } from '@engine';
+import type { Scene } from '@engine';
+import { Component, type ComponentClass } from '@engine';
 
 type ComponentFactory<T extends Component> = () => T;
 

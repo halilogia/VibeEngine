@@ -3,7 +3,7 @@
  * Simplified version that uses Web Audio API directly.
  */
 
-import { Component } from '../core/Component';
+import { Component } from '@engine';
 
 export interface AudioClip {
     name: string;

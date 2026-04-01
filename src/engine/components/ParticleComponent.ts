@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { Component } from '../core/Component';
+import { Component } from '@engine';
 
 export interface ParticleConfig {
     /** Maximum number of particles */

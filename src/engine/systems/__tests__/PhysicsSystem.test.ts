@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PhysicsSystem } from '../PhysicsSystem';
-import { Entity } from '../../core/Entity';
-import { TransformComponent } from '../../components/TransformComponent';
-import { RigidbodyComponent } from '../../components/RigidbodyComponent';
-import { CollisionComponent } from '../../components/CollisionComponent';
+import { Entity } from '@engine';
+import { TransformComponent } from '@engine';
+import { RigidbodyComponent } from '@engine';
+import { CollisionComponent } from '@engine';
 
 describe('PhysicsSystem', () => {
     let physicsSystem: PhysicsSystem;

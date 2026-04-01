@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AudioSystem } from '../AudioSystem';
-import { Entity } from '../../core/Entity';
-import { AudioComponent } from '../../components/AudioComponent';
+import { Entity } from '@engine';
+import { AudioComponent } from '@engine';
 
 describe('AudioSystem', () => {
     let audioSystem: AudioSystem;

@@ -16,10 +16,10 @@
  * }
  */
 
-import { Component } from '../core/Component';
-import type { Entity } from '../core/Entity';
-import type { Application } from '../core/Application';
-import type { ComponentClass } from '../core/Component';
+import { Component } from '@engine';
+import type { Entity } from '@engine';
+import type { Application } from '@engine';
+import type { ComponentClass } from '@engine';
 
 /**
  * Base class for all scripts

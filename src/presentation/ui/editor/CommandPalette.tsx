@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
-import { useEditorStore, useSceneStore } from '@editor/stores';
+import { useEditorStore, useSceneStore } from '@infrastructure/store';
 import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
 
 const styles = createVibeStyles({

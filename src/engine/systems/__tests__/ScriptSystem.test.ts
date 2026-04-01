@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ScriptSystem } from '../ScriptSystem';
-import { Entity } from '../../core/Entity';
-import { ScriptComponent } from '../../components/ScriptComponent';
+import { Entity } from '@engine';
+import { ScriptComponent } from '@engine';
 
 describe('ScriptSystem', () => {
     let scriptSystem: ScriptSystem;

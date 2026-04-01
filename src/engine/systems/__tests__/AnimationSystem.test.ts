@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AnimationSystem } from '../AnimationSystem';
-import { Entity } from '../../core/Entity';
-import { AnimationComponent } from '../../components/AnimationComponent';
+import { Entity } from '@engine';
+import { AnimationComponent } from '@engine';
 
 describe('AnimationSystem', () => {
     let animationSystem: AnimationSystem;

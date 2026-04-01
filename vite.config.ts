@@ -8,7 +8,7 @@ export default defineConfig({
     resolve: {
         alias: {
             '@engine': path.resolve(__dirname, 'src/engine'),
-            '@editor': path.resolve(__dirname, 'src/editor'),
+            '@editor': path.resolve(__dirname, 'src/presentation/features/editor'),
             '@presentation': path.resolve(__dirname, 'src/presentation'),
             '@ui': path.resolve(__dirname, 'src/presentation/ui'),
             '@themes': path.resolve(__dirname, 'src/presentation/ui/themes'),

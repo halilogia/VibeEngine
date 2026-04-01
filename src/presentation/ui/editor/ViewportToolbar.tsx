@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
-import { useEditorStore } from '@editor/stores';
+import { useEditorStore } from '@infrastructure/store';
 import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 

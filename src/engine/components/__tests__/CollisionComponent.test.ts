@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { CollisionComponent } from '../CollisionComponent';
-import { Entity } from '../../core/Entity';
+import { Entity } from '@engine';
 import { TransformComponent } from '../TransformComponent';
 
 describe('CollisionComponent', () => {

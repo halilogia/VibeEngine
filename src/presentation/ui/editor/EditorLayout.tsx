@@ -4,19 +4,22 @@
  */
 
 import React, { useEffect } from 'react';
-import { HierarchyPanel } from '@editor/panels/HierarchyPanel';
-import { ViewportPanel } from '@editor/panels/ViewportPanel';
-import { InspectorPanel } from '@editor/panels/InspectorPanel';
-import { AssetsPanel } from '@editor/panels/AssetsPanel';
-import { ConsolePanel } from '@editor/panels/ConsolePanel';
-import { AICopilotPanel } from '@editor/panels/AICopilotPanel';
-import { ScriptEditorPanel } from '@editor/panels/ScriptEditorPanel';
-import { useEditorStore } from '@editor/stores';
+import { 
+    HierarchyPanel, 
+    ViewportPanel, 
+    InspectorPanel, 
+    AssetsPanel, 
+    ConsolePanel, 
+    AICopilotPanel, 
+    ScriptEditorPanel,
+    MenuBar,
+    StatusBar,
+    Toolbar
+} from './index';
+import { useEditorStore } from '@infrastructure/store';
 import { useVibeDrag } from '@lib/vibe-motion/useVibeDrag';
 import { layoutStyles as styles, PANEL_DIMENSIONS } from './EditorLayout.styles';
 import { VibeErrorBoundary } from '@ui/common/VibeErrorBoundary';
-
-import { MenuBar, Toolbar, StatusBar } from './index';
 
 export const EditorLayout: React.FC = () => {
     const { 

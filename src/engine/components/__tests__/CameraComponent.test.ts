@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { CameraComponent } from '../CameraComponent';
-import { Entity } from '../../core/Entity';
+import { Entity } from '@engine';
 import { TransformComponent } from '../TransformComponent';
 
 describe('CameraComponent', () => {

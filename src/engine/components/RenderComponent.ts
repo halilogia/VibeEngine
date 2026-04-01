@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { Component } from '../core/Component';
+import { Component } from '@engine';
 import { TransformComponent } from './TransformComponent';
 
 export class RenderComponent extends Component {

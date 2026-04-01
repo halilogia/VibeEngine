@@ -26,7 +26,7 @@
             "@engine/*": ["src/engine/*"],
             "@domain/*": ["src/domain/*"],
             "@infrastructure/*": ["src/infrastructure/*"],
-            "@editor/*": ["src/editor/*"],
+            "@editor/*": ["src/presentation/features/editor/*"],
             "@presentation/*": ["src/presentation/*"],
             "@lib/*": ["src/lib/*"],
             "@ui/*": ["src/presentation/ui/*"],

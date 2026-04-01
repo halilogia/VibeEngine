@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { Component } from '../core/Component';
+import { Component } from '@engine';
 
 export class RigidbodyComponent extends Component {
     static readonly TYPE = 'Rigidbody';

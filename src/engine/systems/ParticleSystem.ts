@@ -2,10 +2,10 @@
  * ParticleSystem - Updates particle emitters
  */
 
-import { System } from '../core/System';
-import type { Entity } from '../core/Entity';
-import { TransformComponent } from '../components/TransformComponent';
-import { ParticleComponent } from '../components/ParticleComponent';
+import { System } from '@engine';
+import type { Entity } from '@engine';
+import { TransformComponent } from '@engine';
+import { ParticleComponent } from '@engine';
 
 export class ParticleSystem extends System {
     readonly priority = 35; // After physics, before render

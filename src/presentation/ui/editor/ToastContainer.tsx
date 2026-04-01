@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
-import { useToastStore, type ToastType } from '@editor/stores/toastStore';
+import { useToastStore, type ToastType } from '@infrastructure/store/toastStore';
 import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
 
 const styles = createVibeStyles({

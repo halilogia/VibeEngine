@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { useEditorStore, useSceneStore } from '@editor/stores';
+import { useEditorStore, useSceneStore } from '@infrastructure/store';
 import { VibeIcons } from '@ui/common/VibeIcons';
 import { statusBarStyles as styles } from './StatusBar.styles';
 

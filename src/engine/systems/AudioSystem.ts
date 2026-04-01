@@ -1,6 +1,6 @@
-import { System } from '../core/System';
-import type { Entity } from '../core/Entity';
-import { AudioComponent } from '../components/AudioComponent';
+import { System } from '@engine';
+import type { Entity } from '@engine';
+import { AudioComponent } from '@engine';
 
 /**
  * AudioSystem - Manages global audio context and updates spatial sound positions.

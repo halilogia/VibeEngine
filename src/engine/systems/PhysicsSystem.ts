@@ -3,11 +3,11 @@
  * Handles velocity-based movement and AABB/sphere collision.
  */
 
-import { System } from '../core/System';
-import type { Entity } from '../core/Entity';
-import { TransformComponent } from '../components/TransformComponent';
-import { RigidbodyComponent } from '../components/RigidbodyComponent';
-import { CollisionComponent } from '../components/CollisionComponent';
+import { System } from '@engine';
+import type { Entity } from '@engine';
+import { TransformComponent } from '@engine';
+import { RigidbodyComponent } from '@engine';
+import { CollisionComponent } from '@engine';
 
 /**
  * PhysicsSystem - Manages spatial movement, force application, and collision detection.

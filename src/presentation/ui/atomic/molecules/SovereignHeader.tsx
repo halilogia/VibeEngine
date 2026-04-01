@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { VibeIcons, type VibeIconName } from '@ui/common/VibeIcons';
-import { createVibeStyles, VibeTheme } from '../../themes/VibeStyles';
+import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 
 interface SovereignHeaderProps {
     title: string;

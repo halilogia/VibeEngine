@@ -3,11 +3,11 @@
  * Runs last in the update loop.
  */
 
-import { System } from '../core/System';
-import type { Entity } from '../core/Entity';
-import { TransformComponent } from '../components/TransformComponent';
-import { RenderComponent } from '../components/RenderComponent';
-import { CameraComponent } from '../components/CameraComponent';
+import { System } from '@engine';
+import type { Entity } from '@engine';
+import { TransformComponent } from '@engine';
+import { RenderComponent } from '@engine';
+import { CameraComponent } from '@engine';
 
 /**
  * RenderSystem - Core engine system responsible for visualizing the scene.

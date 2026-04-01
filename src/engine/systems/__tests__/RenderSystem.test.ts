@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { RenderSystem } from '../RenderSystem';
-import { Entity } from '../../core/Entity';
-import { TransformComponent } from '../../components/TransformComponent';
-import { RenderComponent } from '../../components/RenderComponent';
-import { CameraComponent } from '../../components/CameraComponent';
+import { Entity } from '@engine';
+import { TransformComponent } from '@engine';
+import { RenderComponent } from '@engine';
+import { CameraComponent } from '@engine';
 
 describe('RenderSystem', () => {
     let renderSystem: RenderSystem;
