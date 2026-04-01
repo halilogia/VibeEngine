@@ -90,14 +90,8 @@ export const useVibeDrag = (options: DragOptions = {}) => {
 
     const setPosition = useCallback((x: number, y: number, immediate = false) => {
         if (immediate) {
-            // Force reset physics for immediate jump
-            (springX.current as any).position = x;
-            (springX.current as any).velocity = 0;
-            (springY.current as any).position = y;
-            (springY.current as any).velocity = 0;
-            
-            springX.current.setTarget(x);
-            springY.current.setTarget(y);
+            springX.current.reset(x);
+            springY.current.reset(y);
             updatePosition();
         } else {
             springX.current.setTarget(x);

@@ -15,13 +15,17 @@ export const layoutStyles = createVibeStyles({
         overflow: 'hidden',
         color: VibeTheme.colors.textMain,
         fontFamily: "'Inter', sans-serif",
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        msUserSelect: 'none',
+        cursor: 'default',
     },
     topBar: {
-        height: '40px',
+        height: '48px', // Match the unified header height
         flexShrink: 0,
-        zIndex: 100,
+        zIndex: 1000,
         background: 'rgba(5, 5, 10, 0.8)',
-        backdropFilter: 'blur(10px)',
+        backdropFilter: 'blur(20px)',
         borderBottom: `1px solid ${VibeTheme.colors.glassBorder}`,
     },
     mainContent: {

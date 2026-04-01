@@ -42,6 +42,9 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
     ]);
     const [isThinking, setIsThinking] = useState(false);
     const [ollamaReady, setOllamaReady] = useState<boolean | null>(null);
+    const [availableModels, setAvailableModels] = useState<string[]>([]);
+    const [selectedModel, setSelectedModel] = useState<string>('');
+    const [showModelSelector, setShowModelSelector] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -49,7 +52,18 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
     }, [messages]);
 
     useEffect(() => {
-        OllamaService.isAvailable().then(setOllamaReady);
+        const checkOllama = async () => {
+            const available = await OllamaService.isAvailable();
+            setOllamaReady(available);
+            if (available) {
+                const models = await OllamaService.listModels();
+                setAvailableModels(models);
+                if (models.length > 0) {
+                    setSelectedModel(models[0]);
+                }
+            }
+        };
+        checkOllama();
     }, []);
 
     const handleSend = async () => {
@@ -60,23 +74,132 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
         setMessages(prev => [...prev, userMsg]);
         setIsThinking(true);
 
-        // Mock response for now (Same as original logic)
-        setTimeout(() => {
-            const assistantMsg: Message = { 
-                id: (Date.now()+1).toString(), 
-                role: 'assistant', 
-                content: "I've processed your request. Command executed.", 
-                timestamp: new Date() 
-            };
-            setMessages(prev => [...prev, assistantMsg]);
+        try {
+            if (ollamaReady && selectedModel) {
+                const ollamaMessages: OllamaMessage[] = messages.concat(userMsg).map(m => ({
+                    role: m.role === 'assistant' ? 'assistant' : 'user',
+                    content: m.content
+                }));
+
+                const assistantMsgId = (Date.now() + 1).toString();
+                let streamedContent = '';
+
+                // Create placeholder for streaming
+                setMessages(prev => [...prev, {
+                    id: assistantMsgId,
+                    role: 'assistant',
+                    content: '',
+                    timestamp: new Date(),
+                    streaming: true
+                }]);
+
+                const result = await OllamaService.chat({
+                    model: selectedModel,
+                    messages: ollamaMessages,
+                    onToken: (token) => {
+                        streamedContent += token;
+                        setMessages(prev => prev.map(m => 
+                            m.id === assistantMsgId ? { ...m, content: streamedContent } : m
+                        ));
+                    }
+                });
+
+                // Extract and execute commands
+                const commands = OllamaService.extractCommands(result.content);
+                if (commands.length > 0) {
+                    CommandInterpreter.executeBatch(commands as any);
+                }
+
+                setMessages(prev => prev.map(m => 
+                    m.id === assistantMsgId ? { ...m, streaming: false, commands } : m
+                ));
+            } else {
+                // Fallback / Mock
+                setTimeout(() => {
+                    const assistantMsg: Message = { 
+                        id: (Date.now()+1).toString(), 
+                        role: 'assistant', 
+                        content: ollamaReady ? "Please select a model first." : "Ollama is not running. Please start Ollama to use AI Copilot.", 
+                        timestamp: new Date() 
+                    };
+                    setMessages(prev => [...prev, assistantMsg]);
+                }, 1000);
+            }
+        } catch (error) {
+            setMessages(prev => [...prev, {
+                id: Date.now().toString(),
+                role: 'assistant',
+                content: `Error: ${error instanceof Error ? error.message : String(error)}`,
+                timestamp: new Date()
+            }]);
+        } finally {
             setIsThinking(false);
-        }, 1000);
+        }
     };
 
     const headerActions = (
-        <VibeButton variant="ghost" size="sm" onClick={() => setMessages([messages[0]])}>
-            <VibeIcons name="Trash" size={14} />
-        </VibeButton>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {ollamaReady !== null && (
+                <div 
+                    title={ollamaReady ? "Ollama Connected" : "Ollama Disconnected"}
+                    style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: ollamaReady ? '#10b981' : '#ef4444',
+                        boxShadow: ollamaReady ? '0 0 10px #10b981' : 'none'
+                    }} 
+                />
+            )}
+            
+            {ollamaReady && availableModels.length > 0 && (
+                <div style={{ position: 'relative' }}>
+                    <VibeButton 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setShowModelSelector(!showModelSelector)}
+                        style={{ fontSize: '10px', color: VibeTheme.colors.accent, fontWeight: 800 }}
+                    >
+                        {selectedModel || 'SELECT MODEL'}
+                    </VibeButton>
+                    
+                    {showModelSelector && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            right: 0,
+                            background: '#1a1a2e',
+                            border: `1px solid ${VibeTheme.colors.glassBorder}`,
+                            borderRadius: '8px',
+                            zIndex: 100,
+                            marginTop: '4px',
+                            minWidth: '150px',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                        }}>
+                            {availableModels.map(m => (
+                                <div 
+                                    key={m}
+                                    onClick={() => { setSelectedModel(m); setShowModelSelector(false); }}
+                                    style={{
+                                        padding: '8px 12px',
+                                        fontSize: '11px',
+                                        cursor: 'pointer',
+                                        color: selectedModel === m ? VibeTheme.colors.accent : '#fff',
+                                        background: selectedModel === m ? 'rgba(99, 102, 241, 0.1)' : 'transparent'
+                                    }}
+                                >
+                                    {m}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <VibeButton variant="ghost" size="sm" onClick={() => setMessages([messages[0]])}>
+                <VibeIcons name="Trash" size={14} />
+            </VibeButton>
+        </div>
     );
 
     return (
@@ -96,9 +219,39 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
                         </div>
                         <div style={{ ...styles.bubble, ...(msg.role === 'user' ? styles.bubbleUser : {}) }}>
                             {msg.content}
+                            {msg.role === 'assistant' && msg.commands && msg.commands.length > 0 && (
+                                <div style={{ 
+                                    marginTop: '10px', 
+                                    paddingTop: '8px', 
+                                    borderTop: '1px solid rgba(255,255,255,0.05)',
+                                    fontSize: '11px',
+                                    color: VibeTheme.colors.accent,
+                                    fontWeight: 700,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                }}>
+                                    <VibeIcons name="CheckCircle" size={12} />
+                                    {msg.commands.length} COMMANDS EXECUTED
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}
+                {isThinking && (
+                    <div style={styles.message}>
+                        <div style={styles.avatar}>
+                            <VibeIcons name="Bot" size={16} />
+                        </div>
+                        <div style={{ ...styles.bubble, opacity: 0.6 }}>
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                                <span style={{ animation: 'pulse 1s infinite' }}>•</span>
+                                <span style={{ animation: 'pulse 1s infinite 0.2s' }}>•</span>
+                                <span style={{ animation: 'pulse 1s infinite 0.4s' }}>•</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div ref={messagesEndRef} />
             </div>
 

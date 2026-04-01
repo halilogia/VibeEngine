@@ -27,13 +27,28 @@ export const EditorLayout: React.FC = () => {
     const aiInitial = { x: window.innerWidth / 2 - 210, y: 150 };
     const aiDrag = useVibeDrag({ initialX: aiInitial.x, initialY: aiInitial.y });
 
+    useEffect(() => {
+        const preventDefaults = (e: MouseEvent) => {
+            // Allow context menu only if needed, or disable globally for engine feel
+            // e.preventDefault(); 
+        };
+
+        const preventContextMenu = (e: MouseEvent) => {
+            e.preventDefault();
+        };
+
+        window.addEventListener('contextmenu', preventContextMenu);
+        return () => {
+            window.removeEventListener('contextmenu', preventContextMenu);
+        };
+    }, []);
+
     return (
         <div style={styles.appContainer}>
-            {/* 1. Top Section (Fixed) */}
+            {/* 1. Top Section (Fixed Unified Header) */}
             <div style={styles.topBar}>
                 <MenuBar />
             </div>
-            <Toolbar />
 
             {/* 2. Main Workspace (Flex Row) */}
             <div style={styles.mainContent}>

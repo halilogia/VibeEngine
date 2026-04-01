@@ -41,6 +41,8 @@ export const ViewportToolbar: React.FC = () => {
         shadingMode, setShadingMode, 
         showGrid, toggleGrid, 
         showAxes, toggleAxes,
+        showBloom, toggleBloom,
+        showEnvironment, toggleEnvironment
     } = useEditorStore();
 
     return (
@@ -71,11 +73,11 @@ export const ViewportToolbar: React.FC = () => {
             <div style={styles.divider} />
 
             <div style={styles.group}>
-                <VibeButton variant="ghost" size="sm" title="Stats View">
-                    <VibeIcons name="Activity" size={14} />
+                <VibeButton variant={showBloom ? 'primary' : 'ghost'} size="sm" onClick={toggleBloom} title="Bloom Effect">
+                    <VibeIcons name="Sparkles" size={14} />
                 </VibeButton>
-                <VibeButton variant="ghost" size="sm" title="Focus View">
-                    <VibeIcons name="Maximize" size={14} />
+                <VibeButton variant={showEnvironment ? 'primary' : 'ghost'} size="sm" onClick={toggleEnvironment} title="Studio Light">
+                    <VibeIcons name="Sun" size={14} />
                 </VibeButton>
             </div>
         </div>

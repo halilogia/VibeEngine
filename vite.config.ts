@@ -17,6 +17,9 @@ export default defineConfig({
             '@infrastructure': path.resolve(__dirname, 'src/infrastructure'),
         }
     },
+    optimizeDeps: {
+        exclude: ['framer-motion', 'lucide-react']
+    },
     build: {
         outDir: 'dist',
         assetsDir: 'assets',

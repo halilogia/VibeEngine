@@ -3,8 +3,63 @@
  * VibeEngine - Desktop Application with Splash Screen
  */
 
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
+
+function readProjectInfo(projectPath) {
+    const projectDataPath = path.join(projectPath, 'project-data.json');
+    const packageJsonPath = path.join(projectPath, 'package.json');
+    const hasProjectData = fs.existsSync(projectDataPath);
+    const hasPackageJson = fs.existsSync(packageJsonPath);
+    const hasDomain = fs.existsSync(path.join(projectPath, 'src', 'domain'));
+    const name = path.basename(projectPath);
+
+    if (hasProjectData) {
+        try {
+            const raw = fs.readFileSync(projectDataPath, 'utf-8');
+            const projectData = JSON.parse(raw);
+            return {
+                name: projectData.name || name,
+                version: projectData.version || '0.0.0',
+                engine: projectData.engine || 'vibe-engine',
+                description: projectData.description || '',
+                author: projectData.author || '',
+                mainScene: projectData.mainScene || 'index',
+                path: projectPath,
+                hasPackageJson,
+                hasDomain
+            };
+        } catch (error) {
+            console.error('Project data parse error:', error);
+        }
+    }
+
+    return {
+        name,
+        version: hasPackageJson ? 'package.json' : '0.0.0',
+        engine: hasDomain ? 'vibe-engine' : 'unknown',
+        description: '',
+        author: '',
+        mainScene: 'index',
+        path: projectPath,
+        hasPackageJson,
+        hasDomain
+    };
+}
+
+ipcMain.handle('pick-project-folder', async () => {
+    const { canceled, filePaths } = await require('electron').dialog.showOpenDialog({
+        title: 'Select a project folder',
+        properties: ['openDirectory']
+    });
+
+    if (canceled || filePaths.length === 0) {
+        return null;
+    }
+
+    return readProjectInfo(filePaths[0]);
+});
 
 // Determine if in development
 const isDev = !app.isPackaged;
@@ -51,7 +106,8 @@ function createMainWindow() {
         icon: path.join(__dirname, '../assets/icon1.png'),
         webPreferences: {
             nodeIntegration: false,
-            contextIsolation: true
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.cjs')
         },
         backgroundColor: '#1a1a2e',
         show: false

@@ -1,14 +1,18 @@
 /**
- * MenuBar Component (Sovereign Atomic Edition)
+ * Unified Minimalist MenuBar (Sovereign Elite Edition)
  * 🏛️⚛️💎🚀
+ * 
+ * This component now consolidates the MenuBar, Toolbar, and Play Controls
+ * into a single minimalist header to maximize workspace and visual clarity.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
-import { useEditorStore, useSceneStore } from '@editor/stores';
+import { useEditorStore, useSceneStore, type EditorMode } from '@editor/stores';
+import { useProjectStore } from '@infrastructure/store/useProjectStore';
 import { useToastStore } from '@editor/stores/toastStore';
+import { usePlayModeStore } from '@editor/core';
 import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '@editor/serialization';
-import { LocalSceneStorage } from '@editor/storage/LocalSceneStorage';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { menuBarStyles as styles } from './MenuBar.styles';
@@ -30,124 +34,88 @@ export const MenuBar: React.FC = () => {
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { showGrid, showAxes, toggleGrid, toggleAxes } = useEditorStore();
+    
+    // Stores
+    const { 
+        editorMode, setEditorMode, togglePanel, 
+        showAICopilot, showScriptEditor 
+    } = useEditorStore();
     const { sceneName, isDirty } = useSceneStore();
+    const { setShowLauncher } = useProjectStore();
     const { addToast } = useToastStore();
+    const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
 
-    const handleNewScene = () => {
-        if (isDirty && !confirm('Unsaved changes will be lost. Continue?')) return;
-        createDefaultScene();
-        addToast('New Scene Created', 'info');
-    };
-
+    const handleOpenLauncher = () => { setShowLauncher(true); setOpenMenu(null); };
     const handleOpen = () => fileInputRef.current?.click();
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            try { 
-                await loadSceneFromFile(file); 
-                addToast('Scene loaded successfully', 'success');
-            } 
-            catch (error) { addToast('Failed to load scene', 'error'); }
+            try { await loadSceneFromFile(file); addToast('Scene loaded', 'success'); } 
+            catch (error) { addToast('Load failed', 'error'); }
         }
-        e.target.value = '';
+        e.target.value = ''; setOpenMenu(null);
     };
 
     const handleSave = () => {
         downloadScene(`${sceneName.replace(/\s+/g, '_')}.json`);
         useSceneStore.setState({ isDirty: false });
-        addToast('Scene saved locally', 'success');
-    };
-
-    const handleComingSoon = (feature: string) => {
-        addToast(`${feature} is currently in development 🚀`, 'info');
+        addToast('Scene saved', 'success');
     };
 
     const menus: MenuSection[] = [
         {
             label: 'File',
             items: [
-                { label: 'New Scene', icon: <VibeIcons name="Plus" size={14} />, shortcut: 'Ctrl+N', action: handleNewScene },
-                { label: 'Open File...', icon: <VibeIcons name="Search" size={14} />, shortcut: 'Ctrl+O', action: handleOpen },
+                { label: 'Manage Projects', icon: <VibeIcons name="Layers" size={14} />, shortcut: 'Ctrl+L', action: handleOpenLauncher },
                 { divider: true, label: '' },
-                { label: 'Save as File', icon: <VibeIcons name="Save" size={14} />, shortcut: 'Ctrl+S', action: handleSave },
-                { divider: true, label: '' },
-                { label: 'Settings', icon: <VibeIcons name="Settings" size={14} /> },
-            ]
-        },
-        {
-            label: 'Edit',
-            items: [
-                { label: 'Undo', icon: <VibeIcons name="Undo" size={14} />, shortcut: 'Ctrl+Z', action: () => handleComingSoon('Undo') },
-                { label: 'Redo', icon: <VibeIcons name="Redo" size={14} />, shortcut: 'Ctrl+Y', action: () => handleComingSoon('Redo') },
-                { divider: true, label: '' },
-                { label: 'Copy', icon: <VibeIcons name="Copy" size={14} />, shortcut: 'Ctrl+C', action: () => handleComingSoon('Copy') },
-                { label: 'Paste', icon: <VibeIcons name="Plus" size={14} />, shortcut: 'Ctrl+V', action: () => handleComingSoon('Paste') },
-            ]
-        },
-        {
-            label: 'View',
-            items: [
-                { label: showGrid ? 'Hide Grid' : 'Show Grid', icon: <VibeIcons name="Grid" size={14} />, action: toggleGrid },
-                { label: showAxes ? 'Hide Axes' : 'Show Axes', icon: <VibeIcons name="Search" size={14} />, action: toggleAxes },
-                { divider: true, label: '' },
-                { label: 'Reset Layout', icon: <VibeIcons name="Rotate" size={14} />, action: () => (window as any).resetVibeLayout?.() },
+                { label: 'New Scene', icon: <VibeIcons name="Plus" size={14} />, action: () => { createDefaultScene(); addToast('New Scene', 'info'); } },
+                { label: 'Open Scene...', icon: <VibeIcons name="Search" size={14} />, action: handleOpen },
+                { label: 'Save Scene', icon: <VibeIcons name="Save" size={14} />, action: handleSave },
             ]
         },
         {
             label: 'Build',
             items: [
-                { label: 'Export as HTML', icon: <VibeIcons name="Save" size={14} />, action: () => exportToHTML(sceneName) },
+                { label: 'Export HTML', icon: <VibeIcons name="Save" size={14} />, action: () => exportToHTML(sceneName) },
             ]
-        },
+        }
     ];
 
-    const handleItemClick = (item: MenuItem) => {
-        if (item.action) item.action();
-        setOpenMenu(null);
-    };
+    const transformModes: { mode: EditorMode; icon: string; label: string }[] = [
+        { mode: 'translate', icon: 'Move', label: 'Move' },
+        { mode: 'rotate', icon: 'Rotate', label: 'Rotate' },
+        { mode: 'scale', icon: 'Scale', label: 'Scale' },
+    ];
 
     return (
-        <div className="menu-bar" style={styles.container}>
+        <div className="unified-header" style={styles.container}>
             <input type="file" ref={fileInputRef} accept=".json" style={{ display: 'none' }} onChange={handleFileChange} />
 
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={styles.logoGroup}>
-                    <img src="/assets/icon1.png" alt="Vibe" style={{ height: '24px', filter: 'drop-shadow(0 0 10px rgba(99, 102, 241, 0.5))' }} />
-                    <span style={styles.logoText}>VibeEngine</span>
+            {/* LEFT: Branding & Menu & Transform Tools */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={styles.logoGroup} onClick={handleOpenLauncher}>
+                    <img src="/assets/icon1.png" alt="V" style={{ height: '20px' }} />
                 </div>
 
                 {menus.map(menu => (
                     <div
                         key={menu.label}
-                        style={{ 
-                            ...styles.trigger, 
-                            ...(openMenu === menu.label ? styles.triggerActive : {}) 
-                        }}
+                        style={{ ...styles.trigger, ...(openMenu === menu.label ? styles.triggerActive : {}) }}
                         onClick={() => setOpenMenu(openMenu === menu.label ? null : menu.label)}
                     >
                         {menu.label}
-
                         {openMenu === menu.label && (
                             <div style={styles.dropdown}>
                                 {menu.items.map((item, idx) => (
-                                    item.divider ? (
-                                        <div key={idx} style={styles.divider} />
-                                    ) : (
-                                        <div
-                                            key={item.label}
-                                            style={{ 
-                                                ...styles.menuItem, 
-                                                ...(hoveredItem === item.label ? styles.menuItemHover : {}) 
-                                            }}
-                                            onMouseEnter={() => setHoveredItem(item.label)}
-                                            onMouseLeave={() => setHoveredItem(null)}
-                                            onClick={(e) => { e.stopPropagation(); handleItemClick(item); }}
+                                    item.divider ? <div key={idx} style={styles.divider} /> : (
+                                        <div key={item.label} 
+                                            style={{ ...styles.menuItem, ...(hoveredItem === item.label ? styles.menuItemHover : {}) }}
+                                            onMouseEnter={() => setHoveredItem(item.label)} onMouseLeave={() => setHoveredItem(null)}
+                                            onClick={(e) => { e.stopPropagation(); item.action?.(); setOpenMenu(null); }}
                                         >
-                                            <span style={{ display: 'flex', opacity: 0.8 }}>{item.icon}</span>
-                                            <span>{item.label}</span>
-                                            {item.shortcut && <span style={styles.shortcut}>{item.shortcut}</span>}
+                                            <VibeIcons name={item.icon ? (item.icon as any).props.name : 'Plus'} size={14} />
+                                            <span style={{ marginLeft: '8px' }}>{item.label}</span>
                                         </div>
                                     )
                                 ))}
@@ -155,17 +123,60 @@ export const MenuBar: React.FC = () => {
                         )}
                     </div>
                 ))}
+
+                <div style={styles.dividerVertical} />
+
+                {/* Transform Tools integrated into MenuBar */}
+                <div style={{ display: 'flex', gap: '2px' }}>
+                    {transformModes.map((m) => (
+                        <VibeButton
+                            key={m.mode}
+                            variant={editorMode === m.mode ? 'primary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setEditorMode(m.mode)}
+                            style={{ padding: '4px 8px', borderRadius: '4px' }}
+                        >
+                            <VibeIcons name={m.icon as any} size={14} />
+                        </VibeButton>
+                    ))}
+                </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            {/* CENTER: Playback Controls */}
+            <div style={styles.playbackGroup}>
+                {!isPlaying ? (
+                    <VibeButton variant="primary" size="sm" onClick={play} style={{ borderRadius: '20px', background: '#10b981', height: '28px', padding: '0 12px' }}>
+                        <VibeIcons name="Play" size={14} />
+                    </VibeButton>
+                ) : (
+                    <div style={{ display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.2)', padding: '2px', borderRadius: '20px' }}>
+                        <VibeButton variant={isPaused ? 'primary' : 'ghost'} size="sm" onClick={pause} style={{ height: '24px', borderRadius: '12px' }}>
+                            <VibeIcons name="Pause" size={14} />
+                        </VibeButton>
+                        <VibeButton variant="danger" size="sm" onClick={stop} style={{ background: '#ef4444', height: '24px', borderRadius: '12px' }}>
+                            <VibeIcons name="Square" size={14} />
+                        </VibeButton>
+                    </div>
+                )}
+            </div>
+
+            {/* RIGHT: Scene Info & Utilities */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                    <VibeButton variant={showAICopilot ? 'primary' : 'ghost'} size="sm" onClick={() => togglePanel('aiCopilot')}>
+                        <VibeIcons name="Bot" size={14} />
+                    </VibeButton>
+                    <VibeButton variant={showScriptEditor ? 'primary' : 'ghost'} size="sm" onClick={() => togglePanel('scriptEditor')}>
+                        <VibeIcons name="Code" size={14} />
+                    </VibeButton>
+                </div>
+
                 <div style={styles.sceneBadge}>
-                    <VibeIcons name="Layers" size={14} style={{ color: VibeTheme.colors.accent }} />
-                    {sceneName}
-                    {isDirty && <span style={{ color: '#fba919' }}>*</span>}
+                    <span style={{ opacity: 0.5 }}>Scene:</span> {sceneName}
                 </div>
                 
-                <VibeButton variant="primary" size="sm" onClick={handleSave} style={{ borderRadius: '20px' }}>
-                    <VibeIcons name="Save" size={14} /> SAVE
+                <VibeButton variant="primary" size="sm" onClick={handleSave} style={{ borderRadius: '6px', height: '28px' }}>
+                    SAVE
                 </VibeButton>
             </div>
         </div>

@@ -35,12 +35,15 @@ export class VibeSpring {
     }
 
     update(dt: number): number {
+        // Clamp dt to avoid physics explosions at low frame rates
+        const clampedDt = Math.min(dt, 0.032); 
+        
         const force = -this.config.tension * (this.position - this.target);
         const damping = -this.config.friction * this.velocity;
         const acceleration = (force + damping) / this.config.mass;
 
-        this.velocity += acceleration * dt;
-        this.position += this.velocity * dt;
+        this.velocity += acceleration * clampedDt;
+        this.position += this.velocity * clampedDt;
 
         // Equilibrium check
         if (Math.abs(this.velocity) < (this.config.precision || 0.01) && 
@@ -50,6 +53,12 @@ export class VibeSpring {
         }
 
         return this.position;
+    }
+
+    reset(position: number) {
+        this.position = position;
+        this.target = position;
+        this.velocity = 0;
     }
 
     get isAtRest(): boolean {

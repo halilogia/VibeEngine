@@ -14,19 +14,11 @@ import { toolbarStyles as styles } from './Toolbar.styles';
 export const Toolbar: React.FC = () => {
     const { 
         editorMode, setEditorMode, 
-        showGrid, toggleGrid, 
-        showAxes, toggleAxes,
-        showBloom, toggleBloom,
-        showEnvironment, toggleEnvironment,
         togglePanel, showAICopilot, showScriptEditor
     } = useEditorStore();
     
     const { addToast } = useToastStore();
     const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
-
-    const handleSave = () => {
-        addToast('Scene saved successfully', 'success');
-    };
 
     const transformModes: { mode: EditorMode; icon: string; label: string }[] = [
         { mode: 'translate', icon: 'Move', label: 'Move' },
@@ -36,7 +28,7 @@ export const Toolbar: React.FC = () => {
 
     return (
         <div className="toolbar" style={styles.container}>
-            {/* Left Section: Modes & Tools */}
+            {/* Left Section: Modes & Tools - Simplified to core transform modes */}
             <div style={styles.section}>
                 <div style={styles.group}>
                     {transformModes.map((m) => (
@@ -50,26 +42,6 @@ export const Toolbar: React.FC = () => {
                             <VibeIcons name={m.icon as any} size={16} />
                         </VibeButton>
                     ))}
-                </div>
-
-                <div style={styles.divider} />
-
-                <div style={styles.group}>
-                    <VibeButton variant={showGrid ? 'primary' : 'ghost'} size="sm" onClick={toggleGrid} title="Toggle Grid">
-                        <VibeIcons name="Grid" size={16} />
-                    </VibeButton>
-                    <VibeButton variant={showAxes ? 'primary' : 'ghost'} size="sm" onClick={toggleAxes} title="Toggle Axes">
-                        <VibeIcons name="Axis" size={16} />
-                    </VibeButton>
-                </div>
-
-                <div style={styles.group}>
-                    <VibeButton variant={showBloom ? 'primary' : 'ghost'} size="sm" onClick={toggleBloom} title="Elite Bloom">
-                        <VibeIcons name="Sparkles" size={16} />
-                    </VibeButton>
-                    <VibeButton variant={showEnvironment ? 'primary' : 'ghost'} size="sm" onClick={toggleEnvironment} title="Studio Env">
-                        <VibeIcons name="Sun" size={16} />
-                    </VibeButton>
                 </div>
             </div>
 
@@ -91,7 +63,7 @@ export const Toolbar: React.FC = () => {
                 )}
             </div>
 
-            {/* Right Section: Features & Save */}
+            {/* Right Section: Feature Toggles */}
             <div style={styles.section}>
                 <div style={styles.group}>
                     <VibeButton variant={showAICopilot ? 'primary' : 'ghost'} size="sm" onClick={() => togglePanel('aiCopilot')} title="AI Copilot">

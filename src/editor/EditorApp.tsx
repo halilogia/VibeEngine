@@ -8,10 +8,12 @@ import { CommandPalette } from '@ui/editor/CommandPalette';
 import { useKeyboardShortcuts } from './hooks';
 import { ToastContainer } from '@ui/editor/ToastContainer';
 import { useAssetManager } from './assets/AssetManager';
-
+import { ProjectLauncher } from '@presentation/features/launcher/widgets/ProjectLauncher';
+import { useProjectStore } from '@infrastructure/store/useProjectStore';
 
 export const EditorApp: React.FC = () => {
     const [showSplash, setShowSplash] = useState(true);
+    const { launchedProject, showLauncher, setShowLauncher } = useProjectStore();
 
     // Enable keyboard shortcuts
     useKeyboardShortcuts();
@@ -26,7 +28,7 @@ export const EditorApp: React.FC = () => {
             modules: {} as Record<string, 'success' | 'error'>,
             details: 'Starting Editor...'
         };
-        (window as any).VibeLoading = bridge;
+        (window as Window & { VibeLoading?: typeof bridge }).VibeLoading = bridge;
 
         const steps: Array<{ name: string; label: string; delay: number }> = [
             { name: 'Theme', label: 'Loading Theme System...', delay: 200 },
@@ -75,10 +77,12 @@ export const EditorApp: React.FC = () => {
 
 
     return (
-        <>
+        <div style={{ width: '100vw', height: '100vh', background: '#000', overflow: 'hidden', position: 'relative' }}>
             {showSplash && (
                 <SplashScreen onComplete={() => setShowSplash(false)} />
             )}
+            
+            {/* Main Editor UI - Always present now */}
             <div style={{
                 opacity: showSplash ? 0 : 1,
                 visibility: showSplash ? 'hidden' : 'visible',
@@ -86,13 +90,65 @@ export const EditorApp: React.FC = () => {
                 width: '100vw',
                 height: '100vh',
                 overflow: 'hidden',
-                background: '#000', // Deepest black for seamless blending
+                background: '#000',
             }}>
                 <EditorLayout />
                 <ToastContainer />
                 <CommandPalette />
             </div>
-        </>
+
+            {/* Project Launcher Overlay - Only show if manually triggered via showLauncher */}
+            {showLauncher && !showSplash && (
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: 9999,
+                    background: 'rgba(5, 5, 10, 0.85)',
+                    backdropFilter: 'blur(20px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'vibe-fade-in 0.4s ease-out'
+                }}>
+                    <div style={{ width: '90%', height: '85%', position: 'relative' }}>
+                        <ProjectLauncher />
+                        
+                        <button 
+                            onClick={() => setShowLauncher(false)}
+                            style={{
+                                position: 'absolute',
+                                top: '2rem',
+                                right: '2rem',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: '#fff',
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                cursor: 'pointer',
+                                fontSize: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 100
+                            }}
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                @keyframes vibe-fade-in {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+            `}</style>
+        </div>
     );
 };
 

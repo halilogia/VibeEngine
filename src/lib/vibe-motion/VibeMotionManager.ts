@@ -54,7 +54,7 @@ export class VibeMotionManager {
     private loop(now: number) {
         if (!this.isRunning) return;
 
-        const dt = (now - this.lastTime) / 1000;
+        const dt = Math.min((now - this.lastTime) / 1000, 0.032); // Clamp global dt as well
         this.lastTime = now;
 
         const toRemove: string[] = [];
