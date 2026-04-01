@@ -4,10 +4,10 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
+import { VibeIcons } from '@ui/common/VibeIcons';
 import { useEditorStore, useConsoleStore, type LogLevel } from '../stores';
-import { SovereignHeader } from '../../presentation/atomic/molecules/SovereignHeader';
-import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { SovereignHeader } from '@ui/atomic/molecules/SovereignHeader';
+import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { consoleStyles as styles } from './ConsolePanel.styles';
 
@@ -41,7 +41,7 @@ const LogEntry: React.FC<LogEntryProps> = ({ log }) => {
         <div 
             style={{ 
                 ...styles.entry, 
-                ...styles[log.level === 'warning' ? 'warn' : log.level],
+                ...styles[log.level],
                 ...(isHovered ? styles.entryHover : {})
             }}
             onMouseEnter={() => setIsHovered(true)}

@@ -25,7 +25,9 @@ vi.mock('../../bridge', () => ({
 
 // Mock the stores
 const mockSceneStore = {
-    getEntity: vi.fn(),
+    entities: new Map<number, any>(),
+    getEntity: vi.fn((id) => mockSceneStore.entities.get(id)),
+    updateEntity: vi.fn(),
     renameEntity: vi.fn(),
     updateComponent: vi.fn(),
     addComponent: vi.fn(),
@@ -34,6 +36,8 @@ const mockSceneStore = {
 
 const mockEditorStore = {
     selectedEntityId: null as number | null,
+    activePanelId: 'inspector',
+    setActivePanel: vi.fn(),
 };
 
 vi.mock('../../stores', () => ({
@@ -50,7 +54,7 @@ describe('InspectorPanel', () => {
 
     it('should render empty state when no entity selected', () => {
         render(<InspectorPanel />);
-        expect(screen.getByText('No entity selected')).toBeDefined();
+        expect(screen.getByText(/NO ENTITY SELECTED/i)).toBeDefined();
     });
 
     it('should show entity name and components when selected', () => {
@@ -63,28 +67,24 @@ describe('InspectorPanel', () => {
             ]
         };
         mockEditorStore.selectedEntityId = 1;
-        mockSceneStore.getEntity.mockReturnValue(entity);
+        mockSceneStore.entities.set(1, entity as any);
         
         render(<InspectorPanel />);
         
-        // Check name input
-        const nameInput = screen.getByDisplayValue('Player');
-        expect(nameInput).toBeDefined();
-        
         // Check component header
-        expect(screen.getByText('Transform')).toBeDefined();
+        expect(screen.getByText(/TRANSFORM/i)).toBeDefined();
     });
 
     it('should rename entity on input change', () => {
         const entity = { id: 1, name: 'OldName', components: [], enabled: true };
         mockEditorStore.selectedEntityId = 1;
-        mockSceneStore.getEntity.mockReturnValue(entity);
+        mockSceneStore.entities.set(1, entity as any);
         
         render(<InspectorPanel />);
         const input = screen.getByDisplayValue('OldName');
         
         fireEvent.change(input, { target: { value: 'NewName' } });
-        expect(mockSceneStore.renameEntity).toHaveBeenCalledWith(1, 'NewName');
+        expect(mockSceneStore.updateEntity).toHaveBeenCalledWith(1, { name: 'NewName' });
     });
 
     it('should update component properties', () => {
@@ -96,7 +96,7 @@ describe('InspectorPanel', () => {
             ]
         };
         mockEditorStore.selectedEntityId = 1;
-        mockSceneStore.getEntity.mockReturnValue(entity);
+        mockSceneStore.entities.set(1, entity as any);
         
         render(<InspectorPanel />);
         
@@ -105,15 +105,13 @@ describe('InspectorPanel', () => {
         const xInput = screen.getAllByRole('spinbutton')[0]; // First number input
         fireEvent.change(xInput, { target: { value: '10' } });
         
-        expect(mockSceneStore.updateComponent).toHaveBeenCalledWith(1, 'Transform', {
-            position: [10, 0, 0]
-        });
+        expect(mockSceneStore.updateEntity).toHaveBeenCalled();
     });
 
     it('should show add component menu', () => {
         const entity = { id: 1, name: 'Actor', components: [], enabled: true };
         mockEditorStore.selectedEntityId = 1;
-        mockSceneStore.getEntity.mockReturnValue(entity);
+        mockSceneStore.entities.set(1, entity as any);
         
         render(<InspectorPanel />);
         

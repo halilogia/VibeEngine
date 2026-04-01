@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { useEditorStore, useSceneStore } from '../stores';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
+import { useEditorStore, useSceneStore } from '@editor/stores';
+import { VibeIcons } from '@ui/common/VibeIcons';
 import { statusBarStyles as styles } from './StatusBar.styles';
 
 export const StatusBar: React.FC = () => {

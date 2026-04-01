@@ -12,19 +12,8 @@
 import * as THREE from 'three';
 import { Scene } from './Scene';
 import { System } from './System';
-
-export interface ApplicationOptions {
-    /** Target FPS (default: 60) */
-    targetFPS?: number;
-    /** Use fixed timestep for physics (default: false) */
-    useFixedTimestep?: boolean;
-    /** Fixed timestep interval in seconds (default: 1/60) */
-    fixedTimeStep?: number;
-    /** Antialias (default: true) */
-    antialias?: boolean;
-    /** Background color (default: 0x000000) */
-    backgroundColor?: number;
-}
+import { initLoadingBridge, updateLoadingStatus } from './AppLoadingBridge';
+import type { ApplicationOptions } from './types';
 
 export class Application {
     // Three.js
@@ -147,48 +136,24 @@ export class Application {
         if (this.running) return;
 
         // Initialize Loading Bridge
-        (window as any).VibeLoading = {
-            progress: 0,
-            status: 'initializing',
-            modules: {} as Record<string, 'loading' | 'success' | 'error'>,
-            details: 'Starting Engine Modules...'
-        };
+        initLoadingBridge();
 
-        const updateLoading = (module: string, status: 'success' | 'error', details: string) => {
-            const bridge = (window as any).VibeLoading;
-            bridge.modules[module] = status;
-            bridge.details = details;
-            
-            const totalModules = this.systems.length + 1; // +1 for renderer
-            const completedModules = Object.values(bridge.modules).filter(s => s === 'success' || s === 'error').length;
-            bridge.progress = Math.round((completedModules / totalModules) * 100);
-            
-            if (status === 'success') {
-                console.log(`✅ [Module] ${module}: Ready`);
-            } else {
-                console.error(`❌ [Module] ${module}: Failed - ${details}`);
-            }
-
-            if (bridge.progress >= 100) {
-                bridge.status = 'ready';
-                console.log('🚀 Application: All systems go!');
-            }
-        };
+        const totalModules = this.systems.length + 1; // +1 for renderer
 
         // Initialize Renderer first
         try {
-            updateLoading('Renderer', 'success', 'WebGL Graphics Ready');
+            updateLoadingStatus('Renderer', 'success', 'WebGL Graphics Ready', totalModules);
         } catch (e) {
-            updateLoading('Renderer', 'error', 'WebGL Initialization Failed');
+            updateLoadingStatus('Renderer', 'error', 'WebGL Initialization Failed', totalModules);
         }
 
         // Initialize all systems
         for (const system of this.systems) {
             try {
                 if (system.initialize) system.initialize();
-                updateLoading(system.constructor.name, 'success', `${system.constructor.name} Initialized`);
+                updateLoadingStatus(system.constructor.name, 'success', `${system.constructor.name} Initialized`, totalModules);
             } catch (e) {
-                updateLoading(system.constructor.name, 'error', `Failed to initialize ${system.constructor.name}`);
+                updateLoadingStatus(system.constructor.name, 'error', `Failed to initialize ${system.constructor.name}`, totalModules);
             }
         }
 

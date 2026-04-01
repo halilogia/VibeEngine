@@ -12,14 +12,20 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { useEditorStore, useSceneStore } from '../stores';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
-import { ViewportToolbar } from '../components/ViewportToolbar';
+import { VibeIcons } from '@ui/common/VibeIcons';
+import { ViewportToolbar } from '@ui/editor/ViewportToolbar';
 import { viewportStyles as styles, viewportAnimations } from './ViewportPanel.styles';
 
 // Map editor entity IDs to Three.js objects
 const entityMeshMap = new Map<number, THREE.Object3D>();
 
-// Create mesh based on component data
+/**
+ * createMeshForEntity - Utility to generate Three.js primitives.
+ * 
+ * @param meshType - Type of geometry to create (cube, sphere, etc.)
+ * @param color - Hex color string for the material
+ * @returns A fully configured THREE.Mesh with shadow support
+ */
 function createMeshForEntity(meshType: string, color: string): THREE.Mesh {
     let geometry: THREE.BufferGeometry;
     switch (meshType) {
@@ -37,6 +43,14 @@ function createMeshForEntity(meshType: string, color: string): THREE.Mesh {
     return mesh;
 }
 
+/**
+ * ViewportPanel - The 3D visual gateway of the VibeEngine Studio.
+ * 🏛️⚛️💎🚀
+ * 
+ * Manages the Three.js render loop, camera controls, post-processing (Bloom),
+ * and interactive object selection via Raycasting. Synchronizes the 
+ * Editor state with the actual 3D scene.
+ */
 export const ViewportPanel: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);

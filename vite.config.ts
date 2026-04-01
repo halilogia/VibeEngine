@@ -10,7 +10,9 @@ export default defineConfig({
             '@engine': path.resolve(__dirname, 'src/engine'),
             '@editor': path.resolve(__dirname, 'src/editor'),
             '@presentation': path.resolve(__dirname, 'src/presentation'),
-            '@themes': path.resolve(__dirname, 'src/presentation/themes'),
+            '@ui': path.resolve(__dirname, 'src/presentation/ui'),
+            '@themes': path.resolve(__dirname, 'src/presentation/ui/themes'),
+            '@lib': path.resolve(__dirname, 'src/lib'),
             '@domain': path.resolve(__dirname, 'src/domain'),
             '@infrastructure': path.resolve(__dirname, 'src/infrastructure'),
         }

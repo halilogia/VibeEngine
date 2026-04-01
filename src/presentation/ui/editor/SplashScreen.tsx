@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { splashStyles as styles, splashAnimations } from './SplashScreen.styles';
 
 interface SplashScreenProps {
@@ -77,8 +77,16 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                         variant="primary" 
                         size="lg" 
                         onClick={handleStart} 
-                        style={{ padding: '16px 48px', borderRadius: '12px', letterSpacing: '4px' }}
+                        style={{ 
+                            padding: '16px 48px', 
+                            borderRadius: '12px', 
+                            letterSpacing: '4px',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            animation: 'button-pulse 3s ease-in-out infinite'
+                        }}
                     >
+                        <div style={{ ...styles.shimmerOverlay, animation: 'shimmer 2.5s infinite linear' }} />
                         START ENGINE
                     </VibeButton>
                     <p style={styles.startHint}>EXPERIENCE THE SOVEREIGN STUDIO</p>

@@ -121,7 +121,38 @@
 <a name='L56'></a><a href='#L56'>56</a>
 <a name='L57'></a><a href='#L57'>57</a>
 <a name='L58'></a><a href='#L58'>58</a>
-<a name='L59'></a><a href='#L59'>59</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -132,12 +163,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
@@ -157,18 +195,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -188,32 +232,53 @@ import { System } from '../core/System';
 import type { Entity } from '../core/Entity';
 import { ScriptComponent } from '../components/ScriptComponent';
 &nbsp;
+/**
+ * ScriptSystem - Orchestrates the execution of user-defined logic.
+ * It manages the lifecycle of ScriptComponents, ensuring that start hooks 
+ * fire once and update hooks run every frame in the correct order.
+ */
 export class ScriptSystem extends System {
-    readonly priority = 10; // After input, before physics
+    /** 
+     * Priority is set to 10 to ensure scripts run early,
+     * allowing them to set state for physics (20) and rendering (99).
+     */
+    readonly priority = 10;
+&nbsp;
+    /** Required components for an entity to have its scripts executed. */
     readonly requiredComponents = [ScriptComponent];
 &nbsp;
-    /** Track which entities have been started */
+    /** Track which entities have already had their 'start' methods invoked. */
     private readonly startedEntities: Set&lt;number&gt; = new Set();
 &nbsp;
+    /**
+     * Standard update loop for scripts.
+     * @param deltaTime - Time passed since the last frame.
+     * @param entities - Entities matching the requiredComponents filter.
+     */
     update(deltaTime: number, entities: Entity[]): void {
         for (const entity of entities) {
             const scriptComponent = entity.getComponent(ScriptComponent);
             <span class="missing-if-branch" title="if path not taken" >I</span>if (!scriptComponent) <span class="cstat-no" title="statement not covered" >continue;</span>
 &nbsp;
-            // Set app reference
+            // Inject current app reference into the component for global access
             scriptComponent.app = this.app;
 &nbsp;
-            // Call start once
+            // Trigger the 'start' lifecycle hook only once per entity
             if (!this.startedEntities.has(entity.id)) {
                 scriptComponent.startAll();
                 this.startedEntities.add(entity.id);
             }
 &nbsp;
-            // Call update
+            // Standard frame update
             scriptComponent.updateAll(deltaTime);
         }
     }
 &nbsp;
+    /**
+     * Executes the lateUpdate hook for all active entities.
+     * Guaranteed to run after ALL system update() calls have completed.
+     * @param deltaTime - Standard delta time.
+     */
     postUpdate(deltaTime: number): void {
         <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.app) <span class="cstat-no" title="statement not covered" >return;</span>
 &nbsp;
@@ -225,13 +290,14 @@ export class ScriptSystem extends System {
             const scriptComponent = entity.getComponent(ScriptComponent);
             <span class="missing-if-branch" title="if path not taken" >I</span>if (!scriptComponent) <span class="cstat-no" title="statement not covered" >continue;</span>
 &nbsp;
-            // Call late update
+            // Late update for post-process logic (e.g., camera following)
             scriptComponent.lateUpdateAll(deltaTime);
         }
     }
 &nbsp;
     /**
-     * Reset started tracking (for scene reload)
+     * Resets the system's internal state.
+     * Essential for scene reloading to ensure 'start' hooks fire again.
      */
     reset(): void {
         this.startedEntities.clear();
@@ -244,7 +310,7 @@ export class ScriptSystem extends System {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-31T23:25:26.217Z
+                at 2026-04-01T15:08:26.960Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

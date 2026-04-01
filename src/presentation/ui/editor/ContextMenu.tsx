@@ -12,6 +12,7 @@ export interface ContextMenuItem {
     onClick?: () => void;
     danger?: boolean;
     divider?: boolean;
+    disabled?: boolean;
 }
 
 interface ContextMenuProps {
@@ -108,11 +109,16 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
                         style={{ 
                             ...styles.item, 
                             ...(item.danger ? styles.itemDanger : {}),
-                            ...(hoveredIdx === index ? (item.danger ? styles.itemDangerHover : styles.itemHover) : {})
+                            ...(hoveredIdx === index && !item.disabled ? (item.danger ? styles.itemDangerHover : styles.itemHover) : {}),
+                            ...(item.disabled ? { opacity: 0.4, cursor: 'not-allowed', filter: 'grayscale(1)' } : {})
                         }}
-                        onMouseEnter={() => setHoveredIdx(index)}
-                        onMouseLeave={() => setHoveredIdx(null)}
-                        onClick={() => { item.onClick?.(); onClose(); }}
+                        onMouseEnter={() => !item.disabled && setHoveredIdx(index)}
+                        onMouseLeave={() => !item.disabled && setHoveredIdx(null)}
+                        onClick={() => { 
+                            if (item.disabled) return;
+                            item.onClick?.(); 
+                            onClose(); 
+                        }}
                     >
                         <span style={{ display: 'flex', opacity: 0.8 }}>{item.icon}</span>
                         <span style={{ flex: 1 }}>{item.label}</span>

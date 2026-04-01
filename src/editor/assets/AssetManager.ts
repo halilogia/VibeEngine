@@ -5,24 +5,14 @@
 import { create } from 'zustand';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
-/**
- * AssetEntry - Represents a single asset in the engine.
- */
-export interface AssetEntry {
-    /** Unique entity ID for the asset */
-    id: string;
-    /** Original filename or display name */
-    name: string;
-    /** Categorized asset type */
-    type: 'model' | 'texture' | 'audio' | 'script';
-    /** Source URL (Object URL for imports, relative path for local) */
-    url: string;
-    /** Optional thumbnail URL for previewing */
-    thumbnail?: string;
-    /** Loaded data object (THREE.Group, THREE.Texture, etc.) */
-    data?: any;
-}
+import { 
+    type AssetEntry, 
+    loadedModels, 
+    loadedTextures, 
+    generateId, 
+    disposeModel, 
+    disposeTexture 
+} from './AssetUtils';
 
 /**
  * State and actions for the Asset Manager store.
@@ -55,16 +45,6 @@ interface AssetManagerState {
     clear: () => void;
 }
 
-// Cache for loaded Three.js objects
-const loadedModels = new Map<string, THREE.Group>();
-const loadedTextures = new Map<string, THREE.Texture>();
-
-let assetIdCounter = 1;
-/** Generates a unique asset ID */
-function generateId(): string {
-    return `asset_${assetIdCounter++}`;
-}
-
 /**
  * useAssetManager - Zustand store for managing game assets.
  * Handles importing, caching, and explicit disposal of Three.js resources.
@@ -74,7 +54,6 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
     libraryAssets: new Map(),
     loading: false,
     error: null,
-
 
     /**
      * Imports a GLTF/GLB file using THREE.GLTFLoader.
@@ -99,7 +78,7 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
                 data: gltf
             };
 
-            // Cache the model scene
+            // Cache the model scene (cloned for safety)
             loadedModels.set(id, gltf.scene.clone());
 
             set((state) => {
@@ -168,25 +147,15 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
                 URL.revokeObjectURL(asset.url);
                 newAssets.delete(id);
                 
-                // Explicitly dispose Three.js objects
                 const model = loadedModels.get(id);
                 if (model) {
-                    model.traverse((child: any) => {
-                        if (child.geometry) child.geometry.dispose();
-                        if (child.material) {
-                            if (Array.isArray(child.material)) {
-                                child.material.forEach((m: any) => m.dispose());
-                            } else {
-                                child.material.dispose();
-                            }
-                        }
-                    });
+                    disposeModel(model);
                     loadedModels.delete(id);
                 }
 
                 const texture = loadedTextures.get(id);
                 if (texture) {
-                    texture.dispose();
+                    disposeTexture(texture);
                     loadedTextures.delete(id);
                 }
             }
@@ -225,7 +194,6 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
                 newAssets.set(id, entry);
             }
 
-            console.log(`✅ Loaded ${files.length} assets from ${basePath}`);
             return { assets: newAssets };
         });
     },
@@ -245,7 +213,7 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
                     name: name.split('.')[0].replace(/-/g, ' '),
                     type: 'model',
                     url: basePath + name,
-                    thumbnail: undefined // could add previews later
+                    thumbnail: undefined
                 };
                 newLibrary.set(id, entry);
             }
@@ -254,7 +222,6 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
         });
     },
 
-
     /**
      * Resets the manager and cleans up all GPU resources.
      */
@@ -262,30 +229,15 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
         const { assets } = get();
         assets.forEach((asset) => URL.revokeObjectURL(asset.url));
         
-        // Dispose all models
-        loadedModels.forEach((model) => {
-            model.traverse((child: any) => {
-                if (child.geometry) child.geometry.dispose();
-                if (child.material) {
-                    if (Array.isArray(child.material)) {
-                        child.material.forEach((m: any) => m.dispose());
-                    } else {
-                        child.material.dispose();
-                    }
-                }
-            });
-        });
+        loadedModels.forEach(disposeModel);
         loadedModels.clear();
 
-        // Dispose all textures
-        loadedTextures.forEach((texture) => texture.dispose());
+        loadedTextures.forEach(disposeTexture);
         loadedTextures.clear();
 
         set({ assets: new Map() });
     }
 }));
-
-// No auto-load assets in v1.0.0-beta
 
 /**
  * Get a cloned model from cache

@@ -15,6 +15,8 @@ const mockEditorStore = {
     selectedEntityId: null as number | null,
     selectEntity: vi.fn(),
     clearSelection: vi.fn(),
+    activePanelId: 'hierarchy',
+    setActivePanel: vi.fn(),
 };
 
 
@@ -34,7 +36,7 @@ describe('HierarchyPanel', () => {
 
     it('should render empty state when no entities', () => {
         render(<HierarchyPanel />);
-        expect(screen.getByText('No entities')).toBeDefined();
+        expect(screen.getByText(/No entities/i)).toBeDefined();
     });
 
     it('should list root entities', () => {

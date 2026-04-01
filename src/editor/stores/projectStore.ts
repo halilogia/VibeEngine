@@ -32,11 +32,11 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         try {
             // In browser, we'll use a relative path or fetch from server
             // In Electron, we'll use native file access
-            const projectJsonPath = `${projectPath}/project.json`;
+            const projectJsonPath = `${projectPath}/project-data.json`;
 
             const response = await fetch(projectJsonPath);
             if (!response.ok) {
-                console.error('Failed to load project.json');
+                console.error('Failed to load project configuration');
                 return false;
             }
 

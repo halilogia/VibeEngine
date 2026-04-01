@@ -4,9 +4,9 @@
  */
 
 import React, { useState } from 'react';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
+import { VibeIcons } from '@ui/common/VibeIcons';
 import { useEditorStore, useSceneStore } from '../stores';
-import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { scriptStyles as styles } from './ScriptEditorPanel.styles';
 

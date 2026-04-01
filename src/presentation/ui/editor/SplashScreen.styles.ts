@@ -85,6 +85,17 @@ export const splashStyles = createVibeStyles({
         fontSize: '9px',
         letterSpacing: '3px',
         fontWeight: 600,
+    },
+    shimmerOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '50%',
+        height: '100%',
+        background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+        transform: 'skewX(-20deg)',
+        pointerEvents: 'none',
+        zIndex: 5,
     }
 });
 
@@ -101,5 +112,19 @@ export const splashAnimations = `
     @keyframes fade-in {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes button-pulse {
+        0%, 100% { 
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); 
+            transform: scale(1); 
+        }
+        50% { 
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.8), 0 0 60px rgba(168, 85, 247, 0.5); 
+            transform: scale(1.03); 
+        }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-150%) skewX(-20deg); }
+        100% { transform: translateX(350%) skewX(-20deg); }
     }
 `;

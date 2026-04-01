@@ -30,6 +30,10 @@ class RotatorScript extends Script {
             transform.rotate(0, this.speed * deltaTime, 0);
         }
     }
+
+    onDestroy(): void {
+        console.log('🔇 [RotatorScript] Cleanup');
+    }
 }
 
 class PlayerMoveScript extends Script {
@@ -46,6 +50,10 @@ class PlayerMoveScript extends Script {
                 -input.state.vertical * this.speed * deltaTime
             );
         }
+    }
+
+    onDestroy(): void {
+        console.log('🔇 [PlayerMoveScript] Cleanup');
     }
 }
 

@@ -9,7 +9,7 @@ export { EditorApp } from './EditorApp';
 export * from './stores';
 
 // Components
-export * from './components';
+export * from '@ui/editor';
 
 // Panels
 export * from './panels';

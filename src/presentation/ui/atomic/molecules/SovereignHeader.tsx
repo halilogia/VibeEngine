@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { VibeIcons, type VibeIconName } from '../../components/VibeIcons';
+import { VibeIcons, type VibeIconName } from '@ui/common/VibeIcons';
 import { createVibeStyles, VibeTheme } from '../../themes/VibeStyles';
 
 interface SovereignHeaderProps {
@@ -38,7 +38,7 @@ const styles = createVibeStyles({
         justifyContent: 'center',
         width: '14px',
         height: '14px',
-        color: 'rgba(255, 255, 255, 0.2)',
+        color: 'rgba(255, 255, 255, 0.4)',
         cursor: 'grab',
         transition: 'color 0.2s ease',
     },
@@ -53,7 +53,7 @@ const styles = createVibeStyles({
         fontWeight: 800,
         letterSpacing: '1.2px',
         textTransform: 'uppercase',
-        color: 'rgba(255, 255, 255, 0.9)',
+        color: VibeTheme.colors.textMain,
         margin: 0,
     },
     actions: {

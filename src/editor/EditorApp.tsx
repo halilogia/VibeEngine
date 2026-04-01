@@ -3,10 +3,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { MenuBar, Toolbar, EditorLayout, SplashScreen, StatusBar } from './components';
-import { CommandPalette } from './components/CommandPalette';
+import { MenuBar, Toolbar, EditorLayout, SplashScreen, StatusBar } from '@ui/editor';
+import { CommandPalette } from '@ui/editor/CommandPalette';
 import { useKeyboardShortcuts } from './hooks';
-import { ToastContainer } from './components/ToastContainer';
+import { ToastContainer } from '@ui/editor/ToastContainer';
 import { useAssetManager } from './assets/AssetManager';
 
 
@@ -80,21 +80,15 @@ export const EditorApp: React.FC = () => {
                 <SplashScreen onComplete={() => setShowSplash(false)} />
             )}
             <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100vh',
-                width: '100vw',
-                overflow: 'hidden',
-                background: '#05050a',
-                fontFamily: "'Outfit', sans-serif",
                 opacity: showSplash ? 0 : 1,
                 visibility: showSplash ? 'hidden' : 'visible',
-                transition: 'opacity 0.5s ease'
+                transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                width: '100vw',
+                height: '100vh',
+                overflow: 'hidden',
+                background: '#000', // Deepest black for seamless blending
             }}>
-                <MenuBar />
-                <Toolbar />
                 <EditorLayout />
-                <StatusBar />
                 <ToastContainer />
                 <CommandPalette />
             </div>

@@ -2,4 +2,5 @@
  * Assets Index
  */
 
-export { useAssetManager, getLoadedModel, getLoadedTexture, type AssetEntry } from './AssetManager';
+export { useAssetManager, getLoadedModel, getLoadedTexture } from './AssetManager';
+export { type AssetEntry } from './AssetUtils';

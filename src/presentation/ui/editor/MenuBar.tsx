@@ -4,11 +4,12 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
-import { useEditorStore, useSceneStore } from '../stores';
-import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '../serialization';
-import { LocalSceneStorage } from '../storage/LocalSceneStorage';
-import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { VibeIcons } from '@ui/common/VibeIcons';
+import { useEditorStore, useSceneStore } from '@editor/stores';
+import { useToastStore } from '@editor/stores/toastStore';
+import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '@editor/serialization';
+import { LocalSceneStorage } from '@editor/storage/LocalSceneStorage';
+import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { menuBarStyles as styles } from './MenuBar.styles';
 
@@ -31,10 +32,12 @@ export const MenuBar: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { showGrid, showAxes, toggleGrid, toggleAxes } = useEditorStore();
     const { sceneName, isDirty } = useSceneStore();
+    const { addToast } = useToastStore();
 
     const handleNewScene = () => {
         if (isDirty && !confirm('Unsaved changes will be lost. Continue?')) return;
         createDefaultScene();
+        addToast('New Scene Created', 'info');
     };
 
     const handleOpen = () => fileInputRef.current?.click();
@@ -42,8 +45,11 @@ export const MenuBar: React.FC = () => {
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            try { await loadSceneFromFile(file); } 
-            catch (error) { alert('Failed to load scene: ' + error); }
+            try { 
+                await loadSceneFromFile(file); 
+                addToast('Scene loaded successfully', 'success');
+            } 
+            catch (error) { addToast('Failed to load scene', 'error'); }
         }
         e.target.value = '';
     };
@@ -51,6 +57,11 @@ export const MenuBar: React.FC = () => {
     const handleSave = () => {
         downloadScene(`${sceneName.replace(/\s+/g, '_')}.json`);
         useSceneStore.setState({ isDirty: false });
+        addToast('Scene saved locally', 'success');
+    };
+
+    const handleComingSoon = (feature: string) => {
+        addToast(`${feature} is currently in development 🚀`, 'info');
     };
 
     const menus: MenuSection[] = [
@@ -68,11 +79,11 @@ export const MenuBar: React.FC = () => {
         {
             label: 'Edit',
             items: [
-                { label: 'Undo', icon: <VibeIcons name="Undo" size={14} />, shortcut: 'Ctrl+Z' },
-                { label: 'Redo', icon: <VibeIcons name="Redo" size={14} />, shortcut: 'Ctrl+Y' },
+                { label: 'Undo', icon: <VibeIcons name="Undo" size={14} />, shortcut: 'Ctrl+Z', action: () => handleComingSoon('Undo') },
+                { label: 'Redo', icon: <VibeIcons name="Redo" size={14} />, shortcut: 'Ctrl+Y', action: () => handleComingSoon('Redo') },
                 { divider: true, label: '' },
-                { label: 'Copy', icon: <VibeIcons name="Copy" size={14} />, shortcut: 'Ctrl+C' },
-                { label: 'Paste', icon: <VibeIcons name="Plus" size={14} />, shortcut: 'Ctrl+V' },
+                { label: 'Copy', icon: <VibeIcons name="Copy" size={14} />, shortcut: 'Ctrl+C', action: () => handleComingSoon('Copy') },
+                { label: 'Paste', icon: <VibeIcons name="Plus" size={14} />, shortcut: 'Ctrl+V', action: () => handleComingSoon('Paste') },
             ]
         },
         {

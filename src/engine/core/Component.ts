@@ -56,6 +56,7 @@ export abstract class Component {
 
     /**
      * Clone this component (for prefab instantiation)
+     * @returns A shallow copy of the component.
      */
     clone(): Component {
         const cloned = Object.create(Object.getPrototypeOf(this));
@@ -65,7 +66,10 @@ export abstract class Component {
     }
 }
 
-/** Type helper for component classes */
+/** 
+ * ComponentClass - Type helper for component constructor functions.
+ * Includes the static TYPE requirement.
+ */
 export type ComponentClass<T extends Component = Component> = {
     new(...args: any[]): T;
     readonly TYPE: string;

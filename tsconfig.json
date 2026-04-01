@@ -23,24 +23,14 @@
         "outDir": "dist",
         "baseUrl": ".",
         "paths": {
-            "@engine/*": [
-                "src/engine/*"
-            ],
-            "@editor/*": [
-                "src/editor/*"
-            ],
-            "@presentation/*": [
-                "src/presentation/*"
-            ],
-            "@themes/*": [
-                "src/presentation/themes/*"
-            ],
-            "@domain/*": [
-                "src/domain/*"
-            ],
-            "@infrastructure/*": [
-                "src/infrastructure/*"
-            ]
+            "@engine/*": ["src/engine/*"],
+            "@domain/*": ["src/domain/*"],
+            "@infrastructure/*": ["src/infrastructure/*"],
+            "@editor/*": ["src/editor/*"],
+            "@presentation/*": ["src/presentation/*"],
+            "@lib/*": ["src/lib/*"],
+            "@ui/*": ["src/presentation/ui/*"],
+            "@themes/*": ["src/presentation/ui/themes/*"]
         },
         "resolveJsonModule": true,
         "skipLibCheck": true,

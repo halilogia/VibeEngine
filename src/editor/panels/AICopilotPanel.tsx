@@ -4,13 +4,13 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
+import { VibeIcons } from '@ui/common/VibeIcons';
 import { CommandInterpreter } from '../bridge';
 import { OllamaService, type OllamaMessage } from '../bridge/OllamaService';
 import { useEditorStore } from '../stores';
-import { SovereignHeader } from '../../presentation/atomic/molecules/SovereignHeader';
-import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
-import { VibeInput } from '../../presentation/atomic/atoms/VibeInput';
+import { SovereignHeader } from '@ui/atomic/molecules/SovereignHeader';
+import { VibeButton } from '@ui/atomic/atoms/VibeButton';
+import { VibeInput } from '@ui/atomic/atoms/VibeInput';
 import { VibeTheme } from '@themes/VibeStyles';
 import { aiStyles as styles, aiAnimations } from './AICopilotPanel.styles';
 

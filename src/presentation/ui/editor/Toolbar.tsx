@@ -4,11 +4,11 @@
  */
 
 import React from 'react';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
-import { useEditorStore, type EditorMode } from '../stores';
-import { useToastStore } from '../stores/toastStore';
-import { usePlayModeStore } from '../core';
-import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { VibeIcons } from '@ui/common/VibeIcons';
+import { useEditorStore, type EditorMode } from '@editor/stores';
+import { useToastStore } from '@editor/stores/toastStore';
+import { usePlayModeStore } from '@editor/core';
+import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { toolbarStyles as styles } from './Toolbar.styles';
 
 export const Toolbar: React.FC = () => {
@@ -101,12 +101,6 @@ export const Toolbar: React.FC = () => {
                         <VibeIcons name="Code" size={16} />
                     </VibeButton>
                 </div>
-
-                <div style={styles.divider} />
-
-                <VibeButton variant="primary" size="sm" onClick={handleSave} style={{ borderRadius: '8px' }}>
-                    <VibeIcons name="Save" size={16} /> SAVE
-                </VibeButton>
             </div>
         </div>
     );

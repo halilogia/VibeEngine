@@ -134,4 +134,16 @@ export class VibeAudio {
     public setMasterVolume(volume: number): void {
         this.masterGain.gain.setValueAtTime(volume, this.context.currentTime);
     }
+
+    /**
+     * Dispose the audio context and clear all resources
+     */
+    public dispose(): void {
+        this.stopAll();
+        this.buffers.clear();
+        this.context.close().then(() => {
+            console.log('🔊 [VibeAudio] AudioContext closed successfully');
+        });
+        VibeAudio.instance = null as any;
+    }
 }

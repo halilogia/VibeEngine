@@ -26,6 +26,9 @@ npm-debug.log*
 *.tmp
 *.temp
 
+# Coverage Reports (Vitest/Istanbul)
+coverage/
+
 # ========================================
 # GAME/PROJECT FILES - Not part of engine
 # ========================================

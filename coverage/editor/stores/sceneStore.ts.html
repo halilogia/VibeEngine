@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">57.44% </span>
+                <span class="strong">55.67% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>54/94</span>
+                <span class='fraction'>54/97</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">51.72% </span>
+                <span class="strong">46.87% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>15/29</span>
+                <span class='fraction'>15/32</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">60.24% </span>
+                <span class="strong">58.82% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>50/83</span>
+                <span class='fraction'>50/85</span>
             </div>
         
             
@@ -315,7 +315,35 @@
 <a name='L250'></a><a href='#L250'>250</a>
 <a name='L251'></a><a href='#L251'>251</a>
 <a name='L252'></a><a href='#L252'>252</a>
-<a name='L253'></a><a href='#L253'>253</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L253'></a><a href='#L253'>253</a>
+<a name='L254'></a><a href='#L254'>254</a>
+<a name='L255'></a><a href='#L255'>255</a>
+<a name='L256'></a><a href='#L256'>256</a>
+<a name='L257'></a><a href='#L257'>257</a>
+<a name='L258'></a><a href='#L258'>258</a>
+<a name='L259'></a><a href='#L259'>259</a>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a>
+<a name='L268'></a><a href='#L268'>268</a>
+<a name='L269'></a><a href='#L269'>269</a>
+<a name='L270'></a><a href='#L270'>270</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -375,6 +403,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -556,6 +586,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -589,6 +623,13 @@ export interface ComponentData {
     enabled: boolean;
 }
 &nbsp;
+export interface AssetData {
+    id: string;
+    name: string;
+    type: 'model' | 'texture' | 'audio' | 'script';
+    path: string;
+}
+&nbsp;
 interface SceneState {
     // Entities
     entities: Map&lt;number, EntityData&gt;;
@@ -601,6 +642,9 @@ interface SceneState {
     sceneName: string;
     isDirty: boolean;
 &nbsp;
+    // Assets
+    assets: AssetData[];
+&nbsp;
     // Actions
     addEntity: (name?: string, parentId?: number | null) =&gt; number;
     removeEntity: (id: number) =&gt; void;
@@ -612,6 +656,7 @@ interface SceneState {
     getEntity: (id: number) =&gt; EntityData | undefined;
     loadScene: (sceneData: SceneFileData) =&gt; void;
     setSceneName: (name: string) =&gt; void;
+    removeAsset: (id: string) =&gt; void;
     clear: () =&gt; void;
     markDirty: () =&gt; void;
     markClean: () =&gt; void;
@@ -632,6 +677,8 @@ export const useSceneStore = create&lt;SceneState&gt;((set, get) =&gt; ({
     nextEntityId: 1,
     sceneName: 'Untitled Scene',
     isDirty: false,
+&nbsp;
+    assets: [],
 &nbsp;
     addEntity: (name = 'New Entity', parentId = null) =&gt; {
         const id = get().nextEntityId;
@@ -808,6 +855,10 @@ export const useSceneStore = create&lt;SceneState&gt;((set, get) =&gt; ({
 &nbsp;
 <span class="fstat-no" title="function not covered" >    setSceneName: (n</span>ame) =&gt; <span class="cstat-no" title="statement not covered" >set({ sceneName: name, isDirty: true }),</span>
 &nbsp;
+<span class="fstat-no" title="function not covered" >    removeAsset: (i</span>d) =&gt; <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >set((s</span>tate) =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span>
+        assets: state.assets.<span class="fstat-no" title="function not covered" >filter(a</span> =&gt; <span class="cstat-no" title="statement not covered" >a.id !== id)</span>
+    })),
+&nbsp;
     clear: () =&gt; set({
         entities: new Map(),
         rootEntityIds: [],
@@ -826,7 +877,7 @@ export const useSceneStore = create&lt;SceneState&gt;((set, get) =&gt; ({
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-31T23:25:26.217Z
+                at 2026-04-01T15:08:26.960Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

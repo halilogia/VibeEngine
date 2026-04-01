@@ -22,15 +22,15 @@ export const createVibeStyles = <T extends VibeStyleObject>(styles: T): T => {
  */
 export const VibeTheme = {
     colors: {
-        accent: 'var(--editor-accent)',
-        accentHover: 'var(--editor-accent-hover)',
-        bgPrimary: 'var(--editor-bg-primary)',
-        bgSecondary: 'var(--editor-bg-secondary)',
-        border: 'var(--editor-border)',
-        textMain: 'var(--editor-text-main)',
-        textSecondary: 'var(--editor-text-secondary)',
-        glassBg: 'rgba(10, 10, 15, 0.45)',
-        glassBorder: 'rgba(255, 255, 255, 0.08)',
+        accent: '#6366f1',
+        accentHover: '#4f46e5',
+        bgPrimary: '#05050a',
+        bgSecondary: '#0a0a15',
+        border: 'rgba(255, 255, 255, 0.08)',
+        textMain: '#ffffff',
+        textSecondary: 'rgba(255, 255, 255, 0.65)',
+        glassBg: 'rgba(10, 10, 15, 0.7)',
+        glassBorder: 'rgba(255, 255, 255, 0.12)',
     },
     blur: {
         standard: 'blur(45px)',

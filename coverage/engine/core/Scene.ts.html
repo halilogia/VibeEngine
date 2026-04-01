@@ -186,7 +186,23 @@
 <a name='L121'></a><a href='#L121'>121</a>
 <a name='L122'></a><a href='#L122'>122</a>
 <a name='L123'></a><a href='#L123'>123</a>
-<a name='L124'></a><a href='#L124'>124</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -205,6 +221,10 @@
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -213,6 +233,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
@@ -220,6 +242,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -246,16 +270,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -264,6 +282,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -318,22 +350,28 @@ import { Entity } from './Entity';
 import type { ComponentClass } from './Component';
 &nbsp;
 export class Scene {
-    /** Scene name */
+    /** Human-readable name for the scene */
     name: string;
 &nbsp;
-    /** Root entity (invisible parent of all scene entities) */
+    /** Root entity acting as the top-level parent for all entities in the scene hierarchy */
     readonly root: Entity;
 &nbsp;
-    /** All entities in the scene (flat list for quick iteration) */
+    /** Flat storage of all entities in the scene for high-performance iteration and querying */
     private readonly entities: Set&lt;Entity&gt; = new Set();
 &nbsp;
+    /**
+     * Creates a new Scene instance.
+     * @param name - Initial name for the scene. Defaults to 'Scene'.
+     */
     constructor(name: string = 'Scene') {
         this.name = name;
         this.root = new Entity('__SceneRoot__');
     }
 &nbsp;
     /**
-     * Add an entity to the scene
+     * Adds an entity to the scene. The entity is automatically parented to the root.
+     * All children of the entity are also recursively registered.
+     * @param entity - The entity instance to add.
      */
     addEntity(entity: Entity): void {
         <span class="missing-if-branch" title="if path not taken" >I</span>if (this.entities.has(entity)) <span class="cstat-no" title="statement not covered" >return;</span>
@@ -346,7 +384,9 @@ export class Scene {
     }
 &nbsp;
     /**
-     * Remove an entity from the scene
+     * Removes an entity from the scene and its internal flat list.
+     * Children are also recursively unregistered.
+     * @param entity - The entity instance to remove.
      */
     removeEntity(entity: Entity): void {
         <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.entities.has(entity)) <span class="cstat-no" title="statement not covered" >return;</span>
@@ -359,21 +399,25 @@ export class Scene {
     }
 &nbsp;
     /**
-     * Get all entities in scene (flat list)
+     * Returns a flat array of all entities currently registered in the scene.
      */
     getAllEntities(): Entity[] {
         return Array.from(this.entities);
     }
 &nbsp;
     /**
-     * Get all entities with specific component
+     * Queries all active entities that possess a specific component type.
+     * @param type - The component class to search for.
+     * @returns An array of matching entities.
      */
 <span class="fstat-no" title="function not covered" >    getEntitiesWithComponent&lt;T extends ComponentClass&gt;(t</span>ype: T): Entity[] {
 <span class="cstat-no" title="statement not covered" >        return this.getAllEntities().<span class="fstat-no" title="function not covered" >filter(e</span> =&gt; <span class="cstat-no" title="statement not covered" >e.hasComponent(type) &amp;&amp; e.activeInHierarchy);</span></span>
     }
 &nbsp;
     /**
-     * Get all entities with specific components (AND logic)
+     * Queries all active entities that possess a set of specified component types.
+     * @param types - Variadic list of component classes (AND logic).
+     * @returns An array of matching entities.
      */
 <span class="fstat-no" title="function not covered" >    getEntitiesWithComponents(.</span>..types: ComponentClass[]): Entity[] {
 <span class="cstat-no" title="statement not covered" >        return this.getAllEntities().<span class="fstat-no" title="function not covered" >filter(e</span> =&gt; {</span>
@@ -383,14 +427,18 @@ export class Scene {
     }
 &nbsp;
     /**
-     * Get all entities with tag
+     * Queries all active entities that possess a specific tag.
+     * @param tag - The tag string to search for.
+     * @returns An array of matching entities.
      */
 <span class="fstat-no" title="function not covered" >    getEntitiesWithTag(t</span>ag: string): Entity[] {
 <span class="cstat-no" title="statement not covered" >        return this.getAllEntities().<span class="fstat-no" title="function not covered" >filter(e</span> =&gt; <span class="cstat-no" title="statement not covered" >e.tags.has(tag) &amp;&amp; e.activeInHierarchy);</span></span>
     }
 &nbsp;
     /**
-     * Find entity by name
+     * Finds the first entity with the specified name in the scene.
+     * @param name - The name to search for.
+     * @returns The entity instance or null if not found.
      */
 <span class="fstat-no" title="function not covered" >    findByName(n</span>ame: string): Entity | null {
 <span class="cstat-no" title="statement not covered" >        for (const entity of this.entities) {</span>
@@ -400,7 +448,7 @@ export class Scene {
     }
 &nbsp;
     /**
-     * Destroy all entities in scene
+     * Destroys all entities in the scene and clears internal storage.
      */
     clear(): void {
         for (const entity of [...this.entities]) {
@@ -410,7 +458,7 @@ export class Scene {
     }
 &nbsp;
     /**
-     * Get entity count
+     * Returns the total number of entities registered in the scene.
      */
     get <span class="fstat-no" title="function not covered" >entityCount(): number {</span>
 <span class="cstat-no" title="statement not covered" >        return this.entities.size;</span>
@@ -439,7 +487,7 @@ export class Scene {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-31T23:25:26.217Z
+                at 2026-04-01T15:08:26.960Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -50,13 +50,17 @@ interface SceneState {
     addComponent: (entityId: number, component: ComponentData) => void;
     removeComponent: (entityId: number, componentType: string) => void;
     updateComponent: (entityId: number, componentType: string, data: Record<string, any>) => void;
-    getEntity: (id: number) => EntityData | undefined;
+    updateEntity: (id: number, data: Partial<EntityData>) => void;
     loadScene: (sceneData: SceneFileData) => void;
     setSceneName: (name: string) => void;
     removeAsset: (id: string) => void;
     clear: () => void;
     markDirty: () => void;
     markClean: () => void;
+    
+    // UI specific
+    selectedEntityId: number | null;
+    setSelectedEntityId: (id: number | null) => void;
 }
 
 // Scene file format
@@ -75,12 +79,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     sceneName: 'Untitled Scene',
     isDirty: false,
 
-    assets: [
-        { id: '1', name: 'PlayerModel', type: 'model', path: '/models/player.glb' },
-        { id: '2', name: 'GroundTexture', type: 'texture', path: '/textures/ground.png' },
-        { id: '3', name: 'BackgroundMusic', type: 'audio', path: '/audio/bg.mp3' },
-        { id: '4', name: 'PlayerController', type: 'script', path: '/scripts/player.ts' },
-    ],
+    assets: [],
+    selectedEntityId: null,
 
     addEntity: (name = 'New Entity', parentId = null) => {
         const id = get().nextEntityId;
@@ -235,7 +235,19 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         return { entities: newEntities, isDirty: true };
     }),
 
-    getEntity: (id) => get().entities.get(id),
+    updateEntity: (id: number, data: Partial<EntityData>) => set((state) => {
+        const entity = state.entities.get(id);
+        if (!entity) return state;
+
+        const newEntities = new Map(state.entities);
+        newEntities.set(id, { ...entity, ...data });
+
+        return { entities: newEntities, isDirty: true };
+    }),
+
+    setSelectedEntityId: (id: number | null) => set({ selectedEntityId: id }),
+
+    getEntity: (id: number) => get().entities.get(id),
 
     loadScene: (sceneData) => set(() => {
         const newEntities = new Map<number, EntityData>();

@@ -49,13 +49,14 @@ export abstract class System {
 
     /**
      * Called every frame with matching entities
-     * @param deltaTime Time since last frame in seconds
-     * @param entities Entities that have all required components
+     * @param deltaTime - Time since last frame in seconds.
+     * @param entities - Entities that have all required components.
      */
     abstract update(deltaTime: number, entities: Entity[]): void;
 
     /**
-     * Called after update, for cleanup or post-processing
+     * Called after update, for cleanup or post-processing.
+     * @param deltaTime - Time since last frame in seconds.
      */
     postUpdate?(deltaTime: number): void;
 
@@ -66,6 +67,8 @@ export abstract class System {
 
     /**
      * Filter entities that have all required components
+     * @param allEntities - Source list of all entities in the scene.
+     * @returns Filtered list of entities matching requiredComponents.
      */
     filterEntities(allEntities: Entity[]): Entity[] {
         if (this.requiredComponents.length === 0) {

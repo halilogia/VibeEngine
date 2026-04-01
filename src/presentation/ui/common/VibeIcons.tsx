@@ -14,24 +14,40 @@ export type VibeIconName =
   | 'ChevronRight' | 'ChevronDown' | 'Home' | 'Copy' | 'Plus' | 'Loader' | 'Database'
   | 'Layers' | 'Activity' | 'Cursor' | 'Settings' | 'Sun' | 'Video' | 'Shield' | 'Magnet'
   | 'AlertCircle' | 'AlertTriangle' | 'CheckCircle' | 'Terminal' | 'Eye' | 'X' | 'Undo' | 'Redo' | 'Clipboard' | 'Package'
-  | 'Send' | 'Bot' | 'User' | 'Wand' | 'WifiOff' | 'Cpu' | 'Grip';
+  | 'Send' | 'Bot' | 'User' | 'Wand' | 'WifiOff' | 'Cpu' | 'Grip' | 'RefreshCcw';
 
+/**
+ * VibeIcons - High-fidelity icon registry for VibeEngine.
+ * 🏛️⚛️💎🚀
+ * 
+ * Centralizes all visual symbols (SVG-based) used in the engine and studio.
+ * Supports fluid scaling and theme-aware coloring.
+ */
 
-
-
-
-interface VibeIconProps extends React.SVGProps<SVGSVGElement> {
+/**
+ * Props for the VibeIcons component
+ */
+export interface VibeIconsProps {
+    /** Name of the icon to render (must match the internal Icons map) */
     name: VibeIconName;
+    /** Standard pixel size for width and height */
     size?: number;
+    /** Custom CSS color (overrides theme defaults) */
     color?: string;
+    /** Additional CSS styles for visual fine-tuning */
+    style?: React.CSSProperties;
     strokeWidth?: number;
 }
 
-export const VibeIcons: React.FC<VibeIconProps> = ({ 
+/**
+ * VibeIcons Component - Functional entry point for rendering engine symbols.
+ */
+export const VibeIcons: React.FC<VibeIconsProps> = ({ 
     name, 
     size = 18, 
     color = 'currentColor', 
     strokeWidth = 2,
+    style,
     ...props 
 }) => {
     const renderPath = () => {
@@ -383,6 +399,13 @@ export const VibeIcons: React.FC<VibeIconProps> = ({
                     <path d="M9 20v2" />
                 </>
             );
+            case 'RefreshCcw': return (
+                <>
+                    <path d="M1 4v6h6" />
+                    <path d="M23 20v-6h-6" />
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+                </>
+            );
             case 'Grip': return (
                 <>
                     <circle cx="9" cy="5" r="1" />
@@ -410,6 +433,7 @@ export const VibeIcons: React.FC<VibeIconProps> = ({
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeLinejoin="round"
+            style={style}
             {...props}
         >
             {renderPath()}

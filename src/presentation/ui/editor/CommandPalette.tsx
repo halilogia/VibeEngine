@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
-import { useEditorStore, useSceneStore } from '../stores';
+import { VibeIcons } from '@ui/common/VibeIcons';
+import { useEditorStore, useSceneStore } from '@editor/stores';
 import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
 
 const styles = createVibeStyles({
@@ -101,7 +101,7 @@ export const CommandPalette: React.FC = () => {
         const items = [
             { id: 'cube', label: 'Add Cube', desc: 'Create a primitive cube mesh', icon: 'Box', cat: 'Action', onSelect: () => {
                 const id = addEntity('Cube', null);
-                addComponent(id, { type: 'Render', data: { meshType: 'cube' } });
+                addComponent(id, { type: 'Render', data: { meshType: 'cube' }, enabled: true });
             }},
             { id: 'play', label: 'Play / Stop', desc: 'Toggle scene simulation', icon: 'Play', cat: 'Action', onSelect: play },
         ];

@@ -4,42 +4,63 @@
  */
 
 import React, { useState } from 'react';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
+import { VibeIcons } from '@ui/common/VibeIcons';
 import { useSceneStore, useEditorStore, type ComponentData } from '../stores';
-import { SovereignHeader } from '../../presentation/atomic/molecules/SovereignHeader';
-import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
-import { VibeInput } from '../../presentation/atomic/atoms/VibeInput';
+import { SovereignHeader } from '@ui/atomic/molecules/SovereignHeader';
+import { VibeButton } from '@ui/atomic/atoms/VibeButton';
+import { VibeInput } from '@ui/atomic/atoms/VibeInput';
 import { VibeTheme } from '@themes/VibeStyles';
 import { inspectorStyles as styles } from './InspectorPanel.styles';
 
 // #region Components
+
+/**
+ * Props for the Vector3Field component
+ */
 interface Vector3FieldProps {
+    /** Label to display for the vector field */
     label: string;
-    value: { x: number; y: number; z: number };
-    onChange: (val: { x: number; y: number; z: number }) => void;
+    /** Vector value as either an array [x,y,z] or object {x,y,z} */
+    value: number[] | Record<string, number>;
+    /** Callback triggered when any axis changes */
+    onChange: (value: number[] | Record<string, number>) => void;
 }
 
+/**
+ * Vector3Field - Atomic UI component for editing 3D vector data.
+ */
 const Vector3Field: React.FC<Vector3FieldProps> = ({ label, value, onChange }) => {
+    const axes = ['x', 'y', 'z'];
+    
+    // Safely resolve axis value whether it's an array [0,0,0] or object {x,y,z}
+    const getAxisValue = (axis: string, idx: number) => {
+        if (Array.isArray(value)) return value[idx];
+        if (typeof value === 'object' && value !== null) return value[axis];
+        return 0;
+    };
+
+    const handleAxisChange = (axis: string, idx: number, newVal: number) => {
+        if (Array.isArray(value)) {
+            const next = [...value];
+            next[idx] = newVal;
+            onChange(next);
+        } else {
+            onChange({ ...value, [axis]: newVal });
+        }
+    };
+
     return (
         <div style={styles.field}>
             <span style={styles.fieldLabel}>{label}</span>
-            <div style={styles.vectorGroup}>
-                {['x', 'y', 'z'].map((axis) => (
-                    <div key={axis} style={styles.vectorField}>
-                        <div style={{
-                            ...styles.vectorLabel,
-                            background: axis === 'x' ? 'rgba(239, 68, 68, 0.2)' : 
-                                       axis === 'y' ? 'rgba(34, 197, 94, 0.2)' : 
-                                       'rgba(59, 130, 246, 0.2)',
-                            color: axis === 'x' ? '#f87171' : axis === 'y' ? '#4ade80' : '#60a5fa'
-                        }}>
-                            {axis.toUpperCase()}
-                        </div>
-                        <VibeInput
+            <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                {axes.map((axis, idx) => (
+                    <div key={axis} style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 900, color: VibeTheme.colors.accent, width: '16px', textAlign: 'center' }}>{axis.toUpperCase()}</span>
+                        <VibeInput 
                             type="number"
-                            value={String(value[axis as 'x'|'y'|'z'])}
-                            onChange={(e) => onChange({ ...value, [axis]: parseFloat(e.target.value) || 0 })}
-                            style={{ background: 'transparent', border: 'none', height: '24px', padding: '0 6px', fontSize: '11px' }}
+                            value={String(getAxisValue(axis, idx) || 0)}
+                            onChange={(e) => handleAxisChange(axis, idx, parseFloat(e.target.value) || 0)}
+                            style={{ background: 'transparent', border: 'none', height: '24px', padding: '0 6px', fontSize: '11px', width: '100%' }}
                         />
                     </div>
                 ))}
@@ -48,14 +69,33 @@ const Vector3Field: React.FC<Vector3FieldProps> = ({ label, value, onChange }) =
     );
 };
 
+/**
+ * Props for the ComponentSection component
+ */
 interface ComponentSectionProps {
-    component: ComponentData;
-    onRemove: () => void;
+    /** Override title to display in the header */
+    title?: string;
+    /** Override icon name to display in the header */
+    icon?: string;
+    /** Optional component data context */
+    component?: ComponentData;
+    /** Callback for removing this component from the entity */
+    onRemove?: () => void;
+    /** The fields or children to render inside the section */
     children: React.ReactNode;
 }
 
-const ComponentSection: React.FC<ComponentSectionProps> = ({ component, onRemove, children }) => {
+/**
+ * ComponentSection - Collapsible container for grouping component properties.
+ */
+const ComponentSection: React.FC<ComponentSectionProps> = ({ 
+    component, onRemove, title, icon, children 
+}) => {
     const [isHovered, setIsHovered] = useState(false);
+    
+    // Resolve display properties
+    const displayTitle = title || component?.type?.toUpperCase() || 'COMPONENT';
+    const displayIcon = icon || (component?.type === 'Light' ? 'Sun' : component?.type === 'Physics' ? 'Shield' : 'Box');
 
     return (
         <div 
@@ -64,9 +104,9 @@ const ComponentSection: React.FC<ComponentSectionProps> = ({ component, onRemove
             onMouseLeave={() => setIsHovered(false)}
         >
             <div style={styles.sectionHeader}>
-                <VibeIcons name={component.type === 'Light' ? 'Sun' : component.type === 'Physics' ? 'Shield' : 'Box'} size={14} style={{ opacity: 0.7 }} />
-                <span style={{ flex: 1 }}>{component.type.toUpperCase()}</span>
-                {isHovered && component.type !== 'Transform' && (
+                <VibeIcons name={displayIcon as any} size={14} style={{ opacity: 0.7 }} />
+                <span style={{ flex: 1 }}>{displayTitle}</span>
+                {isHovered && component?.type !== 'Transform' && onRemove && (
                     <VibeButton variant="ghost" size="sm" onClick={onRemove} style={{ padding: 0, width: '20px', height: '20px' }}>
                         <VibeIcons name="Trash" size={12} />
                     </VibeButton>
@@ -80,13 +120,25 @@ const ComponentSection: React.FC<ComponentSectionProps> = ({ component, onRemove
 };
 // #endregion
 
+/**
+ * Props for the InspectorPanel component
+ */
 interface InspectorPanelProps {
+    /** Drag handle props from the docking system */
     dragHandleProps?: any;
 }
 
+/**
+ * InspectorPanel - Property editor and entity configuration system.
+ * 🏛️⚛️💎🚀
+ * 
+ * Provides a high-fidelity interface for modifying entity properties, components,
+ * and materials. Supports recursive property binding and transactional updates.
+ */
 export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps }) => {
     const { entities, updateEntity } = useSceneStore();
     const { selectedEntityId, activePanelId, setActivePanel } = useEditorStore();
+    const [showAddComponent, setShowAddComponent] = React.useState(false);
 
     const selectedEntity = selectedEntityId ? entities.get(selectedEntityId) : null;
 
@@ -118,45 +170,45 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps 
             <SovereignHeader title="INSPECTOR" icon="Activity" dragHandleProps={dragHandleProps} />
             
             <div style={styles.content}>
-                {/* Entity Info */}
-                <div style={styles.field}>
+                {/* Entity Header */}
+                <div style={styles.sectionBody}>
                     <span style={styles.fieldLabel}>NAME</span>
                     <VibeInput 
                         value={selectedEntity.name} 
-                        onChange={(e) => updateEntity(selectedEntity.id, { name: e.target.value })} 
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateEntity(selectedEntity.id, { name: e.target.value })} 
                     />
                 </div>
 
-                {/* Transform Component */}
-                {selectedEntity.components.map((comp, idx) => {
+                {/* Components Wrapper */}
+                {selectedEntity.components.map((comp: any, idx: number) => {
+                    const data = comp.data || {};
                     if (comp.type === 'Transform') {
-                        const props = comp.props as any;
                         return (
-                            <ComponentSection key={idx} component={comp} onRemove={() => {}}>
+                            <ComponentSection key={`comp-${idx}`} title="TRANSFORM" icon="Move">
                                 <Vector3Field 
                                     label="POSITION" 
-                                    value={props.position} 
+                                    value={data.position} 
                                     onChange={(val) => {
                                         const newComps = [...selectedEntity.components];
-                                        newComps[idx] = { ...comp, props: { ...props, position: val } };
+                                        newComps[idx] = { ...comp, data: { ...data, position: val } };
                                         updateEntity(selectedEntity.id, { components: newComps });
                                     }} 
                                 />
                                 <Vector3Field 
                                     label="ROTATION" 
-                                    value={props.rotation} 
+                                    value={data.rotation} 
                                     onChange={(val) => {
                                         const newComps = [...selectedEntity.components];
-                                        newComps[idx] = { ...comp, props: { ...props, rotation: val } };
+                                        newComps[idx] = { ...comp, data: { ...data, rotation: val } };
                                         updateEntity(selectedEntity.id, { components: newComps });
                                     }} 
                                 />
                                 <Vector3Field 
                                     label="SCALE" 
-                                    value={props.scale} 
+                                    value={data.scale} 
                                     onChange={(val) => {
                                         const newComps = [...selectedEntity.components];
-                                        newComps[idx] = { ...comp, props: { ...props, scale: val } };
+                                        newComps[idx] = { ...comp, data: { ...data, scale: val } };
                                         updateEntity(selectedEntity.id, { components: newComps });
                                     }} 
                                 />
@@ -166,9 +218,47 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps 
                     return null;
                 })}
 
-                <VibeButton variant="secondary" style={{ marginTop: '12px' }}>
-                    <VibeIcons name="Plus" size={14} /> ADD COMPONENT
-                </VibeButton>
+                <div style={{ marginTop: '12px', position: 'relative' }}>
+                    <VibeButton 
+                        variant="secondary" 
+                        style={{ width: '100%' }}
+                        onClick={() => setShowAddComponent(!showAddComponent)}
+                    >
+                        <VibeIcons name="Plus" size={14} /> ADD COMPONENT
+                    </VibeButton>
+
+                    {showAddComponent && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            background: VibeTheme.colors.bgSecondary,
+                            border: `1px solid ${VibeTheme.colors.glassBorder}`,
+                            borderRadius: '4px',
+                            zIndex: 100,
+                            marginTop: '4px',
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+                        }}>
+                            {['Mesh Renderer', 'Box Collider', 'Rigidbody'].map(item => (
+                                <div 
+                                    key={item}
+                                    style={{
+                                        padding: '8px 12px',
+                                        fontSize: '11px',
+                                        cursor: 'pointer',
+                                        color: '#fff',
+                                        borderBottom: `1px solid ${VibeTheme.colors.glassBorder}`
+                                    }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                    {item}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

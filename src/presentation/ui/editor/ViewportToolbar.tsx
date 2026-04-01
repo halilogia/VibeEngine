@@ -4,10 +4,10 @@
  */
 
 import React from 'react';
-import { VibeIcons } from '../../presentation/components/VibeIcons';
-import { useEditorStore } from '../stores';
+import { VibeIcons } from '@ui/common/VibeIcons';
+import { useEditorStore } from '@editor/stores';
 import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
-import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 
 const styles = createVibeStyles({
     container: {
