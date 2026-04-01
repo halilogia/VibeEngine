@@ -1,5 +1,6 @@
 /**
- * MenuBar Component v2 - With Save/Load functionality
+ * MenuBar Component (Sovereign Atomic Edition)
+ * 🏛️⚛️💎🚀
  */
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -7,7 +8,9 @@ import { VibeIcons } from '../../presentation/components/VibeIcons';
 import { useEditorStore, useSceneStore } from '../stores';
 import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '../serialization';
 import { LocalSceneStorage } from '../storage/LocalSceneStorage';
-import './MenuBar.css';
+import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { VibeTheme } from '@themes/VibeStyles';
+import { menuBarStyles as styles } from './MenuBar.styles';
 
 interface MenuItem {
     label: string;
@@ -24,29 +27,23 @@ interface MenuSection {
 
 export const MenuBar: React.FC = () => {
     const [openMenu, setOpenMenu] = useState<string | null>(null);
+    const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { showGrid, showAxes, toggleGrid, toggleAxes } = useEditorStore();
     const { sceneName, isDirty } = useSceneStore();
 
     const handleNewScene = () => {
-        if (isDirty) {
-            if (!confirm('Unsaved changes will be lost. Continue?')) return;
-        }
+        if (isDirty && !confirm('Unsaved changes will be lost. Continue?')) return;
         createDefaultScene();
     };
 
-    const handleOpen = () => {
-        fileInputRef.current?.click();
-    };
+    const handleOpen = () => fileInputRef.current?.click();
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            try {
-                await loadSceneFromFile(file);
-            } catch (error) {
-                alert('Failed to load scene: ' + error);
-            }
+            try { await loadSceneFromFile(file); } 
+            catch (error) { alert('Failed to load scene: ' + error); }
         }
         e.target.value = '';
     };
@@ -56,70 +53,18 @@ export const MenuBar: React.FC = () => {
         useSceneStore.setState({ isDirty: false });
     };
 
-    const handleSaveToBrowser = () => {
-        try {
-            LocalSceneStorage.save(sceneName);
-            alert(`Scene "${sceneName}" saved to browser storage!`);
-        } catch (e) {
-            alert('Failed to save: ' + e);
-        }
-    };
-
-    const handleLoadFromBrowser = () => {
-        const scenes = LocalSceneStorage.listScenes();
-        if (scenes.length === 0) {
-            alert('No scenes saved in browser storage.');
-            return;
-        }
-        const names = scenes.map((s, i) => `${i + 1}. ${s.name} (${new Date(s.savedAt).toLocaleString()})`);
-        const choice = prompt(`Saved scenes:\n${names.join('\n')}\n\nEnter scene name to load:`);
-        if (choice) {
-            const found = scenes.find(s => s.name === choice.trim());
-            if (found) {
-                try {
-                    LocalSceneStorage.load(choice.trim());
-                } catch (e) {
-                    alert('Failed to load: ' + e);
-                }
-            } else {
-                alert(`Scene "${choice}" not found.`);
-            }
-        }
-    };
-
-    useEffect(() => {
-        LocalSceneStorage.startAutoSave(30_000);
-        return () => LocalSceneStorage.stopAutoSave();
-    }, []);
-
-    const loadSampleScene = async (scenePath: string) => {
-        try {
-            const response = await fetch(scenePath);
-            const sceneData = await response.json();
-            useSceneStore.getState().loadScene(sceneData);
-        } catch (error) {
-            console.error('Failed to load sample scene:', error);
-            alert('Failed to load sample scene');
-        }
-    };
-
     const menus: MenuSection[] = [
         {
             label: 'File',
             items: [
-                { label: 'New Scene', icon: <VibeIcons name="FolderPlus" size={14} />, shortcut: 'Ctrl+N', action: handleNewScene },
-                { label: 'Open File...', icon: <VibeIcons name="Folder" size={14} />, shortcut: 'Ctrl+O', action: handleOpen },
+                { label: 'New Scene', icon: <VibeIcons name="Plus" size={14} />, shortcut: 'Ctrl+N', action: handleNewScene },
+                { label: 'Open File...', icon: <VibeIcons name="Search" size={14} />, shortcut: 'Ctrl+O', action: handleOpen },
                 { divider: true, label: '' },
-                { label: '📂 Open MobRunner Project', action: () => loadSampleScene('/projects/MobRunner/Scenes/main.scene.json') },
-                { divider: true, label: '' },
-                { label: 'Save as File', icon: <VibeIcons name="Download" size={14} />, shortcut: 'Ctrl+S', action: handleSave },
-                { label: 'Save to Browser', icon: <VibeIcons name="Database" size={14} />, action: handleSaveToBrowser },
-                { label: 'Load from Browser', icon: <VibeIcons name="Database" size={14} />, action: handleLoadFromBrowser },
+                { label: 'Save as File', icon: <VibeIcons name="Save" size={14} />, shortcut: 'Ctrl+S', action: handleSave },
                 { divider: true, label: '' },
                 { label: 'Settings', icon: <VibeIcons name="Settings" size={14} /> },
             ]
         },
-
         {
             label: 'Edit',
             items: [
@@ -127,90 +72,71 @@ export const MenuBar: React.FC = () => {
                 { label: 'Redo', icon: <VibeIcons name="Redo" size={14} />, shortcut: 'Ctrl+Y' },
                 { divider: true, label: '' },
                 { label: 'Copy', icon: <VibeIcons name="Copy" size={14} />, shortcut: 'Ctrl+C' },
-                { label: 'Paste', icon: <VibeIcons name="Clipboard" size={14} />, shortcut: 'Ctrl+V' },
-                { label: 'Delete', icon: <VibeIcons name="Trash" size={14} />, shortcut: 'Del' },
+                { label: 'Paste', icon: <VibeIcons name="Plus" size={14} />, shortcut: 'Ctrl+V' },
             ]
         },
-
         {
             label: 'View',
             items: [
                 { label: showGrid ? 'Hide Grid' : 'Show Grid', icon: <VibeIcons name="Grid" size={14} />, action: toggleGrid },
-                { label: showAxes ? 'Hide Axes' : 'Show Axes', icon: <VibeIcons name="Axis" size={14} />, action: toggleAxes },
+                { label: showAxes ? 'Hide Axes' : 'Show Axes', icon: <VibeIcons name="Search" size={14} />, action: toggleAxes },
                 { divider: true, label: '' },
-                { 
-                    label: 'Reset Layout', 
-                    icon: <VibeIcons name="Rotate" size={14} />, 
-                    action: () => (window as any).resetVibeLayout?.() 
-                },
+                { label: 'Reset Layout', icon: <VibeIcons name="Rotate" size={14} />, action: () => (window as any).resetVibeLayout?.() },
             ]
         },
-
-
         {
             label: 'Build',
             items: [
-                { label: 'Export as HTML', icon: <VibeIcons name="Package" size={14} />, action: () => exportToHTML(sceneName) },
+                { label: 'Export as HTML', icon: <VibeIcons name="Save" size={14} />, action: () => exportToHTML(sceneName) },
             ]
         },
-
     ];
 
-    const handleMenuClick = (label: string) => {
-        setOpenMenu(openMenu === label ? null : label);
-    };
-
     const handleItemClick = (item: MenuItem) => {
-        if (item.action) {
-            item.action();
-        }
+        if (item.action) item.action();
         setOpenMenu(null);
     };
 
     return (
-        <div className="menu-bar">
-            {/* Hidden file input */}
-            <input
-                type="file"
-                ref={fileInputRef}
-                accept=".json"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-            />
+        <div className="menu-bar" style={styles.container}>
+            <input type="file" ref={fileInputRef} accept=".json" style={{ display: 'none' }} onChange={handleFileChange} />
 
-            <div className="menu-bar-left">
-                <div className="menu-logo">
-                    <img src="/assets/icon1.png" alt="VibeEngine" className="logo-img" />
-                    <span>VibeEngine</span>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={styles.logoGroup}>
+                    <img src="/assets/icon1.png" alt="Vibe" style={{ height: '24px', filter: 'drop-shadow(0 0 10px rgba(99, 102, 241, 0.5))' }} />
+                    <span style={styles.logoText}>VibeEngine</span>
                 </div>
 
                 {menus.map(menu => (
                     <div
                         key={menu.label}
-                        className="menu-trigger"
-                        onClick={() => handleMenuClick(menu.label)}
+                        style={{ 
+                            ...styles.trigger, 
+                            ...(openMenu === menu.label ? styles.triggerActive : {}) 
+                        }}
+                        onClick={() => setOpenMenu(openMenu === menu.label ? null : menu.label)}
                     >
                         {menu.label}
 
                         {openMenu === menu.label && (
-                            <div className="menu-dropdown">
+                            <div style={styles.dropdown}>
                                 {menu.items.map((item, idx) => (
                                     item.divider ? (
-                                        <div key={idx} className="menu-divider" />
+                                        <div key={idx} style={styles.divider} />
                                     ) : (
                                         <div
                                             key={item.label}
-                                            className="menu-item"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleItemClick(item);
+                                            style={{ 
+                                                ...styles.menuItem, 
+                                                ...(hoveredItem === item.label ? styles.menuItemHover : {}) 
                                             }}
+                                            onMouseEnter={() => setHoveredItem(item.label)}
+                                            onMouseLeave={() => setHoveredItem(null)}
+                                            onClick={(e) => { e.stopPropagation(); handleItemClick(item); }}
                                         >
-                                            <span className="menu-item-icon">{item.icon}</span>
-                                            <span className="menu-item-label">{item.label}</span>
-                                            {item.shortcut && (
-                                                <span className="menu-item-shortcut">{item.shortcut}</span>
-                                            )}
+                                            <span style={{ display: 'flex', opacity: 0.8 }}>{item.icon}</span>
+                                            <span>{item.label}</span>
+                                            {item.shortcut && <span style={styles.shortcut}>{item.shortcut}</span>}
                                         </div>
                                     )
                                 ))}
@@ -220,20 +146,17 @@ export const MenuBar: React.FC = () => {
                 ))}
             </div>
 
-            <div className="menu-bar-center">
-                <span className="scene-name">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <div style={styles.sceneBadge}>
+                    <VibeIcons name="Layers" size={14} style={{ color: VibeTheme.colors.accent }} />
                     {sceneName}
-                    {isDirty && <span className="dirty-indicator">*</span>}
-                </span>
+                    {isDirty && <span style={{ color: '#fba919' }}>*</span>}
+                </div>
+                
+                <VibeButton variant="primary" size="sm" onClick={handleSave} style={{ borderRadius: '20px' }}>
+                    <VibeIcons name="Save" size={14} /> SAVE
+                </VibeButton>
             </div>
-
-            <div className="menu-bar-right">
-                {/* Quick save button */}
-                <button className="menu-bar-btn" onClick={handleSave} title="Save Scene">
-                    <VibeIcons name="Save" size={16} />
-                </button>
-            </div>
-
         </div>
     );
 };

@@ -1,8 +1,11 @@
 /**
- * SplashScreen - Logo animation with sound (10 seconds)
+ * SplashScreen (Sovereign Atomic Edition)
+ * 🏛️⚛️💎🚀
  */
 
 import React, { useState, useEffect } from 'react';
+import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { splashStyles as styles, splashAnimations } from './SplashScreen.styles';
 
 interface SplashScreenProps {
     onComplete: () => void;
@@ -16,18 +19,21 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
 
     const handleStart = () => {
         setUserReady(true);
-        // Play startup sound after interaction
         try {
             const audio = new Audio('./assets/start.mp3');
             audio.volume = 0.5;
-            audio.play().catch(err => console.warn('Audio play failed:', err));
+            audio.play().catch(err => {
+                // Silently handle AbortError which occurs on rapid transitions
+                if (err.name !== 'AbortError') {
+                    console.warn('Audio play failed:', err);
+                }
+            });
         } catch (e) {}
     };
 
     useEffect(() => {
         if (!userReady) return;
 
-        // Poll for loading status from the engine bridge
         const pollInterval = setInterval(() => {
             const loading = (window as any).VibeLoading;
             if (loading) {
@@ -36,7 +42,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
 
                 if (loading.status === 'ready' && loading.progress >= 100) {
                     clearInterval(pollInterval);
-                    // Add a small delay for the 100% visual to be seen
                     setTimeout(() => {
                         setFadeOut(true);
                         setTimeout(onComplete, 800);
@@ -49,29 +54,44 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
     }, [onComplete, userReady]);
 
     return (
-        <div className={`splash-screen ${fadeOut ? 'fade-out' : ''}`}>
-            <div className="splash-logo">
-                <img src="./assets/icon1.png" alt="VibeEngine" />
+        <div style={{ ...styles.container, opacity: fadeOut ? 0 : 1 }}>
+            <style dangerouslySetInnerHTML={{ __html: splashAnimations }} />
+            
+            <div style={{ 
+                ...styles.logo, 
+                animation: 'logo-breathe 3s ease-in-out infinite' 
+            }}>
+                <img 
+                    src="./assets/icon1.png" 
+                    alt="VibeEngine" 
+                    style={{ 
+                        ...styles.logoImage, 
+                        animation: 'logo-glow 2s ease-in-out infinite alternate' 
+                    }} 
+                />
             </div>
 
             {!userReady ? (
-                <div className="start-overlay">
-                    <button className="start-btn" onClick={handleStart}>
-                        <div className="start-btn-shadow" />
-                        <span className="start-btn-text">START ENGINE</span>
-                    </button>
-                    <p className="start-hint">EXPERIENCE THE SOVEREIGN STUDIO</p>
+                <div style={{ ...styles.startOverlay, animation: 'fade-in 1s ease-out' }}>
+                    <VibeButton 
+                        variant="primary" 
+                        size="lg" 
+                        onClick={handleStart} 
+                        style={{ padding: '16px 48px', borderRadius: '12px', letterSpacing: '4px' }}
+                    >
+                        START ENGINE
+                    </VibeButton>
+                    <p style={styles.startHint}>EXPERIENCE THE SOVEREIGN STUDIO</p>
                 </div>
             ) : (
-                <div className="loading-container">
-                    <div className="loading-bar-bg">
+                <div style={{ ...styles.loadingContainer, animation: 'fade-in 1.5s ease-out' }}>
+                    <div style={styles.barBg}>
                         <div 
-                            className="loading-bar-fill" 
-                            style={{ width: `${progress}%` }} 
+                            style={{ ...styles.barFill, width: `${progress}%` }} 
                         />
                     </div>
-                    <div className="loading-percentage">{progress}%</div>
-                    <div className="loading-status">{status}</div>
+                    <div style={styles.percentage}>{progress}%</div>
+                    <div style={styles.status}>{status}</div>
                 </div>
             )}
         </div>

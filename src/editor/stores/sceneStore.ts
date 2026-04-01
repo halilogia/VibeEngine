@@ -20,6 +20,13 @@ export interface ComponentData {
     enabled: boolean;
 }
 
+export interface AssetData {
+    id: string;
+    name: string;
+    type: 'model' | 'texture' | 'audio' | 'script';
+    path: string;
+}
+
 interface SceneState {
     // Entities
     entities: Map<number, EntityData>;
@@ -32,6 +39,9 @@ interface SceneState {
     sceneName: string;
     isDirty: boolean;
 
+    // Assets
+    assets: AssetData[];
+
     // Actions
     addEntity: (name?: string, parentId?: number | null) => number;
     removeEntity: (id: number) => void;
@@ -43,6 +53,7 @@ interface SceneState {
     getEntity: (id: number) => EntityData | undefined;
     loadScene: (sceneData: SceneFileData) => void;
     setSceneName: (name: string) => void;
+    removeAsset: (id: string) => void;
     clear: () => void;
     markDirty: () => void;
     markClean: () => void;
@@ -63,6 +74,13 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     nextEntityId: 1,
     sceneName: 'Untitled Scene',
     isDirty: false,
+
+    assets: [
+        { id: '1', name: 'PlayerModel', type: 'model', path: '/models/player.glb' },
+        { id: '2', name: 'GroundTexture', type: 'texture', path: '/textures/ground.png' },
+        { id: '3', name: 'BackgroundMusic', type: 'audio', path: '/audio/bg.mp3' },
+        { id: '4', name: 'PlayerController', type: 'script', path: '/scripts/player.ts' },
+    ],
 
     addEntity: (name = 'New Entity', parentId = null) => {
         const id = get().nextEntityId;
@@ -238,6 +256,10 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     }),
 
     setSceneName: (name) => set({ sceneName: name, isDirty: true }),
+
+    removeAsset: (id) => set((state) => ({
+        assets: state.assets.filter(a => a.id !== id)
+    })),
 
     clear: () => set({
         entities: new Map(),

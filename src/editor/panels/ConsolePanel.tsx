@@ -1,22 +1,64 @@
 /**
- * ConsolePanel - Log output v2 with Store integration
+ * ConsolePanel - Terminal view (Sovereign Atomic Edition)
+ * 🏛️⚛️💎🚀
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { VibeIcons } from '../../presentation/components/VibeIcons';
+import { useEditorStore, useConsoleStore, type LogLevel } from '../stores';
+import { SovereignHeader } from '../../presentation/atomic/molecules/SovereignHeader';
+import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { VibeTheme } from '@themes/VibeStyles';
+import { consoleStyles as styles } from './ConsolePanel.styles';
 
-import { useConsoleStore, useEditorStore, type LogLevel } from '../stores';
-import './ConsolePanel.css';
+// #region Components
+interface LogEntryProps {
+    log: { id: string; message: string; level: LogLevel; timestamp: number };
+}
 
-const getIcon = (level: LogLevel) => {
-    switch (level) {
-        case 'error': return <VibeIcons name="AlertCircle" size={14} />;
-        case 'warning': return <VibeIcons name="AlertTriangle" size={14} />;
-        case 'success': return <VibeIcons name="CheckCircle" size={14} />;
-        default: return <VibeIcons name="Sparkles" size={14} />;
-    }
+const LogEntry: React.FC<LogEntryProps> = ({ log }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    
+    const getIcon = () => {
+        switch (log.level) {
+            case 'error': return 'Trash';
+            case 'warn': return 'Settings';
+            case 'success': return 'Plus';
+            default: return 'Search';
+        }
+    };
+
+    const getIconColor = () => {
+        switch (log.level) {
+            case 'error': return '#f43f5e';
+            case 'warn': return '#fbbf24';
+            case 'success': return '#10b981';
+            default: return '#60a5fa';
+        }
+    };
+
+    return (
+        <div 
+            style={{ 
+                ...styles.entry, 
+                ...styles[log.level === 'warning' ? 'warn' : log.level],
+                ...(isHovered ? styles.entryHover : {})
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <span style={styles.time}>{new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+            <VibeIcons name={getIcon()} size={12} style={{ color: getIconColor(), marginTop: '2px' }} />
+            <span style={{ 
+                ...styles.message,
+                color: log.level === 'error' ? '#fca5a5' : log.level === 'warn' ? '#fde68a' : 'rgba(255, 255, 255, 0.9)'
+            }}>
+                {log.message}
+            </span>
+        </div>
+    );
 };
-
+// #endregion
 
 interface ConsolePanelProps {
     dragHandleProps?: any;
@@ -26,89 +68,63 @@ export const ConsolePanel: React.FC<ConsolePanelProps> = ({ dragHandleProps }) =
     const { logs, clearLogs } = useConsoleStore();
     const { activePanelId, setActivePanel } = useEditorStore();
     const [filter, setFilter] = useState<LogLevel | 'all'>('all');
+    const scrollRef = useRef<HTMLDivElement>(null);
 
-    const filteredLogs = logs.filter((log) =>
-        filter === 'all' || log.level === filter
+    const filteredLogs = logs.filter(log => filter === 'all' || log.level === filter);
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [logs, filter]);
+
+    const headerActions = (
+        <>
+            <VibeButton variant="ghost" size="sm" onClick={clearLogs} title="Clear Logs">
+                <VibeIcons name="Trash" size={14} />
+            </VibeButton>
+        </>
     );
-
-    const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    };
 
     return (
         <div 
             className={`editor-panel console-panel ${activePanelId === 'console' ? 'active-panel' : ''}`}
             onClick={() => setActivePanel('console')}
+            style={styles.panel}
         >
-            <div className="panel-header" {...dragHandleProps}>
-                <div className="drag-handle-pill">
-                    <VibeIcons name="Grip" size={14} />
-                </div>
-                <div className="panel-header-left">
-                    <VibeIcons name="Terminal" size={14} style={{ color: 'var(--editor-accent)' }} />
-                    <h2>CONSOLE</h2>
-                </div>
+            <SovereignHeader 
+                title="CONSOLE" 
+                icon="Activity" 
+                dragHandleProps={dragHandleProps}
+                actions={headerActions}
+            />
 
-                <div className="panel-header-actions" onClick={e => e.stopPropagation()}>
-                    <div className="console-filters">
-                        <button 
-                            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-                            onClick={() => setFilter('all')}
+            <div style={styles.toolbar}>
+                <div style={styles.filters}>
+                    {['all', 'info', 'warn', 'error', 'success'].map((l) => (
+                        <VibeButton
+                            key={l}
+                            variant={filter === l ? 'primary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setFilter(l as any)}
+                            style={{ borderRadius: '20px', fontSize: '10px', height: '24px' }}
                         >
-                            All
-                        </button>
-                        <button 
-                            className={`filter-btn info ${filter === 'info' ? 'active' : ''}`}
-                            onClick={() => setFilter('info')}
-                        >
-                            Info
-                        </button>
-                        <button 
-                            className={`filter-btn warn ${filter === 'warning' ? 'active' : ''}`}
-                            onClick={() => setFilter('warning')}
-                        >
-                            Warn
-                        </button>
-                        <button 
-                            className={`filter-btn error ${filter === 'error' ? 'active' : ''}`}
-                            onClick={() => setFilter('error')}
-                        >
-                            Error
-                        </button>
-                    </div>
-                    <div className="v-separator" />
-                    <button 
-                        className="panel-action-btn" 
-                        onClick={clearLogs}
-                        title="Clear logs"
-                    >
-                        <VibeIcons name="Trash" size={14} />
-                    </button>
+                            {l.toUpperCase()}
+                        </VibeButton>
+                    ))}
                 </div>
             </div>
 
-            <div className="console-content">
+            <div ref={scrollRef} style={styles.content}>
                 {filteredLogs.length === 0 ? (
-                    <div className="console-empty">
-                        <VibeIcons name="Terminal" size={32} />
-                        <p>No console output</p>
+                    <div style={styles.empty}>
+                        <VibeIcons name="Activity" size={40} style={{ opacity: 0.1, color: VibeTheme.colors.accent }} />
+                        <span>No logs to display</span>
                     </div>
                 ) : (
-                    filteredLogs.map((log, idx) => (
-                        <div key={idx} className={`console-entry ${log.level}`}>
-                            <div className="console-time">{formatTime(log.timestamp)}</div>
-                            <div className="console-icon">{getIcon(log.level)}</div>
-                            <div className="console-message">{log.message}</div>
-                        </div>
-                    ))
+                    filteredLogs.map(log => <LogEntry key={log.id} log={log} />)
                 )}
             </div>
         </div>
     );
 };
-

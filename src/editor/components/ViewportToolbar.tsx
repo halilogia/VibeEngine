@@ -1,87 +1,83 @@
-import { VibeIcons } from '../../presentation/components/VibeIcons';
+/**
+ * ViewportToolbar (Sovereign Atomic Edition)
+ * 🏛️⚛️💎🚀
+ */
 
+import React from 'react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
 import { useEditorStore } from '../stores';
-import './ViewportToolbar.css';
+import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
+import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+
+const styles = createVibeStyles({
+    container: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '6px',
+        background: 'rgba(10, 10, 15, 0.4)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: `1px solid ${VibeTheme.colors.glassBorder}`,
+        borderRadius: '12px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        pointerEvents: 'auto',
+    },
+    group: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+    },
+    divider: {
+        width: '1px',
+        height: '20px',
+        background: 'rgba(255, 255, 255, 0.08)',
+        margin: '0 4px',
+    }
+});
 
 export const ViewportToolbar: React.FC = () => {
     const { 
         shadingMode, setShadingMode, 
         showGrid, toggleGrid, 
         showAxes, toggleAxes,
-        isPlaying 
     } = useEditorStore();
 
     return (
-        <div className="v-toolbar-container glass-panel">
-            {/* Shading Modes */}
-            <div className="v-toolbar-group">
-                <button 
-                    className={`v-tool-btn ${shadingMode === 'lit' ? 'active' : ''}`}
-                    onClick={() => setShadingMode('lit')}
-                    title="Shaded (Lit)"
-                >
+        <div style={styles.container}>
+            <div style={styles.group}>
+                <VibeButton variant={shadingMode === 'lit' ? 'primary' : 'ghost'} size="sm" onClick={() => setShadingMode('lit')} title="Lit">
                     <VibeIcons name="Box" size={14} />
-                </button>
-
-                <button 
-                    className={`v-tool-btn ${shadingMode === 'wireframe' ? 'active' : ''}`}
-                    onClick={() => setShadingMode('wireframe')}
-                    title="Wireframe"
-                >
+                </VibeButton>
+                <VibeButton variant={shadingMode === 'wireframe' ? 'primary' : 'ghost'} size="sm" onClick={() => setShadingMode('wireframe')} title="Wireframe">
                     <VibeIcons name="Grid" size={14} />
-                </button>
-
-                <button 
-                    className={`v-tool-btn ${shadingMode === 'solid' ? 'active' : ''}`}
-                    onClick={() => setShadingMode('solid')}
-                    title="Flat (Solid)"
-                >
+                </VibeButton>
+                <VibeButton variant={shadingMode === 'solid' ? 'primary' : 'ghost'} size="sm" onClick={() => setShadingMode('solid')} title="Solid">
                     <VibeIcons name="Layers" size={14} />
-                </button>
-
+                </VibeButton>
             </div>
 
-            <div className="v-toolbar-divider" />
+            <div style={styles.divider} />
 
-            {/* Scene Helpers */}
-            <div className="v-toolbar-group">
-                <button 
-                    className={`v-tool-btn ${showGrid ? 'active' : ''}`}
-                    onClick={toggleGrid}
-                    title="Toggle Grid (G)"
-                >
+            <div style={styles.group}>
+                <VibeButton variant={showGrid ? 'primary' : 'ghost'} size="sm" onClick={toggleGrid} title="Toggle Grid">
                     <VibeIcons name="Grid" size={14} />
-                </button>
-
-                <button 
-                    className={`v-tool-btn ${showAxes ? 'active' : ''}`}
-                    onClick={toggleAxes}
-                    title="Toggle Axes"
-                >
+                </VibeButton>
+                <VibeButton variant={showAxes ? 'primary' : 'ghost'} size="sm" onClick={toggleAxes} title="Toggle Axes">
                     <VibeIcons name="Axis" size={14} />
-                </button>
-
+                </VibeButton>
             </div>
 
-            <div className="v-toolbar-divider" />
+            <div style={styles.divider} />
 
-            {/* Viewport Extras */}
-            <div className="v-toolbar-group">
-                <button className="v-tool-btn" title="Stats View">
+            <div style={styles.group}>
+                <VibeButton variant="ghost" size="sm" title="Stats View">
                     <VibeIcons name="Activity" size={14} />
-                </button>
-                <button className="v-tool-btn" title="Focus View (F)">
+                </VibeButton>
+                <VibeButton variant="ghost" size="sm" title="Focus View">
                     <VibeIcons name="Maximize" size={14} />
-                </button>
+                </VibeButton>
             </div>
-
-
-            {isPlaying && (
-                <div className="v-toolbar-badge">
-                    <div className="v-pulse-dot" />
-                    <span>Live Simulation</span>
-                </div>
-            )}
         </div>
     );
 };

@@ -1,11 +1,12 @@
 /**
- * StatusBar Component - Thin glass bar at the bottom for quick stats
+ * StatusBar Component (Sovereign Atomic Edition)
+ * 🏛️⚛️💎🚀
  */
 
 import React from 'react';
 import { useEditorStore, useSceneStore } from '../stores';
 import { VibeIcons } from '../../presentation/components/VibeIcons';
-import './StatusBar.css';
+import { statusBarStyles as styles } from './StatusBar.styles';
 
 export const StatusBar: React.FC = () => {
     const { selectedEntityId, editorMode } = useEditorStore();
@@ -15,42 +16,38 @@ export const StatusBar: React.FC = () => {
     const selectedName = selectedEntityId !== null ? entities.get(selectedEntityId)?.name : 'None';
 
     return (
-        <div className="status-bar glass-panel">
-            <div className="status-group">
-                <VibeIcons name="Layers" size={12} />
-                <span>Entities: {entityCount}</span>
+        <div className="status-bar" style={styles.container}>
+            <div style={styles.group}>
+                <VibeIcons name="Layers" size={12} style={{ opacity: 0.6 }} />
+                <span>Entities: <span style={styles.highlight}>{entityCount}</span></span>
             </div>
 
+            <div style={styles.divider} />
             
-            <div className="status-divider" />
-            
-            <div className="status-group">
-                <VibeIcons name="Cursor" size={12} />
-                <span>Selected: <span className="entity-highlight">{selectedName}</span></span>
+            <div style={styles.group}>
+                <VibeIcons name="Cursor" size={12} style={{ opacity: 0.6 }} />
+                <span>Selected: <span style={styles.highlight}>{selectedName}</span></span>
             </div>
 
-
-            <div className="status-divider" />
+            <div style={styles.divider} />
             
-            <div className="status-group">
-                <span className="mode-badge">{editorMode.toUpperCase()}</span>
+            <div style={styles.group}>
+                <span style={styles.modeBadge}>{editorMode.toUpperCase()}</span>
             </div>
 
-            <div className="status-spacer" />
-            
-            <div className="status-group fps-counter">
-                <VibeIcons name="Eye" size={12} />
-                <span>FPS: <span className="fps-value">60</span></span>
+            <div style={styles.group}>
+                <div style={styles.fpsBadge}>
+                    <VibeIcons name="Eye" size={12} style={{ color: '#10b981', opacity: 0.8 }} />
+                    <span>FPS: <span style={styles.fpsValue}>60</span></span>
+                </div>
             </div>
 
+            <div style={styles.divider} />
             
-            <div className="status-divider" />
-            
-            <div className="status-group version-badge">
+            <div style={{ ...styles.group, ...styles.version }}>
                 <VibeIcons name="Cpu" size={12} />
-                <span>VibeEngine v1.0.0 Sovereign Beta</span>
+                <span>VibeEngine v1.0.0 Sovereign Elite</span>
             </div>
-
         </div>
     );
 };

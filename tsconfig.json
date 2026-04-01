@@ -28,6 +28,18 @@
             ],
             "@editor/*": [
                 "src/editor/*"
+            ],
+            "@presentation/*": [
+                "src/presentation/*"
+            ],
+            "@themes/*": [
+                "src/presentation/themes/*"
+            ],
+            "@domain/*": [
+                "src/domain/*"
+            ],
+            "@infrastructure/*": [
+                "src/infrastructure/*"
             ]
         },
         "resolveJsonModule": true,

@@ -1,5 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import './ContextMenu.css';
+/**
+ * ContextMenu (Sovereign Atomic Edition)
+ * 🏛️⚛️💎🚀
+ */
+
+import React, { useEffect, useRef, useState } from 'react';
+import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
 
 export interface ContextMenuItem {
     label: string;
@@ -16,25 +21,70 @@ interface ContextMenuProps {
     onClose: () => void;
 }
 
+const styles = createVibeStyles({
+    menu: {
+        position: 'fixed',
+        minWidth: '180px',
+        background: 'rgba(15, 15, 25, 0.9)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
+        border: `1px solid ${VibeTheme.colors.glassBorder}`,
+        borderRadius: '10px',
+        padding: '6px',
+        boxShadow: '0 12px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+        zIndex: 9999,
+        animation: 'context-fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
+    },
+    item: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '8px 12px',
+        borderRadius: '6px',
+        fontSize: '13px',
+        color: VibeTheme.colors.textSecondary,
+        cursor: 'pointer',
+        transition: 'all 0.15s ease',
+        userSelect: 'none',
+    },
+    itemHover: {
+        background: 'rgba(255, 255, 255, 0.08)',
+        color: '#fff',
+    },
+    itemDanger: {
+        color: '#f43f5e',
+    },
+    itemDangerHover: {
+        background: 'rgba(244, 63, 94, 0.2)',
+        color: '#fb7185',
+    },
+    divider: {
+        height: '1px',
+        background: 'rgba(255, 255, 255, 0.05)',
+        margin: '6px 8px',
+    }
+});
+
+const animations = `
+    @keyframes context-fade-in {
+        from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+`;
+
 export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }) => {
     const menuRef = useRef<HTMLDivElement>(null);
+    const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                onClose();
-            }
+        const handleClickOutside = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) onClose();
         };
-
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         document.addEventListener('keydown', handleKeyDown);
-        
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('keydown', handleKeyDown);
@@ -42,27 +92,30 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
     }, [onClose]);
 
     // Adjust position if menu goes off screen
-    const adjustedX = Math.min(x, window.innerWidth - 160);
-    const adjustedY = Math.min(y, window.innerHeight - (items.length * 32 + 20));
+    const adjustedX = Math.min(x, window.innerWidth - 200);
+    const adjustedY = Math.min(y, window.innerHeight - (items.length * 40));
 
     return (
         <div 
-            className="context-menu glass-panel"
             ref={menuRef}
-            style={{ top: adjustedY, left: adjustedX }}
+            style={{ ...styles.menu, top: adjustedY, left: adjustedX }}
         >
+            <style dangerouslySetInnerHTML={{ __html: animations }} />
             {items.map((item, index) => (
                 <React.Fragment key={index}>
-                    {item.divider && <div className="context-menu-divider" />}
+                    {item.divider && <div style={styles.divider} />}
                     <div 
-                        className={`context-menu-item ${item.danger ? 'danger' : ''}`}
-                        onClick={() => {
-                            item.onClick?.();
-                            onClose();
+                        style={{ 
+                            ...styles.item, 
+                            ...(item.danger ? styles.itemDanger : {}),
+                            ...(hoveredIdx === index ? (item.danger ? styles.itemDangerHover : styles.itemHover) : {})
                         }}
+                        onMouseEnter={() => setHoveredIdx(index)}
+                        onMouseLeave={() => setHoveredIdx(null)}
+                        onClick={() => { item.onClick?.(); onClose(); }}
                     >
-                        <span className="context-menu-icon">{item.icon}</span>
-                        <span className="context-menu-label">{item.label}</span>
+                        <span style={{ display: 'flex', opacity: 0.8 }}>{item.icon}</span>
+                        <span style={{ flex: 1 }}>{item.label}</span>
                     </div>
                 </React.Fragment>
             ))}

@@ -7,10 +7,6 @@ import { MenuBar, Toolbar, EditorLayout, SplashScreen, StatusBar } from './compo
 import { CommandPalette } from './components/CommandPalette';
 import { useKeyboardShortcuts } from './hooks';
 import { ToastContainer } from './components/ToastContainer';
-import './styles/editor.css';
-import './components/CommandPalette.css';
-import './components/SplashScreen.css';
-import './components/StatusBar.css';
 import { useAssetManager } from './assets/AssetManager';
 
 
@@ -83,7 +79,18 @@ export const EditorApp: React.FC = () => {
             {showSplash && (
                 <SplashScreen onComplete={() => setShowSplash(false)} />
             )}
-            <div className={`editor-root ${showSplash ? 'hidden' : ''}`}>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100vh',
+                width: '100vw',
+                overflow: 'hidden',
+                background: '#05050a',
+                fontFamily: "'Outfit', sans-serif",
+                opacity: showSplash ? 0 : 1,
+                visibility: showSplash ? 'hidden' : 'visible',
+                transition: 'opacity 0.5s ease'
+            }}>
                 <MenuBar />
                 <Toolbar />
                 <EditorLayout />

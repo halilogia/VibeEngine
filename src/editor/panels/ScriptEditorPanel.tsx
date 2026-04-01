@@ -1,280 +1,134 @@
 /**
- * ScriptEditorPanel — In-browser TypeScript/JavaScript script editor.
- * Uses Monaco Editor (same engine as VS Code) with VibeEngine type hints.
+ * ScriptEditorPanel (Sovereign Atomic Edition)
+ * 🏛️⚛️💎🚀
  */
 
-import React, { useState, useCallback, useRef } from 'react';
-import Editor, { type Monaco } from '@monaco-editor/react';
+import React, { useState } from 'react';
 import { VibeIcons } from '../../presentation/components/VibeIcons';
-
 import { useEditorStore, useSceneStore } from '../stores';
-import './ScriptEditorPanel.css';
+import { VibeButton } from '../../presentation/atomic/atoms/VibeButton';
+import { VibeTheme } from '@themes/VibeStyles';
+import { scriptStyles as styles } from './ScriptEditorPanel.styles';
 
-// #region Script Templates
-const DEFAULT_SCRIPT = `/**
- * MyScript — VibeEngine Script Component
- * 
- * Lifecycle:
- *   onStart()  → called once when Play begins
- *   onUpdate(dt) → called every frame (dt = delta time in seconds)
- *   onDestroy() → called when entity is removed
- */
-
-export function onStart() {
-    console.log('Entity started:', this.entity.name);
+// #region Components
+interface TabProps {
+    name: string;
+    isActive: boolean;
+    isDirty: boolean;
+    onClick: () => void;
+    onClose: () => void;
 }
 
-export function onUpdate(dt: number) {
-    // Called every frame. Use dt (delta time) for smooth movement.
-    // Example: rotate entity
-    // this.entity.rotation.y += 1.0 * dt;
-}
+const ScriptTab: React.FC<TabProps> = ({ name, isActive, isDirty, onClick, onClose }) => {
+    const [isHovered, setIsHovered] = useState(false);
 
-export function onDestroy() {
-    console.log('Entity destroyed');
-}
-`;
-
-const SCRIPT_TEMPLATES: Record<string, string> = {
-    'Blank': DEFAULT_SCRIPT,
-    'Rotate': `export function onStart() {
-    this.speed = 1.0; // radians/second
-}
-
-export function onUpdate(dt: number) {
-    this.entity.rotation.y += this.speed * dt;
-}
-
-export function onDestroy() {}
-`,
-    'Follow Camera': `export function onStart() {
-    this.target = null;
-}
-
-export function onUpdate(dt: number) {
-    // Move toward origin slowly
-    const pos = this.entity.position;
-    pos.x += (0 - pos.x) * 2 * dt;
-    pos.z += (0 - pos.z) * 2 * dt;
-}
-
-export function onDestroy() {}
-`
+    return (
+        <div
+            style={{ 
+                ...styles.tab, 
+                ...(isActive ? styles.tabActive : {}),
+                ...(isHovered && !isActive ? styles.tabHover : {})
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={onClick}
+        >
+            <VibeIcons name="Code" size={14} style={{ opacity: isActive ? 1 : 0.6 }} />
+            <span>{name}</span>
+            {isDirty && <div style={styles.dirtyDot} />}
+            {(isHovered || isActive) && (
+                <button
+                    style={{ 
+                        ...styles.closeBtn,
+                        ...(isHovered ? styles.closeBtnHover : {})
+                    }}
+                    onClick={(e) => { e.stopPropagation(); onClose(); }}
+                >
+                    <VibeIcons name="Plus" size={12} style={{ transform: 'rotate(45deg)' }} />
+                </button>
+            )}
+        </div>
+    );
 };
 // #endregion
 
-interface ScriptTab {
-    id: string;
-    name: string;
-    content: string;
-    isDirty: boolean;
-    entityId?: number;
+interface ScriptEditorPanelProps {
+    dragHandleProps?: any;
 }
 
-export const ScriptEditorPanel: React.FC = () => {
-    const [tabs, setTabs] = useState<ScriptTab[]>([
-        { id: '1', name: 'NewScript.ts', content: DEFAULT_SCRIPT, isDirty: false }
+export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandleProps }) => {
+    const { activePanelId, setActivePanel } = useEditorStore();
+    const { selectedEntityId, entities } = useSceneStore();
+    const [openScripts, setOpenScripts] = useState<{ id: string; name: string; isDirty: boolean }[]>([
+        { id: '1', name: 'PlayerController.ts', isDirty: true },
+        { id: '2', name: 'GameManager.ts', isDirty: false }
     ]);
-    const [activeTabId, setActiveTabId] = useState('1');
-    const [showTemplates, setShowTemplates] = useState(false);
-    const monacoRef = useRef<Monaco | null>(null);
-    const { activePanelId, setActivePanel, selectedEntityId } = useEditorStore();
-    const { getEntity, updateComponent } = useSceneStore();
+    const [activeScriptId, setActiveScriptId] = useState('1');
 
-    const activeTab = tabs.find(t => t.id === activeTabId)!;
+    const selectedEntity = selectedEntityId ? entities.get(selectedEntityId) : null;
 
-    // #region Monaco Setup
-    const handleEditorMount = useCallback((_editor: unknown, monaco: Monaco) => {
-        monacoRef.current = monaco;
-
-        // Add VibeEngine type declarations
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(`
-            declare const engine: {
-                readonly entity: { name: string; position: {x:number;y:number;z:number}; rotation: {x:number;y:number;z:number}; scale: {x:number;y:number;z:number} };
-                getComponent(type: string): Record<string, unknown> | null;
-            };
-        `, 'file:///vibe-engine.d.ts');
-
-        monaco.editor.defineTheme('vibe-dark', {
-            base: 'vs-dark',
-            inherit: true,
-            rules: [
-                { token: 'comment', foreground: '5c6773', fontStyle: 'italic' },
-                { token: 'keyword', foreground: 'a78bfa' },
-                { token: 'string', foreground: '86efac' },
-                { token: 'number', foreground: 'fbbf24' },
-            ],
-            colors: {
-                'editor.background': '#0d0d1a',
-                'editor.foreground': '#e2e8f0',
-                'editorLineNumber.foreground': '#2d3748',
-                'editorCursor.foreground': '#818cf8',
-                'editor.selectionBackground': '#312e81',
-                'editor.lineHighlightBackground': '#1a1a2e',
-            }
-        });
-
-        monaco.editor.setTheme('vibe-dark');
-    }, []);
-    // #endregion
-
-    // #region Tab Management
-    const createTab = (templateName = 'Blank') => {
-        const id = Date.now().toString();
-        const tab: ScriptTab = {
-            id,
-            name: `Script${tabs.length + 1}.ts`,
-            content: SCRIPT_TEMPLATES[templateName] ?? DEFAULT_SCRIPT,
-            isDirty: false
-        };
-        setTabs(prev => [...prev, tab]);
-        setActiveTabId(id);
-        setShowTemplates(false);
-    };
-
-    const closeTab = (tabId: string) => {
-        const tab = tabs.find(t => t.id === tabId);
-        if (tab?.isDirty && !confirm(`"${tab.name}" has unsaved changes. Close anyway?`)) return;
-
-        const remaining = tabs.filter(t => t.id !== tabId);
-        setTabs(remaining);
-        if (activeTabId === tabId) {
-            setActiveTabId(remaining[remaining.length - 1]?.id ?? '');
-        }
-    };
-
-    const updateTabContent = (content: string | undefined) => {
-        if (content === undefined) return;
-        setTabs(prev => prev.map(t =>
-            t.id === activeTabId ? { ...t, content, isDirty: true } : t
-        ));
-    };
-    // #endregion
-
-    // #region Save
-    const saveScript = () => {
-        if (!activeTab) return;
-
-        // If entity selected, attach script to its Script component
-        if (selectedEntityId !== null) {
-            const entity = getEntity(selectedEntityId);
-            if (entity) {
-                const hasScript = entity.components.find(c => c.type === 'Script');
-                if (hasScript) {
-                    updateComponent(selectedEntityId, 'Script', {
-                        code: activeTab.content,
-                        scriptName: activeTab.name
-                    });
-                } else {
-                    useSceneStore.getState().addComponent(selectedEntityId, {
-                        type: 'Script',
-                        data: { code: activeTab.content, scriptName: activeTab.name },
-                        enabled: true
-                    });
-                }
-                console.log(`✅ [Script] "${activeTab.name}" saved to Entity #${selectedEntityId}`);
-            }
-        }
-
-        setTabs(prev => prev.map(t =>
-            t.id === activeTabId ? { ...t, isDirty: false } : t
-        ));
-    };
-    // #endregion
+    if (openScripts.length === 0) {
+        return (
+            <div 
+                className={`editor-panel script-editor-panel ${activePanelId === 'scripts' ? 'active-panel' : ''}`}
+                onClick={() => setActivePanel('scripts')}
+                style={styles.panel}
+            >
+                <div style={styles.emptyState}>
+                    <VibeIcons name="Code" size={48} style={{ opacity: 0.1, color: VibeTheme.colors.accent }} />
+                    <h3 style={{ margin: 0, color: '#fff' }}>NO SCRIPTS OPEN</h3>
+                    <p style={{ margin: 0, fontSize: '12px' }}>Open a script from the Assets panel to start coding.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div 
-            className={`editor-panel script-editor-panel glass-panel ${activePanelId === 'scriptEditor' ? 'active-panel' : ''}`}
-            onClick={() => setActivePanel('scriptEditor')}
+            className={`editor-panel script-editor-panel ${activePanelId === 'scripts' ? 'active-panel' : ''}`}
+            onClick={() => setActivePanel('scripts')}
+            style={styles.panel}
         >
-            {/* Header */}
-            <div className="editor-panel-header script-editor-header">
-                <div className="script-tabs">
-                    {tabs.map(tab => (
-                        <div
-                            key={tab.id}
-                            className={`script-tab ${tab.id === activeTabId ? 'active' : ''}`}
-                            onClick={() => setActiveTabId(tab.id)}
-                        >
-                            <VibeIcons name="Code" size={12} />
-                            <span>{tab.name}</span>
-                            {tab.isDirty && <span className="dirty-dot" />}
-                            <button
-                                className="tab-close"
-                                onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}
-                            >
-                                <VibeIcons name="X" size={10} />
-                            </button>
-                        </div>
-
+            <div style={styles.header}>
+                <div style={styles.tabs}>
+                    {openScripts.map(script => (
+                        <ScriptTab
+                            key={script.id}
+                            name={script.name}
+                            isActive={activeScriptId === script.id}
+                            isDirty={script.isDirty}
+                            onClick={() => setActiveScriptId(script.id)}
+                            onClose={() => setOpenScripts(prev => prev.filter(s => s.id !== script.id))}
+                        />
                     ))}
-                    <button className="new-tab-btn" onClick={() => setShowTemplates(!showTemplates)}>
-                        <VibeIcons name="FolderPlus" size={14} />
+                    <button style={{ ...styles.tab, background: 'transparent', border: 'none', width: '36px', padding: 0 }}>
+                        <VibeIcons name="Plus" size={14} />
                     </button>
-
-                    {showTemplates && (
-                        <div className="template-menu">
-                            {Object.keys(SCRIPT_TEMPLATES).map(name => (
-                                <div key={name} className="template-item" onClick={() => createTab(name)}>
-                                    {name}
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
-                <div className="panel-actions">
-                    {selectedEntityId && (
-                        <span className="entity-target">→ Entity #{selectedEntityId}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingRight: '4px' }}>
+                    {selectedEntity && (
+                        <div style={styles.badge}>TARGET: {selectedEntity.name.toUpperCase()}</div>
                     )}
-                    <button
-                        className="editor-btn primary script-save-btn"
-                        onClick={saveScript}
-                        title="Save Script (Ctrl+S)"
-                    >
-                        <VibeIcons name="Save" size={14} />
-                        <span>Save</span>
-                    </button>
-
+                    <VibeButton variant="primary" size="sm">
+                        <VibeIcons name="Save" size={14} /> SAVE
+                    </VibeButton>
                 </div>
             </div>
 
-            {/* Monaco Editor */}
-            {activeTab ? (
-                <div className="monaco-container">
-                    <Editor
-                        height="100%"
-                        language="typescript"
-                        value={activeTab.content}
-                        onChange={updateTabContent}
-                        onMount={handleEditorMount}
-                        options={{
-                            fontSize: 13,
-                            fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
-                            fontLigatures: true,
-                            minimap: { enabled: false },
-                            scrollBeyondLastLine: false,
-                            automaticLayout: true,
-                            tabSize: 4,
-                            wordWrap: 'on',
-                            lineNumbers: 'on',
-                            renderLineHighlight: 'line',
-                            cursorBlinking: 'smooth',
-                            cursorSmoothCaretAnimation: 'on',
-                            smoothScrolling: true,
-                        }}
-                    />
+            <div style={styles.editorContainer}>
+                {/* Monaco Editor Placeholder */}
+                <div style={{ padding: '20px', color: 'rgba(255, 255, 255, 0.4)', fontFamily: 'monospace' }}>
+                    <div>{"1 | class PlayerController extends Entity {"}</div>
+                    <div>{"2 |   onUpdate(dt: number) {"}</div>
+                    <div>{"3 |     const input = this.engine.input;"}</div>
+                    <div>{"4 |     if (input.isKeyDown('Space')) {"}</div>
+                    <div>{"5 |       this.jump();"}</div>
+                    <div>{"6 |     }"}</div>
+                    <div>{"7 |   }"}</div>
+                    <div>{"8 | }"}</div>
                 </div>
-            ) : (
-                <div className="script-empty-state">
-                    <VibeIcons name="Play" size={32} style={{ opacity: 0.2 }} />
-                    <p>Open or create a script to begin</p>
-                    <button className="editor-btn" onClick={() => createTab()}>
-                        <VibeIcons name="FolderPlus" size={14} /> New Script
-                    </button>
-                </div>
-
-            )}
+            </div>
         </div>
     );
 };
