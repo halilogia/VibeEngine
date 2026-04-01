@@ -5,7 +5,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
     Folder, File, Image, Box, Music, Code,
-    Grid, List, Upload, FolderPlus, Search, Trash2, Loader
+    Grid, List, Upload, FolderPlus, Search, Trash2, Loader,
+    ChevronRight, Home
 } from 'lucide-react';
 import { useAssetManager, type AssetEntry } from '../assets';
 import { useSceneStore, useEditorStore } from '../stores';
@@ -126,7 +127,7 @@ export const AssetsPanel: React.FC = () => {
 
     return (
         <div
-            className={`editor-panel assets-panel ${isDragging ? 'dragging' : ''}`}
+            className={`editor-panel assets-panel glass-panel ${isDragging ? 'dragging' : ''}`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -142,10 +143,13 @@ export const AssetsPanel: React.FC = () => {
             />
 
             <div className="editor-panel-header">
-                <span>Assets</span>
-                <span style={{ fontSize: '10px', color: '#888', marginLeft: '8px' }}>
-                    📂 Documents/VibeProjects/MobRunner
-                </span>
+                <div className="assets-breadcrumbs">
+                    <Home size={12} className="breadcrumb-icon" onClick={() => {}} />
+                    <ChevronRight size={10} className="breadcrumb-separator" />
+                    <span className="breadcrumb-item">Assets</span>
+                    <ChevronRight size={10} className="breadcrumb-separator" />
+                    <span className="breadcrumb-item active">MobRunner</span>
+                </div>
                 <div className="panel-actions">
                     <button
                         className={`panel-action-btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -201,10 +205,19 @@ export const AssetsPanel: React.FC = () => {
 
             <div className={`assets-content ${viewMode}`}>
                 {filteredAssets.length === 0 ? (
-                    <div className="empty-assets">
-                        <Upload size={32} />
-                        <span>Drag & drop files here</span>
-                        <span className="hint">or click Import button</span>
+                    <div className="assets-empty-state">
+                        <div className="empty-state-icon">
+                            <Upload size={40} />
+                            <Box size={20} className="floating-icon" />
+                        </div>
+                        <h3>No assets found</h3>
+                        <p>Drag & drop models, textures, or audio files here to start building your world.</p>
+                        <button 
+                            className="editor-btn primary"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <Upload size={14} /> Import Assets
+                        </button>
                     </div>
                 ) : (
                     filteredAssets.map((asset) => (

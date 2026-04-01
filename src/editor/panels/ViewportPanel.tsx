@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { useEditorStore, useSceneStore } from '../stores';
+import { Layers, Activity, MousePointer2 } from 'lucide-react';
 import './ViewportPanel.css';
 
 // Map editor entity IDs to Three.js objects
@@ -322,8 +323,28 @@ export const ViewportPanel: React.FC = () => {
     return (
         <div className="viewport-panel" ref={containerRef} onClick={handleClick}>
             <canvas ref={canvasRef} className="viewport-canvas" />
+            
+            {/* Elite Design: Inset shadow for depth */}
+            <div className="viewport-inset-shadow" />
 
             <div className="viewport-overlay">
+                <div className="viewport-scene-stats">
+                    <div className="stats-item">
+                        <Activity size={12} />
+                        <span>60 FPS</span>
+                    </div>
+                    <div className="stats-item">
+                        <Layers size={12} />
+                        <span>{entities.size} Entities</span>
+                    </div>
+                    {selectedEntityId !== null && (
+                        <div className="stats-item highlight">
+                            <MousePointer2 size={12} />
+                            <span>Entity #{selectedEntityId} Selected</span>
+                        </div>
+                    )}
+                </div>
+
                 <div className="viewport-info">
                     {isPlaying && <span className="playing-badge">▶ Playing</span>}
                 </div>

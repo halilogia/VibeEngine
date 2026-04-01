@@ -2,14 +2,15 @@
  * MenuBar Component v2 - With Save/Load functionality
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     Save, FolderOpen, FilePlus, Settings, Download,
     Undo, Redo, Copy, Clipboard, Trash2,
-    Grid3X3, Axis3D, Package
+    Grid3X3, Axis3D, Package, Database
 } from 'lucide-react';
 import { useEditorStore, useSceneStore } from '../stores';
 import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '../serialization';
+import { LocalSceneStorage } from '../storage/LocalSceneStorage';
 import './MenuBar.css';
 
 interface MenuItem {
@@ -59,6 +60,42 @@ export const MenuBar: React.FC = () => {
         useSceneStore.setState({ isDirty: false });
     };
 
+    const handleSaveToBrowser = () => {
+        try {
+            LocalSceneStorage.save(sceneName);
+            alert(`Scene "${sceneName}" saved to browser storage!`);
+        } catch (e) {
+            alert('Failed to save: ' + e);
+        }
+    };
+
+    const handleLoadFromBrowser = () => {
+        const scenes = LocalSceneStorage.listScenes();
+        if (scenes.length === 0) {
+            alert('No scenes saved in browser storage.');
+            return;
+        }
+        const names = scenes.map((s, i) => `${i + 1}. ${s.name} (${new Date(s.savedAt).toLocaleString()})`);
+        const choice = prompt(`Saved scenes:\n${names.join('\n')}\n\nEnter scene name to load:`);
+        if (choice) {
+            const found = scenes.find(s => s.name === choice.trim());
+            if (found) {
+                try {
+                    LocalSceneStorage.load(choice.trim());
+                } catch (e) {
+                    alert('Failed to load: ' + e);
+                }
+            } else {
+                alert(`Scene "${choice}" not found.`);
+            }
+        }
+    };
+
+    useEffect(() => {
+        LocalSceneStorage.startAutoSave(30_000);
+        return () => LocalSceneStorage.stopAutoSave();
+    }, []);
+
     const loadSampleScene = async (scenePath: string) => {
         try {
             const response = await fetch(scenePath);
@@ -75,11 +112,13 @@ export const MenuBar: React.FC = () => {
             label: 'File',
             items: [
                 { label: 'New Scene', icon: <FilePlus size={14} />, shortcut: 'Ctrl+N', action: handleNewScene },
-                { label: 'Open...', icon: <FolderOpen size={14} />, shortcut: 'Ctrl+O', action: handleOpen },
+                { label: 'Open File...', icon: <FolderOpen size={14} />, shortcut: 'Ctrl+O', action: handleOpen },
                 { divider: true, label: '' },
                 { label: '📂 Open MobRunner Project', action: () => loadSampleScene('/projects/MobRunner/Scenes/main.scene.json') },
                 { divider: true, label: '' },
-                { label: 'Save', icon: <Download size={14} />, shortcut: 'Ctrl+S', action: handleSave },
+                { label: 'Save as File', icon: <Download size={14} />, shortcut: 'Ctrl+S', action: handleSave },
+                { label: 'Save to Browser', icon: <Database size={14} />, action: handleSaveToBrowser },
+                { label: 'Load from Browser', icon: <Database size={14} />, action: handleLoadFromBrowser },
                 { divider: true, label: '' },
                 { label: 'Settings', icon: <Settings size={14} /> },
             ]

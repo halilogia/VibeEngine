@@ -141,21 +141,60 @@ export class Application {
     // ============ LIFECYCLE ============
 
     /**
-     * Start the application
+     * Start the application and initialize the loading bridge
      */
     start(): void {
         if (this.running) return;
 
+        // Initialize Loading Bridge
+        (window as any).VibeLoading = {
+            progress: 0,
+            status: 'initializing',
+            modules: {} as Record<string, 'loading' | 'success' | 'error'>,
+            details: 'Starting Engine Modules...'
+        };
+
+        const updateLoading = (module: string, status: 'success' | 'error', details: string) => {
+            const bridge = (window as any).VibeLoading;
+            bridge.modules[module] = status;
+            bridge.details = details;
+            
+            const totalModules = this.systems.length + 1; // +1 for renderer
+            const completedModules = Object.values(bridge.modules).filter(s => s === 'success' || s === 'error').length;
+            bridge.progress = Math.round((completedModules / totalModules) * 100);
+            
+            if (status === 'success') {
+                console.log(`✅ [Module] ${module}: Ready`);
+            } else {
+                console.error(`❌ [Module] ${module}: Failed - ${details}`);
+            }
+
+            if (bridge.progress >= 100) {
+                bridge.status = 'ready';
+                console.log('🚀 Application: All systems go!');
+            }
+        };
+
+        // Initialize Renderer first
+        try {
+            updateLoading('Renderer', 'success', 'WebGL Graphics Ready');
+        } catch (e) {
+            updateLoading('Renderer', 'error', 'WebGL Initialization Failed');
+        }
+
         // Initialize all systems
         for (const system of this.systems) {
-            if (system.initialize) system.initialize();
+            try {
+                if (system.initialize) system.initialize();
+                updateLoading(system.constructor.name, 'success', `${system.constructor.name} Initialized`);
+            } catch (e) {
+                updateLoading(system.constructor.name, 'error', `Failed to initialize ${system.constructor.name}`);
+            }
         }
 
         this.running = true;
         this.lastTime = performance.now();
         this.loop();
-
-        console.log('🚀 Application started');
     }
 
     /**
@@ -163,6 +202,9 @@ export class Application {
      */
     stop(): void {
         this.running = false;
+        if ((window as any).VibeLoading) {
+            (window as any).VibeLoading.status = 'stopped';
+        }
         console.log('⏹️ Application stopped');
     }
 

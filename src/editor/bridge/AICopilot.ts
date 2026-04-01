@@ -15,7 +15,8 @@ export type AICommandType =
     | 'add_component' 
     | 'update_component'
     | 'remove_component'
-    | 'set_parent';
+    | 'set_parent'
+    | 'spawn_prefab';
 
 /**
  * Structure of a single AI command

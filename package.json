@@ -26,6 +26,7 @@
         "pack:sdk": "npm run build:protected && npm pack"
     },
     "dependencies": {
+        "@monaco-editor/react": "^4.7.0",
         "three": "^0.160.0"
     },
     "devDependencies": {

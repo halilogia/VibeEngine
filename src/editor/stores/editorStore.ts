@@ -30,6 +30,7 @@ interface EditorState {
     showAssets: boolean;
     showConsole: boolean;
     showAICopilot: boolean;
+    showScriptEditor: boolean;
 
     // Actions
     selectEntity: (id: number | null) => void;
@@ -42,7 +43,7 @@ interface EditorState {
     play: () => void;
     pause: () => void;
     stop: () => void;
-    togglePanel: (panel: 'hierarchy' | 'inspector' | 'assets' | 'console' | 'aiCopilot') => void;
+    togglePanel: (panel: 'hierarchy' | 'inspector' | 'assets' | 'console' | 'aiCopilot' | 'scriptEditor') => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -60,6 +61,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     showAssets: true,
     showConsole: true,
     showAICopilot: true,
+    showScriptEditor: false,
 
     // Actions
     selectEntity: (id) => set({
@@ -98,6 +100,7 @@ export const useEditorStore = create<EditorState>((set) => ({
             case 'assets': return { showAssets: !state.showAssets };
             case 'console': return { showConsole: !state.showConsole };
             case 'aiCopilot': return { showAICopilot: !state.showAICopilot };
+            case 'scriptEditor': return { showScriptEditor: !state.showScriptEditor };
         }
     }),
 }));

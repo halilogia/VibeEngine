@@ -21,8 +21,37 @@
     top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
     pointer-events: none;
-    padding: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.viewport-scene-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    width: fit-content;
+    font-family: var(--editor-font-mono);
+    font-size: 10px;
+}
+
+.stats-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--editor-text-secondary);
+}
+
+.stats-item.highlight {
+    color: var(--editor-accent);
 }
 
 .viewport-info {

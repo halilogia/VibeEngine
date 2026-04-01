@@ -176,3 +176,34 @@
 .add-component-item:hover {
     background: var(--editor-bg-hover);
 }
+
+/* Inspector Empty State */
+.inspector-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    height: 300px;
+    padding: 20px;
+    color: var(--editor-text-muted);
+    text-align: center;
+}
+
+.inspector-empty-state .empty-icon {
+    opacity: 0.2;
+    margin-bottom: 8px;
+    color: var(--editor-accent);
+}
+
+.inspector-empty-state h3 {
+    margin: 0;
+    font-size: 14px;
+    color: var(--editor-text-primary);
+}
+
+.inspector-empty-state p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+}

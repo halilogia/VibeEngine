@@ -1,15 +1,129 @@
-/**
- * AICopilotPanel Styling
- */
-
-.ai-copilot-panel {
+.ai-header {
+    padding: 8px 12px;
+    background: var(--editor-bg-tertiary);
+    border-bottom: 1px solid var(--editor-border);
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    background-color: var(--editor-bg-secondary);
-    border-left: 1px solid var(--editor-border);
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
 }
 
+.model-selector-container {
+    position: relative;
+    flex: 1;
+}
+
+.model-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+}
+
+.model-selector:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--editor-accent);
+}
+
+.model-icon {
+    color: var(--ui-accent, #818cf8);
+}
+
+.model-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--editor-text-primary);
+    flex: 1;
+    text-align: left;
+}
+
+.chevron {
+    color: var(--editor-text-secondary);
+    transition: transform 0.2s;
+}
+
+.chevron.rotate {
+    transform: rotate(180deg);
+}
+
+.model-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--editor-bg-tertiary);
+    border: 1px solid var(--editor-border);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    animation: menu-slide 0.2s ease-out;
+}
+
+@keyframes menu-slide {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.model-option {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.model-option:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.model-option.active {
+    background: rgba(99, 102, 241, 0.15);
+    border-left: 3px solid var(--editor-accent);
+}
+
+.option-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--editor-text-primary);
+}
+
+.option-provider {
+    font-size: 10px;
+    color: var(--editor-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.panel-action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--editor-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.panel-action-btn:hover {
+    background: rgba(255, 0, 0, 0.15);
+    color: #ef4444;
+}
+
+/* Rest of the styles... */
 .chat-history {
     flex: 1;
     overflow-y: auto;
@@ -198,4 +312,44 @@
     color: var(--text-muted, #94a3b8);
     text-align: center;
     padding: 40px;
+}
+
+/* Streaming cursor blink */
+.cursor-blink {
+    display: inline-block;
+    animation: blink 0.7s step-end infinite;
+    color: #818cf8;
+    font-weight: bold;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Ollama offline badge */
+.ollama-status {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.ollama-status.offline {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Spinner */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }

@@ -76,7 +76,7 @@ export const HierarchyPanel: React.FC = () => {
     };
 
     return (
-        <div className="editor-panel hierarchy-panel">
+        <div className="editor-panel hierarchy-panel glass-panel">
             <div className="editor-panel-header">
                 <span>Hierarchy</span>
                 <div className="panel-actions">
@@ -96,8 +96,10 @@ export const HierarchyPanel: React.FC = () => {
 
             <div className="editor-panel-content">
                 {rootEntityIds.length === 0 ? (
-                    <div className="empty-state">
-                        <p>No entities</p>
+                    <div className="hierarchy-empty-state">
+                        <Box size={40} className="empty-icon" />
+                        <h3>No entities in scene</h3>
+                        <p>Create your first object to start building.</p>
                         <button className="editor-btn primary" onClick={handleAddEntity}>
                             <Plus size={14} /> Add Entity
                         </button>

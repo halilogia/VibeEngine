@@ -1,20 +1,33 @@
 /**
  * AICopilotPanel - Chat interface for AI-powered scene authoring
+ * Connected to Ollama for real LLM responses.
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Wand2, Trash2, Grid } from 'lucide-react';
-import { CommandInterpreter, SceneContext } from '../bridge';
+import { Send, Bot, User, Sparkles, Wand2, Trash2, Grid, Cpu, ChevronDown, WifiOff, Loader2 } from 'lucide-react';
+import { CommandInterpreter } from '../bridge';
+import { OllamaService, type OllamaMessage } from '../bridge/OllamaService';
 import { useEditorStore } from '../stores';
 import './AICopilotPanel.css';
 
+// #region Types
 interface Message {
     id: string;
     role: 'user' | 'assistant';
     content: string;
     timestamp: Date;
-    commands?: any[];
+    commands?: Array<{ type: string; params: Record<string, unknown> }>;
+    streaming?: boolean;
 }
+
+const OLLAMA_MODELS = [
+    { id: 'llama3:8b', name: 'Llama 3 (8B)', provider: 'Ollama' },
+    { id: 'mistral:7b', name: 'Mistral (7B)', provider: 'Ollama' },
+    { id: 'deepseek-coder', name: 'DeepSeek Coder', provider: 'Ollama' },
+    { id: 'phi3:mini', name: 'Phi-3 Mini', provider: 'Ollama' },
+    { id: 'gemma2:2b', name: 'Gemma 2 (2B)', provider: 'Ollama' },
+];
+// #endregion
 
 export const AICopilotPanel: React.FC = () => {
     const [input, setInput] = useState('');
@@ -22,20 +35,39 @@ export const AICopilotPanel: React.FC = () => {
         {
             id: '1',
             role: 'assistant',
-            content: 'Hello! I am your VibeEngine AI Co-pilot. How can I help you build your scene today?',
+            content: 'Hello! I am your VibeEngine AI Copilot powered by Ollama. Try asking me to "add a red cube" or "create a point light".',
             timestamp: new Date()
         }
     ]);
     const [isThinking, setIsThinking] = useState(false);
+    const [ollamaReady, setOllamaReady] = useState<boolean | null>(null);
+    const [selectedModel, setSelectedModel] = useState(OLLAMA_MODELS[0]);
+    const [showModelMenu, setShowModelMenu] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const abortRef = useRef<AbortController | null>(null);
 
-    const scrollToBottom = () => {
+    // #region Lifecycle
+    useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+    }, [messages]);
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        OllamaService.isAvailable().then(available => {
+            setOllamaReady(available);
+            if (available) {
+                console.log('✅ [OllamaService] Connected to local Ollama server');
+            } else {
+                console.warn('⚠️ [OllamaService] Ollama not reachable at localhost:11434');
+            }
+        });
+    }, []);
+    // #endregion
+
+    // #region Chat
+    const buildOllamaMessages = (history: Message[]): OllamaMessage[] =>
+        history
+            .filter(m => !m.streaming)
+            .map(m => ({ role: m.role, content: m.content }));
 
     const handleSend = async () => {
         if (!input.trim() || isThinking) return;
@@ -43,122 +75,144 @@ export const AICopilotPanel: React.FC = () => {
         const userMessage: Message = {
             id: Date.now().toString(),
             role: 'user',
-            content: input,
+            content: input.trim(),
             timestamp: new Date()
         };
 
-        setMessages(prev => [...prev, userMessage]);
+        const currentInput = input.trim();
         setInput('');
+        setMessages(prev => [...prev, userMessage]);
         setIsThinking(true);
 
-        // Simulation of AI processing
-        setTimeout(() => {
-            const response = processCommand(input);
-            
-            const assistantMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                role: 'assistant',
-                content: response.text,
-                timestamp: new Date(),
-                commands: response.commands
-            };
+        if (!ollamaReady) {
+            // Fallback to mock if Ollama not available
+            setTimeout(() => {
+                const response = getMockResponse(currentInput);
+                const assistantMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    role: 'assistant',
+                    content: response.text,
+                    timestamp: new Date(),
+                    commands: response.commands
+                };
+                setMessages(prev => [...prev, assistantMessage]);
+                setIsThinking(false);
+                if (response.commands.length > 0) {
+                    setTimeout(() => CommandInterpreter.executeBatch(response.commands as Parameters<typeof CommandInterpreter.executeBatch>[0]), 300);
+                }
+            }, 600);
+            return;
+        }
 
-            setMessages(prev => [...prev, assistantMessage]);
+        // Real Ollama streaming
+        const streamingId = (Date.now() + 1).toString();
+        setMessages(prev => [...prev, {
+            id: streamingId,
+            role: 'assistant',
+            content: '',
+            timestamp: new Date(),
+            streaming: true
+        }]);
+
+        abortRef.current = new AbortController();
+
+        try {
+            const historyMessages = buildOllamaMessages([...messages, userMessage]);
+
+            let fullContent = '';
+            await OllamaService.chat({
+                model: selectedModel.id,
+                messages: historyMessages,
+                signal: abortRef.current.signal,
+                onToken: (token) => {
+                    fullContent += token;
+                    setMessages(prev => prev.map(m =>
+                        m.id === streamingId ? { ...m, content: fullContent } : m
+                    ));
+                }
+            });
+
+            // Extract and execute commands from complete response
+            const commands = OllamaService.extractCommands(fullContent);
+
+            setMessages(prev => prev.map(m =>
+                m.id === streamingId ? { ...m, streaming: false, commands } : m
+            ));
+
+            if (commands.length > 0) {
+                console.log(`🤖 [AI] Executing ${commands.length} scene commands`);
+                setTimeout(() => CommandInterpreter.executeBatch(commands as Parameters<typeof CommandInterpreter.executeBatch>[0]), 300);
+            }
+        } catch (e) {
+            const errMsg = (e instanceof Error && e.name !== 'AbortError')
+                ? `⚠️ Ollama error: ${e.message}`
+                : 'Request cancelled.';
+
+            setMessages(prev => prev.map(m =>
+                m.id === streamingId ? { ...m, content: errMsg, streaming: false } : m
+            ));
+        } finally {
             setIsThinking(false);
-
-            // Execute commands if any with a subtle delay for 'AI feeling'
-            if (response.commands && response.commands.length > 0) {
-                setTimeout(() => {
-                    CommandInterpreter.executeBatch(response.commands);
-                }, 500);
-            }
-        }, 800);
+            abortRef.current = null;
+        }
     };
+    // #endregion
 
-    /**
-     * Mock command processor for prototype phase
-     */
-    const processCommand = (prompt: string): { text: string; commands: any[] } => {
-        const lowerPrompt = prompt.toLowerCase();
-        const selectedId = useEditorStore.getState().selectedEntityId;
-        
-        if (lowerPrompt.includes('pirate') || lowerPrompt.includes('battle')) {
-            return {
-                text: "Captain on deck! I've set up a pirate battle arena. I added an ocean, a central island, and your ship.",
-                commands: [
-                    { type: 'spawn_prefab', params: { prefabName: 'OceanTile' } },
-                    { type: 'spawn_prefab', params: { prefabName: 'Island', position: [0, -0.5, 0] } },
-                    { type: 'spawn_prefab', params: { prefabName: 'PirateShip', position: [5, 0.5, 5] } }
-                ]
-            };
+    // #region Mock Fallback
+    const getMockResponse = (prompt: string) => {
+        const low = prompt.toLowerCase();
+        if (low.includes('cube') || low.includes('box')) {
+            return { text: "Added a cube to the scene!", commands: [{ type: 'add_entity', params: { name: 'Cube' } }] };
         }
-
-        if (lowerPrompt.includes('character') || lowerPrompt.includes('player')) {
-            return {
-                text: "I've added a playable character to the scene. You can control it with WASD when you press Play.",
-                commands: [
-                    { type: 'spawn_prefab', params: { prefabName: 'PlayerCharacter', position: [0, 0.5, -2] } }
-                ]
-            };
+        if (low.includes('light')) {
+            return { text: "Added a point light!", commands: [{ type: 'add_entity', params: { name: 'Point Light' } }] };
         }
-
-        if (lowerPrompt.includes('move') || lowerPrompt.includes('wasd') || lowerPrompt.includes('control')) {
-            if (selectedId) {
-                return {
-                    text: `I've attached player controls to entity #${selectedId}. It will now respond to WASD!`,
-                    commands: [
-                        { type: 'add_component', params: { entityId: selectedId, componentType: 'Script', data: { scriptName: 'PlayerMoveScript' } } },
-                        { type: 'add_component', params: { entityId: selectedId, componentType: 'Collision', data: { colliderType: 'box' } } }
-                    ]
-                };
-            }
-            return { text: "I can make things move, but please select an entity in the hierarchy first!", commands: [] };
-        }
-
-        if (lowerPrompt.includes('rotate') || lowerPrompt.includes('spin')) {
-            if (selectedId) {
-                return {
-                    text: `I've added a rotation behavior to entity #${selectedId}. It will now spin!`,
-                    commands: [
-                        { type: 'add_component', params: { entityId: selectedId, componentType: 'Script', data: { scriptName: 'RotatorScript', data: { speed: 2 } } } }
-                    ]
-                };
-            }
-            return { text: "Which object should I rotate? Please select one!", commands: [] };
-        }
-
-        if (lowerPrompt.includes('light') || lowerPrompt.includes('sun')) {
-            return {
-                text: "I've added a sun-like directional light to illuminate your world.",
-                commands: [
-                    { type: 'add_entity', params: { name: 'Sun' } },
-                    { type: 'add_component', params: { entityId: 100, componentType: 'Light', data: { lightType: 'directional', intensity: 1.2 } } }
-                ]
-            };
-        }
-
-        return {
-            text: "I understood your request: '" + prompt + "'. In the final version, I will use Gemini to generate specific commands for this. For now, try asking for a 'pirate scene'!",
-            commands: []
-        };
+        return { text: `Ollama is not running. Start it with: ollama serve\nThen select a model with: ollama pull ${selectedModel.id}`, commands: [] };
     };
+    // #endregion
 
     const clearHistory = () => {
+        abortRef.current?.abort();
         setMessages([{
-            id: '1',
-            role: 'assistant',
-            content: 'Chat history cleared. How can I help you?',
+            id: '1', role: 'assistant',
+            content: 'Chat cleared. How can I help?',
             timestamp: new Date()
         }]);
     };
 
     return (
-        <div className="editor-panel ai-copilot-panel">
+        <div className="editor-panel ai-copilot-panel glass-panel">
             <div className="editor-panel-header">
-                <div className="panel-title">
-                    <Sparkles size={16} className="title-icon" />
-                    <span>AI Co-pilot</span>
+                {/* Model Selector */}
+                <div className="model-selector-container">
+                    <button className="model-selector" onClick={() => setShowModelMenu(!showModelMenu)}>
+                        {ollamaReady === false
+                            ? <WifiOff size={14} style={{ color: '#ef4444' }} />
+                            : ollamaReady === null
+                                ? <Loader2 size={14} className="spin" />
+                                : <Cpu size={14} className="model-icon" />
+                        }
+                        <span className="model-name">{selectedModel.name}</span>
+                        <ChevronDown size={14} className={`chevron ${showModelMenu ? 'rotate' : ''}`} />
+                    </button>
+                    {showModelMenu && (
+                        <div className="model-menu">
+                            {OLLAMA_MODELS.map(model => (
+                                <div
+                                    key={model.id}
+                                    className={`model-option ${selectedModel.id === model.id ? 'active' : ''}`}
+                                    onClick={() => { setSelectedModel(model); setShowModelMenu(false); }}
+                                >
+                                    <span className="option-name">{model.name}</span>
+                                    <span className="option-provider">{model.provider}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
+                {ollamaReady === false && (
+                    <span className="ollama-status offline">Ollama Offline</span>
+                )}
                 <div className="panel-actions">
                     <button className="panel-action-btn" onClick={clearHistory} title="Clear Chat">
                         <Trash2 size={14} />
@@ -174,7 +228,10 @@ export const AICopilotPanel: React.FC = () => {
                                 {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
                             </div>
                             <div className="message-bubble">
-                                <div className="message-content">{msg.content}</div>
+                                <div className="message-content">
+                                    {msg.content}
+                                    {msg.streaming && <span className="cursor-blink">▌</span>}
+                                </div>
                                 {msg.commands && msg.commands.length > 0 && (
                                     <div className="message-footer">
                                         <Wand2 size={10} />
@@ -184,8 +241,8 @@ export const AICopilotPanel: React.FC = () => {
                             </div>
                         </div>
                     ))}
-                    {isThinking && (
-                        <div className="chat-message assistant thinking">
+                    {isThinking && !messages.some(m => m.streaming) && (
+                        <div className="chat-message assistant">
                             <div className="message-icon"><Bot size={16} /></div>
                             <div className="message-bubble">
                                 <div className="typing-indicator">
@@ -200,23 +257,23 @@ export const AICopilotPanel: React.FC = () => {
 
             <div className="panel-footer chat-input-area">
                 <div className="quick-actions">
-                    <button className="chip" onClick={() => { setInput('Add a sun light'); handleSend(); }}>
-                        <Sparkles size={12} /> Add Sun
+                    <button className="chip" onClick={() => { setInput('Add a red cube'); handleSend(); }}>
+                        <Sparkles size={12} /> Red Cube
                     </button>
-                    <button className="chip" onClick={() => { setInput('Create a pirate scene'); handleSend(); }}>
-                        <Wand2 size={12} /> Pirate Scene
+                    <button className="chip" onClick={() => { setInput('Create a point light'); handleSend(); }}>
+                        <Wand2 size={12} /> Add Light
                     </button>
-                    <button className="chip" onClick={() => { setInput('Make it spin'); handleSend(); }}>
-                        <Grid size={12} /> Spin Selected
+                    <button className="chip" onClick={() => { setInput('Make the selected entity spin'); handleSend(); }}>
+                        <Grid size={12} /> Spin
                     </button>
-                    <button className="chip" onClick={() => { setInput('Add a player'); handleSend(); }}>
-                        <User size={12} /> Add Player
+                    <button className="chip" onClick={() => { setInput('Add a player character with physics'); handleSend(); }}>
+                        <User size={12} /> Player
                     </button>
                 </div>
                 <div className="input-wrapper">
                     <input
                         type="text"
-                        placeholder="Say something like 'Create a pirate scene'..."
+                        placeholder={ollamaReady ? `Ask ${selectedModel.name}...` : 'Ollama offline — mock mode active'}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}

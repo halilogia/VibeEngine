@@ -35,14 +35,36 @@
     cursor: not-allowed;
 }
 
-.empty-state {
+.hierarchy-empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 12px;
+    padding: 60px 20px;
     height: 100%;
     color: var(--editor-text-muted);
+    text-align: center;
+}
+
+.empty-icon {
+    opacity: 0.2;
+    margin-bottom: 8px;
+    color: var(--editor-accent);
+}
+
+.hierarchy-empty-state h3 {
+    margin: 0;
+    font-size: 14px;
+    color: var(--editor-text-primary);
+}
+
+.hierarchy-empty-state p {
+    margin: 0;
+    font-size: 12px;
+    max-width: 180px;
+    line-height: 1.4;
+    margin-bottom: 8px;
 }
 
 .tree-view {

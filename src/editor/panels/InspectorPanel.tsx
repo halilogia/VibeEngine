@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 import {
     Box, Plus, Trash2, ChevronDown, ChevronRight,
-    Move, Camera, Shield, Magnet, Code, Sun
+    Move, Camera, Shield, Magnet, Code, Sun, MousePointer2
 } from 'lucide-react';
 import { useSceneStore, useEditorStore, type ComponentData } from '../stores';
 import { getComponentInfo, getAvailableComponents, type PropertyInfo } from '../bridge';
@@ -236,15 +236,17 @@ export const InspectorPanel: React.FC = () => {
     const entity = selectedEntityId !== null ? getEntity(selectedEntityId) : undefined;
 
     return (
-        <div className="editor-panel inspector-panel">
+        <div className="editor-panel inspector-panel glass-panel">
             <div className="editor-panel-header">
                 <span>Inspector</span>
             </div>
 
             <div className="editor-panel-content">
                 {!entity ? (
-                    <div className="empty-state">
-                        <p>No entity selected</p>
+                    <div className="inspector-empty-state">
+                        <MousePointer2 size={40} className="empty-icon" />
+                        <h3>No entity selected</h3>
+                        <p>Select an object in the Hierarchy or Viewport to view and edit its properties.</p>
                     </div>
                 ) : (
                     <>

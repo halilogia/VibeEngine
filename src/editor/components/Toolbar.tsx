@@ -7,7 +7,7 @@ import {
     Move, RotateCcw, Expand,
     Play, Pause, Square,
     Grid3X3, Axis3D,
-    Maximize2, Sparkles
+    Maximize2, Sparkles, Code2
 } from 'lucide-react';
 import { useEditorStore, type EditorMode } from '../stores';
 import { usePlayModeStore } from '../core';
@@ -17,7 +17,7 @@ export const Toolbar: React.FC = () => {
     const { 
         editorMode, setEditorMode, 
         showGrid, showAxes, toggleGrid, toggleAxes,
-        showAICopilot, togglePanel
+        showAICopilot, showScriptEditor, togglePanel
     } = useEditorStore();
     const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
 
@@ -30,50 +30,66 @@ export const Toolbar: React.FC = () => {
     return (
         <div className="toolbar">
             {/* Transform modes */}
-            <div className="toolbar-group">
-                {modes.map(m => (
-                    <button
-                        key={m.mode}
-                        className={`toolbar-btn ${editorMode === m.mode ? 'active' : ''}`}
-                        onClick={() => setEditorMode(m.mode)}
-                        title={`${m.label} (${m.key})`}
-                    >
-                        {m.icon}
-                    </button>
-                ))}
+            <div className="toolbar-group-container">
+                <span className="group-label">Transform</span>
+                <div className="toolbar-group">
+                    {modes.map(m => (
+                        <button
+                            key={m.mode}
+                            className={`toolbar-btn ${editorMode === m.mode ? 'active' : ''}`}
+                            onClick={() => setEditorMode(m.mode)}
+                            title={`${m.label} (${m.key})`}
+                        >
+                            {m.icon}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="toolbar-divider" />
 
             {/* View controls */}
-            <div className="toolbar-group">
-                <button
-                    className={`toolbar-btn ${showGrid ? 'active' : ''}`}
-                    onClick={toggleGrid}
-                    title="Toggle Grid"
-                >
-                    <Grid3X3 size={16} />
-                </button>
-                <button
-                    className={`toolbar-btn ${showAxes ? 'active' : ''}`}
-                    onClick={toggleAxes}
-                    title="Toggle Axes"
-                >
-                    <Axis3D size={16} />
-                </button>
+            <div className="toolbar-group-container">
+                <span className="group-label">View</span>
+                <div className="toolbar-group">
+                    <button
+                        className={`toolbar-btn ${showGrid ? 'active' : ''}`}
+                        onClick={toggleGrid}
+                        title="Toggle Grid"
+                    >
+                        <Grid3X3 size={16} />
+                    </button>
+                    <button
+                        className={`toolbar-btn ${showAxes ? 'active' : ''}`}
+                        onClick={toggleAxes}
+                        title="Toggle Axes"
+                    >
+                        <Axis3D size={16} />
+                    </button>
+                </div>
             </div>
 
             <div className="toolbar-spacer" />
 
-            {/* AI Co-pilot */}
-            <div className="toolbar-group">
-                <button
-                    className={`toolbar-btn ai-copilot-toggle ${showAICopilot ? 'active' : ''}`}
-                    onClick={() => togglePanel('aiCopilot')}
-                    title="AI Co-pilot Chat"
-                >
-                    <Sparkles size={16} />
-                </button>
+            {/* AI Co-pilot & Script Editor */}
+            <div className="toolbar-group-container">
+                <span className="group-label">Features</span>
+                <div className="toolbar-group features-group">
+                    <button
+                        className={`toolbar-btn ai-copilot-toggle ${showAICopilot ? 'active' : ''}`}
+                        onClick={() => togglePanel('aiCopilot')}
+                        title="AI Co-pilot Chat"
+                    >
+                        <Sparkles size={16} />
+                    </button>
+                    <button
+                        className={`toolbar-btn ${showScriptEditor ? 'active' : ''}`}
+                        onClick={() => togglePanel('scriptEditor')}
+                        title="Script Editor"
+                    >
+                        <Code2 size={16} />
+                    </button>
+                </div>
             </div>
 
             <div className="toolbar-spacer" />

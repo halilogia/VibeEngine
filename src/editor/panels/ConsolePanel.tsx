@@ -3,10 +3,10 @@
  */
 
 import React, { useState } from 'react';
-import { AlertCircle, AlertTriangle, Info, Trash2 } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Info, Trash2, CheckCircle } from 'lucide-react';
 import './ConsolePanel.css';
 
-type LogLevel = 'info' | 'warning' | 'error';
+type LogLevel = 'info' | 'warning' | 'error' | 'success';
 
 interface LogEntry {
     level: LogLevel;
@@ -16,7 +16,7 @@ interface LogEntry {
 
 // Initial logs
 const INITIAL_LOGS: LogEntry[] = [
-    { level: 'info', message: 'VibeEngine Editor v1.0.0-beta initialized', timestamp: new Date() },
+    { level: 'success', message: 'VibeEngine Editor v1.0.0-beta initialized', timestamp: new Date() },
     { level: 'info', message: 'AI Copilot Bridge: Active', timestamp: new Date() },
     { level: 'info', message: 'Graphics: ACESFilmic Rendering Enabled', timestamp: new Date() },
 ];
@@ -25,6 +25,7 @@ const getIcon = (level: LogLevel) => {
     switch (level) {
         case 'error': return <AlertCircle size={14} />;
         case 'warning': return <AlertTriangle size={14} />;
+        case 'success': return <CheckCircle size={14} />;
         default: return <Info size={14} />;
     }
 };
@@ -49,7 +50,7 @@ export const ConsolePanel: React.FC = () => {
     };
 
     return (
-        <div className="editor-panel console-panel">
+        <div className="editor-panel console-panel glass-panel">
             <div className="editor-panel-header">
                 <span>Console</span>
                 <div className="panel-actions">
@@ -77,6 +78,12 @@ export const ConsolePanel: React.FC = () => {
                             onClick={() => setFilter('error')}
                         >
                             Error
+                        </button>
+                        <button 
+                            className={`filter-btn success ${filter === 'success' ? 'active' : ''}`}
+                            onClick={() => setFilter('success')}
+                        >
+                            Success
                         </button>
                     </div>
                     <div className="v-separator" />

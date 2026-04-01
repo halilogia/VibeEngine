@@ -10,17 +10,18 @@ import { InspectorPanel } from '../panels/InspectorPanel';
 import { AssetsPanel } from '../panels/AssetsPanel';
 import { ConsolePanel } from '../panels/ConsolePanel';
 import { AICopilotPanel } from '../panels/AICopilotPanel';
+import { ScriptEditorPanel } from '../panels/ScriptEditorPanel';
 import { useEditorStore } from '../stores';
 import './EditorLayout.css';
 
 export const EditorLayout: React.FC = () => {
-    const { showHierarchy, showInspector, showAssets, showConsole, showAICopilot } = useEditorStore();
+    const { showHierarchy, showInspector, showAssets, showConsole, showAICopilot, showScriptEditor } = useEditorStore();
 
     return (
         <div className="editor-layout">
             <PanelGroup direction="vertical">
                 {/* Main area (top) */}
-                <Panel defaultSize={75} minSize={30}>
+                <Panel defaultSize={showScriptEditor ? 60 : 75} minSize={30}>
                     <PanelGroup direction="horizontal">
                         {/* Hierarchy (left) */}
                         {showHierarchy && (
@@ -59,22 +60,28 @@ export const EditorLayout: React.FC = () => {
                     </PanelGroup>
                 </Panel>
 
-                {/* Bottom area */}
-                {(showAssets || showConsole) && (
+                {/* Script Editor Panel (fullwidth bottom) */}
+                {showScriptEditor && (
+                    <>
+                        <PanelResizeHandle />
+                        <Panel defaultSize={40} minSize={20} maxSize={70}>
+                            <ScriptEditorPanel />
+                        </Panel>
+                    </>
+                )}
+
+                {/* Bottom area: Assets + Console (hidden when script editor is open) */}
+                {(showAssets || showConsole) && !showScriptEditor && (
                     <>
                         <PanelResizeHandle />
                         <Panel defaultSize={25} minSize={15} maxSize={50}>
                             <PanelGroup direction="horizontal">
-                                {/* Assets */}
                                 {showAssets && (
                                     <Panel defaultSize={60} minSize={20}>
                                         <AssetsPanel />
                                     </Panel>
                                 )}
-
-                                {/* Console */}
                                 {showAssets && showConsole && <PanelResizeHandle />}
-
                                 {showConsole && (
                                     <Panel defaultSize={40} minSize={20}>
                                         <ConsolePanel />
