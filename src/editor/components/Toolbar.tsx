@@ -7,14 +7,40 @@ import { VibeIcons } from '../../presentation/components/VibeIcons';
 import { useEditorStore, type EditorMode } from '../stores';
 import { useToastStore } from '../stores/toastStore';
 import { usePlayModeStore } from '../core';
+import { createVibeStyles, VibeTheme } from '../../presentation/themes/VibeStyles';
 import './Toolbar.css';
+
+const styles = createVibeStyles({
+    container: {
+        height: '54px',
+        background: 'rgba(10, 10, 15, 0.45)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: `1px solid ${VibeTheme.colors.glassBorder}`,
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 20px',
+        gap: '16px',
+        zIndex: 1000,
+    },
+    group: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        background: 'rgba(255, 255, 255, 0.03)',
+        padding: '4px',
+        borderRadius: '10px',
+        border: '1px solid rgba(255, 255, 255, 0.03)',
+    }
+});
 
 export const Toolbar: React.FC = () => {
     const { 
         editorMode, setEditorMode, 
         showGrid, showAxes, toggleGrid, toggleAxes,
         showAICopilot, showScriptEditor, togglePanel,
-        showBloom, toggleBloom, showEnvironment, toggleEnvironment
+        showBloom, toggleBloom, showEnvironment, toggleEnvironment,
+        activePanelId
     } = useEditorStore();
     const { addToast } = useToastStore();
 
@@ -32,10 +58,10 @@ export const Toolbar: React.FC = () => {
     ];
 
     return (
-        <div className="toolbar studio-toolbar">
+        <div className="toolbar studio-toolbar" style={styles.container}>
             <div className="toolbar-left-group">
                 {/* Transform modes */}
-                <div className="toolbar-group">
+                <div className="toolbar-group" style={styles.group}>
                     {modes.map(m => (
                         <button
                             key={m.mode}
@@ -51,7 +77,7 @@ export const Toolbar: React.FC = () => {
                 <div className="toolbar-divider" />
 
                 {/* View controls */}
-                <div className="toolbar-group">
+                <div className="toolbar-group" style={styles.group}>
                     <button
                         className={`toolbar-btn ${showGrid ? 'active' : ''}`}
                         onClick={toggleGrid}
@@ -69,7 +95,7 @@ export const Toolbar: React.FC = () => {
                 </div>
 
                 {/* Elite Graphics Control */}
-                <div className="toolbar-group">
+                <div className="toolbar-group" style={styles.group}>
                     <button
                         className={`toolbar-btn graphics-toggle ${showBloom ? 'active' : ''}`}
                         onClick={toggleBloom}
@@ -116,7 +142,7 @@ export const Toolbar: React.FC = () => {
                     onClick={() => togglePanel('aiCopilot')}
                     title="AI Copilot Studio"
                 >
-                    <VibeIcons name="Sparkles" size={16} />
+                    <VibeIcons name="Bot" size={16} />
                 </button>
                 <button
                     className={`toolbar-btn ${showScriptEditor ? 'active' : ''}`}
@@ -136,3 +162,4 @@ export const Toolbar: React.FC = () => {
         </div>
     );
 };
+

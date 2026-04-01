@@ -14,7 +14,7 @@ export type VibeIconName =
   | 'ChevronRight' | 'ChevronDown' | 'Home' | 'Copy' | 'Plus' | 'Loader' | 'Database'
   | 'Layers' | 'Activity' | 'Cursor' | 'Settings' | 'Sun' | 'Video' | 'Shield' | 'Magnet'
   | 'AlertCircle' | 'AlertTriangle' | 'CheckCircle' | 'Terminal' | 'Eye' | 'X' | 'Undo' | 'Redo' | 'Clipboard' | 'Package'
-  | 'Send' | 'Bot' | 'User' | 'Wand' | 'WifiOff' | 'Cpu';
+  | 'Send' | 'Bot' | 'User' | 'Wand' | 'WifiOff' | 'Cpu' | 'Grip';
 
 
 
@@ -381,6 +381,16 @@ export const VibeIcons: React.FC<VibeIconProps> = ({
                     <path d="M20 9h2" />
                     <path d="M9 2v2" />
                     <path d="M9 20v2" />
+                </>
+            );
+            case 'Grip': return (
+                <>
+                    <circle cx="9" cy="5" r="1" />
+                    <circle cx="9" cy="12" r="1" />
+                    <circle cx="9" cy="19" r="1" />
+                    <circle cx="15" cy="5" r="1" />
+                    <circle cx="15" cy="12" r="1" />
+                    <circle cx="15" cy="19" r="1" />
                 </>
             );
             default: return null;

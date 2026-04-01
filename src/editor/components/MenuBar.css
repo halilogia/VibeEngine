@@ -1,5 +1,5 @@
 /**
- * MenuBar Styles
+ * MenuBar Styles - Sovereign Elite Studio
  */
 
 .menu-bar {
@@ -7,16 +7,19 @@
     align-items: center;
     justify-content: space-between;
     height: var(--editor-header-height);
-    background: var(--editor-bg-tertiary);
-    border-bottom: 1px solid var(--editor-border);
-    padding: 0 8px;
+    background: rgba(10, 10, 15, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0 16px;
     user-select: none;
+    z-index: 100;
 }
 
 .menu-bar-left {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
 }
 
 .menu-bar-center {
@@ -27,64 +30,86 @@
 .menu-bar-right {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .menu-logo {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 0 12px;
-    font-weight: 700;
+    gap: 12px;
+    padding-right: 16px;
+    font-weight: 800;
     font-size: 14px;
     color: var(--editor-text-primary);
-    letter-spacing: -0.2px;
+    letter-spacing: -0.3px;
+    text-transform: uppercase;
 }
 
 .logo-img {
     height: 24px;
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.4));
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.6));
+    animation: vibe-logo-pulse 4s infinite ease-in-out;
+}
+
+@keyframes vibe-logo-pulse {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.4)); }
+    50% { filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.8)); }
 }
 
 .menu-trigger {
     position: relative;
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: 6px 14px;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
     transition: var(--editor-transition);
+    color: var(--editor-text-secondary);
 }
 
 .menu-trigger:hover {
-    background: var(--editor-bg-hover);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--editor-text-primary);
 }
 
 .menu-dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 4px);
     left: 0;
-    min-width: 200px;
-    background: var(--editor-bg-secondary);
-    border: 1px solid var(--editor-border);
-    border-radius: 6px;
-    padding: 4px;
+    min-width: 220px;
+    background: rgba(15, 15, 25, 0.8);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 6px;
     z-index: 1000;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.6),
+        0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .menu-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     padding: 8px 12px;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 13px;
     transition: var(--editor-transition);
 }
 
 .menu-item:hover {
-    background: var(--editor-bg-hover);
+    background: var(--editor-accent);
+    color: white;
+}
+
+.menu-item:hover .menu-item-icon,
+.menu-item:hover .menu-item-shortcut {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .menu-item-icon {
@@ -100,35 +125,44 @@
 }
 
 .menu-item-shortcut {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--editor-text-muted);
     font-family: var(--editor-font-mono);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 4px;
+    border-radius: 3px;
 }
 
 .menu-divider {
     height: 1px;
-    background: var(--editor-border);
-    margin: 4px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    margin: 6px 8px;
 }
 
 .scene-name {
-    font-size: 12px;
-    color: var(--editor-text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--editor-text-primary);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .dirty-indicator {
     color: var(--editor-warning);
     margin-left: 4px;
+    font-weight: 900;
 }
 
 .menu-bar-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     background: transparent;
     color: var(--editor-text-secondary);
     cursor: pointer;
@@ -136,6 +170,7 @@
 }
 
 .menu-bar-btn:hover {
-    background: var(--editor-bg-hover);
-    color: var(--editor-text-primary);
-}
+    background: var(--editor-accent);
+    color: white;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}

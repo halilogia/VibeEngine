@@ -21,6 +21,10 @@ interface Message {
     streaming?: boolean;
 }
 
+interface AICopilotPanelProps {
+    dragHandleProps?: any;
+}
+
 interface OllamaModel {
     id: string;
     name: string;
@@ -32,7 +36,8 @@ const DEFAULT_MODELS: OllamaModel[] = [
 ];
 // #endregion
 
-export const AICopilotPanel: React.FC = () => {
+export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps }) => {
+
     const { activePanelId, setActivePanel } = useEditorStore();
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([
@@ -200,9 +205,13 @@ export const AICopilotPanel: React.FC = () => {
             className={`editor-panel ai-copilot-panel glass-panel ${activePanelId === 'aiCopilot' ? 'active-panel' : ''}`}
             onClick={() => setActivePanel('aiCopilot')}
         >
-            <div className="editor-panel-header">
+            <div className="editor-panel-header" {...dragHandleProps}>
+                <div className="drag-handle-pill">
+                    <VibeIcons name="Grip" size={14} />
+                </div>
                 {/* Model Selector */}
                 <div className="model-selector-container">
+
                     <button className="model-selector" onClick={() => setShowModelMenu(!showModelMenu)}>
                         {ollamaReady === false
                             ? <VibeIcons name="WifiOff" size={14} style={{ color: '#ef4444' }} />

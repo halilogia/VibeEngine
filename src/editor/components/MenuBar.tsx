@@ -137,8 +137,15 @@ export const MenuBar: React.FC = () => {
             items: [
                 { label: showGrid ? 'Hide Grid' : 'Show Grid', icon: <VibeIcons name="Grid" size={14} />, action: toggleGrid },
                 { label: showAxes ? 'Hide Axes' : 'Show Axes', icon: <VibeIcons name="Axis" size={14} />, action: toggleAxes },
+                { divider: true, label: '' },
+                { 
+                    label: 'Reset Layout', 
+                    icon: <VibeIcons name="Rotate" size={14} />, 
+                    action: () => (window as any).resetVibeLayout?.() 
+                },
             ]
         },
+
 
         {
             label: 'Build',

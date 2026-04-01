@@ -25,6 +25,7 @@ export const useVibeDrag = (options: DragOptions = {}) => {
 
     // Interaction state
     const isDragging = useRef(false);
+    const activePointerId = useRef<number | null>(null);
     const offset = useRef({ x: 0, y: 0 });
     const targetEl = useRef<HTMLElement | null>(null);
 
@@ -37,7 +38,7 @@ export const useVibeDrag = (options: DragOptions = {}) => {
     }, [onDrag]);
 
     const handlePointerMove = useCallback((e: PointerEvent) => {
-        if (!isDragging.current) return;
+        if (!isDragging.current || e.pointerId !== activePointerId.current) return;
 
         const nextX = e.clientX - offset.current.x;
         const nextY = e.clientY - offset.current.y;
@@ -49,9 +50,14 @@ export const useVibeDrag = (options: DragOptions = {}) => {
         manager.register('vibe-drag-y', springY.current, updatePosition);
     }, [manager, updatePosition]);
 
-    const handlePointerUp = useCallback(() => {
+    const handlePointerUp = useCallback((e: PointerEvent) => {
+        if (e.pointerId !== activePointerId.current) return;
+
         isDragging.current = false;
-        targetEl.current?.releasePointerCapture(1); // simplified pointer ID
+        if (targetEl.current && activePointerId.current !== null) {
+            targetEl.current.releasePointerCapture(activePointerId.current);
+        }
+        activePointerId.current = null;
         
         document.removeEventListener('pointermove', handlePointerMove);
         document.removeEventListener('pointerup', handlePointerUp);
@@ -65,6 +71,8 @@ export const useVibeDrag = (options: DragOptions = {}) => {
         onDragStart?.();
         
         isDragging.current = true;
+        activePointerId.current = e.pointerId;
+
         const rect = targetEl.current.getBoundingClientRect();
         
         // Calculate offset from current spring position
@@ -79,22 +87,33 @@ export const useVibeDrag = (options: DragOptions = {}) => {
         document.addEventListener('pointerup', handlePointerUp);
     }, [handlePointerMove, handlePointerUp, onDragStart]);
 
+
     const setPosition = useCallback((x: number, y: number, immediate = false) => {
-        springX.current.setTarget(x);
-        springY.current.setTarget(y);
-        
         if (immediate) {
             // Force reset physics for immediate jump
             (springX.current as any).position = x;
-            (springY.current as any).velocity = 0;
+            (springX.current as any).velocity = 0;
             (springY.current as any).position = y;
             (springY.current as any).velocity = 0;
+            
+            springX.current.setTarget(x);
+            springY.current.setTarget(y);
             updatePosition();
         } else {
+            springX.current.setTarget(x);
+            springY.current.setTarget(y);
             manager.register('vibe-drag-x', springX.current, updatePosition);
             manager.register('vibe-drag-y', springY.current, updatePosition);
         }
     }, [manager, updatePosition]);
+
+    // --- Sovereign Initialization Effect ---
+    // Applies the translate3d transform as soon as the target element is ready.
+    useEffect(() => {
+        if (targetEl.current) {
+            updatePosition();
+        }
+    }, [updatePosition, initialX, initialY]);
 
     return {
         dragProps: {
@@ -103,6 +122,8 @@ export const useVibeDrag = (options: DragOptions = {}) => {
         },
         targetRef: targetEl,
         setPosition,
-        isDragging: isDragging.current
+        isDragging: isDragging.current,
+        currentPos: { x: springX.current.currentPosition, y: springY.current.currentPosition }
     };
 };
+

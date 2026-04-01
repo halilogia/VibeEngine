@@ -68,7 +68,11 @@ const getAssetType = (filename: string): AssetType => {
     }
 };
 
-export const AssetsPanel: React.FC = () => {
+interface AssetsPanelProps {
+    dragHandleProps?: any;
+}
+
+export const AssetsPanel: React.FC<AssetsPanelProps> = ({ dragHandleProps }) => {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState<AssetType | 'all'>('all');
@@ -186,7 +190,7 @@ export const AssetsPanel: React.FC = () => {
 
     return (
         <div
-            className={`editor-panel assets-panel glass-panel ${isDragging ? 'dragging' : ''} ${activePanelId === 'assets' ? 'active-panel' : ''}`}
+            className={`editor-panel assets-panel ${isDragging ? 'dragging' : ''} ${activePanelId === 'assets' ? 'active-panel' : ''}`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -202,7 +206,10 @@ export const AssetsPanel: React.FC = () => {
                 onChange={handleFileInput}
             />
 
-            <div className="editor-panel-header">
+            <div className="editor-panel-header" {...dragHandleProps}>
+                <div className="drag-handle-pill">
+                    <VibeIcons name="Grip" size={14} />
+                </div>
                 <div className="assets-tabs">
                     <button 
                         className={`assets-tab ${activeTab === 'project' ? 'active' : ''}`}
@@ -218,7 +225,6 @@ export const AssetsPanel: React.FC = () => {
                     </button>
                 </div>
                 <div className="panel-actions">
-
                     <button
                         className={`panel-action-btn ${viewMode === 'grid' ? 'active' : ''}`}
                         onClick={() => setViewMode('grid')}
@@ -233,7 +239,6 @@ export const AssetsPanel: React.FC = () => {
                     >
                         <VibeIcons name="List" size={14} />
                     </button>
-
                 </div>
             </div>
 
@@ -282,7 +287,6 @@ export const AssetsPanel: React.FC = () => {
                     >
                         <VibeIcons name="Upload" size={14} />
                     </button>
-
                 </div>
             </div>
 

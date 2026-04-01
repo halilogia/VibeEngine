@@ -1,29 +1,28 @@
 /**
- * Toolbar Styles
+ * Toolbar Styles - Sovereign Elite Studio
  */
 
 .toolbar {
-    height: 48px;
-    background: var(--editor-bg-secondary);
-    border-bottom: 1px solid var(--editor-border);
+    height: 54px;
+    background: rgba(10, 10, 15, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
-    padding: 0 12px;
-    gap: 12px;
+    padding: 0 20px;
+    gap: 16px;
     z-index: 100;
 }
 
 .studio-toolbar {
-    background: rgba(10, 10, 15, 0.85);
-    backdrop-filter: blur(15px);
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    /* Inherits from .toolbar but can add specific studio tweaks here */
 }
 
 .toolbar-left-group, .toolbar-right-group {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     flex: 1;
 }
 
@@ -35,28 +34,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 2px 12px;
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .toolbar-group {
     display: flex;
     align-items: center;
-    gap: 1px;
+    gap: 4px;
     background: rgba(255, 255, 255, 0.03);
-    padding: 2px;
-    border-radius: 8px;
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .toolbar-btn {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     position: relative;
     color: var(--editor-text-secondary);
     background: transparent;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
@@ -69,6 +65,7 @@
     background: rgba(255, 255, 255, 0.08);
     color: var(--editor-text-primary);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .toolbar-btn.active {
@@ -80,44 +77,59 @@
 .toolbar-btn.ai-copilot-toggle.active {
     background: linear-gradient(135deg, #6366f1, #a855f7);
     color: white;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.5);
+}
+
+.play-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 15, 25, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 4px 16px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .toolbar-btn.play-btn {
     color: var(--editor-success);
     background: rgba(16, 185, 129, 0.1);
-    width: 44px;
-    border-radius: 12px;
+    width: 50px;
+    border-radius: 20px;
 }
 
 .toolbar-btn.play-btn:hover {
     background: var(--editor-success);
     color: white;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.5);
 }
 
 .toolbar-btn.stop-btn {
-    color: var(--editor-error);
+    color: #f43f5e;
     background: rgba(244, 63, 94, 0.1);
+    width: 34px;
 }
 
 .toolbar-btn.stop-btn:hover {
-    background: var(--editor-error);
+    background: #f43f5e;
     color: white;
-    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4);
+    box-shadow: 0 4px 15px rgba(244, 63, 94, 0.5);
 }
 
 .toolbar-divider {
     display: none;
 }
 
-.toolbar-spacer {
-    flex: 1;
+.toolbar-btn.save-btn.primary {
+    background: var(--editor-accent);
+    color: white;
+    width: 80px;
+    gap: 8px;
 }
 
-.play-controls {
-    background: var(--editor-bg-tertiary);
-    border-radius: 12px;
-    padding: 4px;
-    border: 1px solid var(--editor-border);
-}
+.toolbar-btn.save-btn.primary::after {
+    content: "SAVE";
+    font-size: 11px;
+    font-weight: 700;
+}

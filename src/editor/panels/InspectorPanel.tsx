@@ -295,7 +295,11 @@ const AddComponentMenu: React.FC<{
     );
 };
 
-export const InspectorPanel: React.FC = () => {
+interface InspectorPanelProps {
+    dragHandleProps?: any;
+}
+
+export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps }) => {
     const [showAddMenu, setShowAddMenu] = useState(false);
     const [compSearch, setCompSearch] = useState('');
     const { 
@@ -308,20 +312,26 @@ export const InspectorPanel: React.FC = () => {
 
     return (
         <div 
-            className={`editor-panel inspector-panel glass-panel ${activePanelId === 'inspector' ? 'active-panel' : ''}`}
+            className={`editor-panel inspector-panel ${activePanelId === 'inspector' ? 'active-panel' : ''}`}
             onClick={() => setActivePanel('inspector')}
         >
-            <div className="panel-header">
+            <div className="panel-header" {...dragHandleProps}>
+                <div className="drag-handle-pill">
+                    <VibeIcons name="Grip" size={14} />
+                </div>
                 <div className="panel-header-left">
-                    <VibeIcons name="Activity" size={16} />
+                    <VibeIcons name="Activity" size={14} style={{ color: 'var(--editor-accent)' }} />
                     <h2>INSPECTOR</h2>
                 </div>
-                <div className="panel-header-actions">
+
+                <div className="panel-header-actions" onClick={e => e.stopPropagation()}>
                     <button className="panel-action-btn" title="Settings">
                         <VibeIcons name="Settings" size={14} />
                     </button>
                 </div>
             </div>
+
+
 
             <div className="editor-panel-content">
                 {!entity ? (

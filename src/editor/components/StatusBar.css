@@ -1,74 +1,90 @@
 /**
- * StatusBar Styles
+ * StatusBar Styles - Sovereign Elite Capsule
  */
 
 .status-bar {
-    height: var(--editor-status-height);
-    background: var(--editor-bg-primary);
-    border-top: 1px solid var(--editor-border);
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 32px;
+    min-width: 600px;
+    background: rgba(10, 10, 15, 0.45);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
     display: flex;
     align-items: center;
-    padding: 0 12px;
-    gap: 12px;
+    justify-content: center;
+    padding: 0 20px;
+    gap: 20px;
     font-size: 11px;
     color: var(--editor-text-secondary);
     z-index: 1000;
+    box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1); /* 💎 Rim Light */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-bar:hover {
+    background: rgba(10, 10, 15, 0.6);
+    border-color: rgba(99, 102, 241, 0.3);
+    width: auto;
+    padding: 0 24px;
 }
 
 .status-group {
     display: flex;
     align-items: center;
-    gap: 6px;
-    transition: var(--editor-transition);
-}
-
-.status-group:hover {
-    color: var(--editor-text-primary);
+    gap: 8px;
+    white-space: nowrap;
 }
 
 .status-divider {
     width: 1px;
-    height: 12px;
-    background: var(--editor-border);
+    height: 14px;
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .status-spacer {
-    flex: 1;
+    display: none; /* Removed for capsule centering */
 }
 
 .entity-highlight {
-    color: #818cf8;
-    font-weight: 600;
-    text-shadow: 0 0 8px rgba(129, 140, 248, 0.3);
+    color: var(--editor-accent);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.fps-counter {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .fps-value {
-    color: #34d399;
-    font-weight: 700;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+    color: var(--editor-success);
+    font-weight: 800;
+    font-family: var(--editor-font-mono);
 }
 
 .mode-badge {
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(99, 102, 241, 0.15);
     color: var(--editor-accent);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 800;
     font-size: 10px;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .version-badge {
-    color: #34d399;
-    background: rgba(52, 211, 153, 0.1);
-    padding: 2px 8px;
-    border-radius: 4px;
-    border: 1px solid rgba(52, 211, 153, 0.2);
-    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+    font-size: 10px;
 }
+

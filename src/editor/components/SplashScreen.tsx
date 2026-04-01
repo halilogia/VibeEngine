@@ -12,14 +12,20 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
     const [fadeOut, setFadeOut] = useState(false);
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState('Initializing Engine...');
+    const [userReady, setUserReady] = useState(false);
 
-    useEffect(() => {
-        // Play startup sound
+    const handleStart = () => {
+        setUserReady(true);
+        // Play startup sound after interaction
         try {
             const audio = new Audio('./assets/start.mp3');
             audio.volume = 0.5;
-            audio.play().catch(() => {});
+            audio.play().catch(err => console.warn('Audio play failed:', err));
         } catch (e) {}
+    };
+
+    useEffect(() => {
+        if (!userReady) return;
 
         // Poll for loading status from the engine bridge
         const pollInterval = setInterval(() => {
@@ -34,13 +40,13 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                     setTimeout(() => {
                         setFadeOut(true);
                         setTimeout(onComplete, 800);
-                    }, 500);
+                    }, 800);
                 }
             }
         }, 100);
 
         return () => clearInterval(pollInterval);
-    }, [onComplete]);
+    }, [onComplete, userReady]);
 
     return (
         <div className={`splash-screen ${fadeOut ? 'fade-out' : ''}`}>
@@ -48,16 +54,26 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                 <img src="./assets/icon1.png" alt="VibeEngine" />
             </div>
 
-            <div className="loading-container">
-                <div className="loading-bar-bg">
-                    <div 
-                        className="loading-bar-fill" 
-                        style={{ width: `${progress}%` }} 
-                    />
+            {!userReady ? (
+                <div className="start-overlay">
+                    <button className="start-btn" onClick={handleStart}>
+                        <div className="start-btn-shadow" />
+                        <span className="start-btn-text">START ENGINE</span>
+                    </button>
+                    <p className="start-hint">EXPERIENCE THE SOVEREIGN STUDIO</p>
                 </div>
-                <div className="loading-percentage">{progress}%</div>
-                <div className="loading-status">{status}</div>
-            </div>
+            ) : (
+                <div className="loading-container">
+                    <div className="loading-bar-bg">
+                        <div 
+                            className="loading-bar-fill" 
+                            style={{ width: `${progress}%` }} 
+                        />
+                    </div>
+                    <div className="loading-percentage">{progress}%</div>
+                    <div className="loading-status">{status}</div>
+                </div>
+            )}
         </div>
     );
 };

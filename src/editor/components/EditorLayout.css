@@ -1,5 +1,6 @@
 /**
- * EditorLayout Styles
+ * EditorLayout Styles - Sovereign Elite Studio Framework
+ * Implements Smart-Docked glassmorphic panels and premium interaction FX.
  */
 
 .editor-layout {
@@ -20,149 +21,155 @@
     z-index: 1;
 }
 
+/* 🏔️ Studio Overlay Layer - The UI Canvas */
 .studio-overlay-layer {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
+    pointer-events: none; /* Allows interacting with viewport behind */
     z-index: 10;
-    display: flex;
-    padding: 12px;
-    gap: 12px;
 }
 
-.floating-panel {
-    pointer-events: auto;
-    display: flex;
-    flex-direction: column;
-    background: rgba(10, 10, 15, 0.6);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-    overflow: hidden;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.floating-panel:hover {
-    border-color: rgba(99, 102, 241, 0.3);
-}
-
-.floating-panel.active-panel {
-    border-color: var(--editor-accent);
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15), 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-}
-
-.floating-panel {
+/* 🏰 Sovereign Panel - The Frame of Elite Studio */
+.sovereign-panel {
+    pointer-events: auto; /* Re-enable pointer events for UI */
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 10;
-    pointer-events: auto;
-}
-
-/* Base Panel Dimensions */
-.hierarchy-overlay {
-    width: 280px;
-    height: calc(100vh - 120px);
-}
-
-.inspector-overlay {
-    width: 320px;
-    height: calc(100vh - 120px);
-}
-
-.assets-overlay {
-    width: 800px;
-    height: 300px;
-}
-
-.console-overlay {
-    width: 450px;
-    height: 220px;
-    display: none; /* Hidden by default in Elite Studio to keep it clean */
-}
-
-.console-overlay.visible {
     display: flex;
+    flex-direction: column;
+    background: rgba(10, 10, 15, 0.35);
+    backdrop-filter: blur(45px) saturate(210%) contrast(115%);
+    -webkit-backdrop-filter: blur(45px) saturate(210%) contrast(115%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    box-shadow: 
+        0 24px 60px -12px rgba(0, 0, 0, 0.8),
+        0 12px 24px -8px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.12); /* 💎 Rim Light / Top Highlight */
+    overflow: hidden;
+    transition: 
+        box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-
-/* Add spacing between panels */
-.editor-layout [data-panel-group] {
-    gap: 6px;
+.sovereign-panel:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    background: rgba(10, 10, 15, 0.45);
 }
 
-/* Custom Resize Handles */
-.editor-layout [data-resize-handle] {
-    background: transparent !important;
+.sovereign-panel.active-glow {
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 
+        0 0 50px -10px rgba(99, 102, 241, 0.25),
+        0 32px 90px -15px rgba(0, 0, 0, 0.95),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    z-index: 50; /* Bring active panel to front */
+}
+
+/* 💎 Header Drag Handle Enhancement */
+.sovereign-panel .panel-header {
+    cursor: grab;
+    user-select: none;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sovereign-panel .panel-header h2 {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
+.drag-handle-pill {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: var(--editor-transition);
-    position: relative;
+    width: 14px;
+    height: 14px;
+    color: rgba(255, 255, 255, 0.2);
+    cursor: grab;
+    transition: all 0.2s ease;
+}
+
+.sovereign-panel .panel-header:hover .drag-handle-pill {
+    color: var(--editor-accent);
+}
+
+.sovereign-panel .panel-header:active {
+    cursor: grabbing;
+    background: rgba(99, 102, 241, 0.08);
+}
+
+
+/* 📐 Heroic Anchor - Default Dimensions */
+.hierarchy-frame {
+    width: 300px;
+    height: 70vh; /* Responsive Height */
+    max-height: calc(100vh - 180px);
+}
+
+.inspector-frame {
+    width: 340px;
+    height: 70vh; /* Responsive Height */
+    max-height: calc(100vh - 180px);
+}
+
+.assets-frame {
+    width: calc(100vw - 700px);
+    height: 340px;
+    max-height: 40vh;
+    min-width: 800px;
+}
+
+.console-frame {
+    width: 520px;
+    height: 300px;
+    max-height: 40vh;
+    display: flex; /* Ensure it's visible by default */
+}
+
+.ai-copilot-frame {
+    width: 420px;
+    height: 60vh;
+    max-height: calc(100vh - 200px);
+    display: flex;
+}
+
+
+
+
+.console-frame.visible {
+    display: flex;
+}
+
+/* 📜 Script Editor - Immersive Modal Layout */
+.script-editor-overlay {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    right: 50px;
+    bottom: 50px;
     z-index: 100;
+    pointer-events: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
 }
 
-.editor-layout [data-panel-group-direction="horizontal"] > [data-resize-handle] {
-    width: 6px;
-    margin: 0 -3px;
-    cursor: col-resize;
-}
-
-.editor-layout [data-panel-group-direction="vertical"] > [data-resize-handle] {
-    height: 6px;
-    margin: -3px 0;
-    cursor: row-resize;
-}
-
-/* Elite Glow Effect */
-.editor-layout [data-resize-handle]:hover::before,
-.editor-layout [data-resize-handle][data-resize-handle-active]::before {
-    content: "";
-    position: absolute;
-    background: var(--editor-accent);
-    filter: blur(8px);
-    opacity: 0.4;
-    transition: var(--editor-transition);
-}
-
-.editor-layout [data-panel-group-direction="horizontal"] > [data-resize-handle]:hover::before {
-    width: 2px;
-    height: 100%;
-}
-
-.editor-layout [data-panel-group-direction="vertical"] > [data-resize-handle]:hover::before {
-    width: 100%;
-    height: 2px;
-}
-
-.editor-layout [data-resize-handle]:hover::after,
-.editor-layout [data-resize-handle][data-resize-handle-active]::after {
-    background: var(--editor-accent);
-    box-shadow: 0 0 12px var(--editor-accent);
-}
-
-.editor-layout [data-resize-handle]::after {
-    content: "";
-    position: absolute;
-    background: var(--editor-border);
-    transition: var(--editor-transition);
-}
-
-.editor-layout [data-panel-group-direction="horizontal"] > [data-resize-handle]::after {
-    width: 1px;
-    height: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.editor-layout [data-panel-group-direction="vertical"] > [data-resize-handle]::after {
-    width: 24px;
-    height: 1px;
-    top: 50%;
-    transform: translateY(-50%);
-}
+/* 🌊 Sovereign Interactive Transitions */
+.sovereign-panel * {
+    transition: color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}

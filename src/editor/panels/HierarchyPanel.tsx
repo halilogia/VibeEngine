@@ -108,7 +108,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({ entity, depth, searchQuery, onConte
     );
 };
 
-export const HierarchyPanel: React.FC = () => {
+interface HierarchyPanelProps {
+    dragHandleProps?: any;
+}
+
+export const HierarchyPanel: React.FC<HierarchyPanelProps> = ({ dragHandleProps }) => {
     const { entities, rootEntityIds, addEntity, removeEntity } = useSceneStore();
     const { 
         selectedEntityId, selectEntity, clearSelection,
@@ -175,15 +179,19 @@ export const HierarchyPanel: React.FC = () => {
 
     return (
         <div 
-            className={`editor-panel hierarchy-panel glass-panel ${activePanelId === 'hierarchy' ? 'active-panel' : ''}`}
+            className={`editor-panel hierarchy-panel ${activePanelId === 'hierarchy' ? 'active-panel' : ''}`}
             onClick={() => setActivePanel('hierarchy')}
         >
-            <div className="panel-header">
+            <div className="panel-header" {...dragHandleProps}>
+                <div className="drag-handle-pill">
+                    <VibeIcons name="Grip" size={14} />
+                </div>
                 <div className="panel-header-left">
-                    <VibeIcons name="Layers" size={16} />
+                    <VibeIcons name="Layers" size={14} style={{ color: 'var(--editor-accent)' }} />
                     <h2>HIERARCHY</h2>
                 </div>
-                <div className="panel-header-actions">
+
+                <div className="panel-header-actions" onClick={e => e.stopPropagation()}>
                     <button className="panel-action-btn" onClick={handleAddEntity} title="Add Entity">
                         <VibeIcons name="Plus" size={14} />
                     </button>
@@ -197,6 +205,8 @@ export const HierarchyPanel: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+
 
             <div className="hierarchy-toolbar">
                 <div className="hierarchy-search">

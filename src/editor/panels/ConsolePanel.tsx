@@ -18,7 +18,11 @@ const getIcon = (level: LogLevel) => {
 };
 
 
-export const ConsolePanel: React.FC = () => {
+interface ConsolePanelProps {
+    dragHandleProps?: any;
+}
+
+export const ConsolePanel: React.FC<ConsolePanelProps> = ({ dragHandleProps }) => {
     const { logs, clearLogs } = useConsoleStore();
     const { activePanelId, setActivePanel } = useEditorStore();
     const [filter, setFilter] = useState<LogLevel | 'all'>('all');
@@ -38,52 +42,50 @@ export const ConsolePanel: React.FC = () => {
 
     return (
         <div 
-            className={`editor-panel console-panel glass-panel ${activePanelId === 'console' ? 'active-panel' : ''}`}
+            className={`editor-panel console-panel ${activePanelId === 'console' ? 'active-panel' : ''}`}
             onClick={() => setActivePanel('console')}
         >
-            <div className="panel-header">
+            <div className="panel-header" {...dragHandleProps}>
+                <div className="drag-handle-pill">
+                    <VibeIcons name="Grip" size={14} />
+                </div>
                 <div className="panel-header-left">
-                    <VibeIcons name="Terminal" size={16} />
+                    <VibeIcons name="Terminal" size={14} style={{ color: 'var(--editor-accent)' }} />
                     <h2>CONSOLE</h2>
                 </div>
-                <div className="panel-header-actions">
+
+                <div className="panel-header-actions" onClick={e => e.stopPropagation()}>
                     <div className="console-filters">
                         <button 
                             className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); setFilter('all'); }}
+                            onClick={() => setFilter('all')}
                         >
                             All
                         </button>
                         <button 
                             className={`filter-btn info ${filter === 'info' ? 'active' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); setFilter('info'); }}
+                            onClick={() => setFilter('info')}
                         >
                             Info
                         </button>
                         <button 
                             className={`filter-btn warn ${filter === 'warning' ? 'active' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); setFilter('warning'); }}
+                            onClick={() => setFilter('warning')}
                         >
                             Warn
                         </button>
                         <button 
                             className={`filter-btn error ${filter === 'error' ? 'active' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); setFilter('error'); }}
+                            onClick={() => setFilter('error')}
                         >
                             Error
-                        </button>
-                        <button 
-                            className={`filter-btn success ${filter === 'success' ? 'active' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); setFilter('success'); }}
-                        >
-                            Success
                         </button>
                     </div>
                     <div className="v-separator" />
                     <button 
                         className="panel-action-btn" 
-                        onClick={(e) => { e.stopPropagation(); clearLogs(); }} 
-                        title="Clear"
+                        onClick={clearLogs}
+                        title="Clear logs"
                     >
                         <VibeIcons name="Trash" size={14} />
                     </button>
@@ -92,13 +94,16 @@ export const ConsolePanel: React.FC = () => {
 
             <div className="console-content">
                 {filteredLogs.length === 0 ? (
-                    <div className="console-empty">No logs</div>
+                    <div className="console-empty">
+                        <VibeIcons name="Terminal" size={32} />
+                        <p>No console output</p>
+                    </div>
                 ) : (
                     filteredLogs.map((log, idx) => (
                         <div key={idx} className={`console-entry ${log.level}`}>
-                            <span className="console-icon">{getIcon(log.level)}</span>
-                            <span className="console-time">{formatTime(log.timestamp)}</span>
-                            <span className="console-message">{log.message}</span>
+                            <div className="console-time">{formatTime(log.timestamp)}</div>
+                            <div className="console-icon">{getIcon(log.level)}</div>
+                            <div className="console-message">{log.message}</div>
                         </div>
                     ))
                 )}
@@ -106,3 +111,4 @@ export const ConsolePanel: React.FC = () => {
         </div>
     );
 };
+
