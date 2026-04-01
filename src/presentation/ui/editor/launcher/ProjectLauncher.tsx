@@ -1,8 +1,8 @@
 import React from 'react';
-import { FolderOpen, Play, Search, AlertCircle, Loader2, Sparkles } from 'lucide-react';
+import { VibeIcons } from '@ui/common/VibeIcons';
 import { useLauncherViewModel } from './LauncherViewModel';
 import { VibeTheme } from '@themes/VibeStyles';
-import { VibeMotion } from '@lib/vibe-motion/VibeMotion';
+import { motion } from 'framer-motion';
 
 export const ProjectLauncher: React.FC = () => {
   const { 
@@ -40,7 +40,11 @@ export const ProjectLauncher: React.FC = () => {
       }} />
 
       <header style={{ marginBottom: '4rem', zIndex: 1, position: 'relative' }}>
-          <VibeMotion animate={{ x: 0, opacity: 1 }} initial={{ x: -20, opacity: 0 }}>
+          <motion.div 
+            animate={{ x: 0, opacity: 1 }} 
+            initial={{ x: -20, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+          >
             <h1 style={{
                 fontSize: '3.5rem',
                 fontWeight: 900,
@@ -60,10 +64,10 @@ export const ProjectLauncher: React.FC = () => {
                 alignItems: 'center',
                 gap: '0.75rem'
             }}>
-                <Sparkles size={20} color={VibeTheme.colors.accent} />
+                <VibeIcons name="Sparkles" size={20} color={VibeTheme.colors.accent} />
                 Projektör: Oyun Evrenini Başlatın
             </p>
-          </VibeMotion>
+          </motion.div>
       </header>
 
       <section style={{ flex: 1, overflowY: 'auto', zIndex: 1, position: 'relative', paddingBottom: '100px' }}>
@@ -74,7 +78,7 @@ export const ProjectLauncher: React.FC = () => {
               marginBottom: '2rem'
           }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                  <Search size={24} color={VibeTheme.colors.textSecondary} />
+                  <VibeIcons name="Search" size={24} color={VibeTheme.colors.textSecondary} />
                   <span style={{ fontSize: '1.5rem', fontWeight: 600 }}>Kitaplığınız ({projects.length})</span>
               </div>
               <button 
@@ -94,7 +98,7 @@ export const ProjectLauncher: React.FC = () => {
                   }}
                   disabled={isLoading}
               >
-                  {isLoading ? <Loader2 className="animate-spin" size={18} /> : <FolderOpen size={18} />}
+                  {isLoading ? <VibeIcons name="Loader" size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <VibeIcons name="Folder" size={18} />}
                   Proje Klasörü Aktar
               </button>
           </div>
@@ -111,7 +115,7 @@ export const ProjectLauncher: React.FC = () => {
                   gap: '1rem',
                   marginBottom: '2rem'
               }}>
-                  <AlertCircle size={20} />
+                  <VibeIcons name="AlertCircle" size={20} />
                   <span>{error}</span>
               </div>
           )}
@@ -144,7 +148,7 @@ export const ProjectLauncher: React.FC = () => {
                               borderRadius: '12px',
                               color: project.hasDomain ? '#4ade80' : VibeTheme.colors.textSecondary
                           }}>
-                              <FolderOpen size={28} />
+                              <VibeIcons name="Folder" size={28} />
                           </div>
                       </div>
 
@@ -166,7 +170,14 @@ export const ProjectLauncher: React.FC = () => {
                                   }}>GAME READY</span>
                               )}
                           </div>
-                          <Play size={20} fill={selectedProject?.path === project.path ? VibeTheme.colors.accent : 'transparent'} color={selectedProject?.path === project.path ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary} />
+                          <VibeIcons 
+                              name="Play" 
+                              size={20} 
+                              style={{ 
+                                  fill: selectedProject?.path === project.path ? VibeTheme.colors.accent : 'transparent',
+                                  color: selectedProject?.path === project.path ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary
+                              }} 
+                          />
                       </div>
                   </div>
               ))}

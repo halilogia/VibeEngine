@@ -11,7 +11,7 @@ export const aiStyles = createVibeStyles({
         display: 'flex',
         flexDirection: 'column',
         background: '#0a0a1a',
-        overflow: 'hidden',
+        overflow: 'visible',
     },
     header: {
         padding: '10px 16px',

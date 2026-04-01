@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { VibeIcons } from '@ui/common/VibeIcons';
 import { CommandInterpreter } from '@editor/bridge';
 import { OllamaService, type OllamaMessage } from '@editor/bridge';
@@ -58,7 +59,12 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
             if (available) {
                 const models = await OllamaService.listModels();
                 setAvailableModels(models);
-                if (models.length > 0) {
+                
+                // 🧠 RESTORE LAST SELECTED MODEL FROM MEMORY
+                const savedModel = localStorage.getItem('vibe_last_ai_model');
+                if (savedModel && models.includes(savedModel)) {
+                    setSelectedModel(savedModel);
+                } else if (models.length > 0) {
                     setSelectedModel(models[0]);
                 }
             }
@@ -66,12 +72,27 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
         checkOllama();
     }, []);
 
+    // 🧠 HAFIDZA: Model değişimini kaydet
+    const handleModelChange = (modelName: string) => {
+        setSelectedModel(modelName);
+        localStorage.setItem('vibe_last_ai_model', modelName);
+        console.debug(`[AI Memory] Brain switched to: ${modelName}`);
+    };
+
     const handleSend = async () => {
         if (!input.trim() || isThinking) return;
 
         const userMsg: Message = { id: Date.now().toString(), role: 'user', content: input.trim(), timestamp: new Date() };
+        const assistantMsgId = (Date.now() + 1).toString();
+        
         setInput('');
-        setMessages(prev => [...prev, userMsg]);
+        setMessages(prev => [...prev, userMsg, {
+            id: assistantMsgId,
+            role: 'assistant',
+            content: '',
+            timestamp: new Date(),
+            streaming: true
+        }]);
         setIsThinking(true);
 
         try {
@@ -81,17 +102,7 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
                     content: m.content
                 }));
 
-                const assistantMsgId = (Date.now() + 1).toString();
                 let streamedContent = '';
-
-                // Create placeholder for streaming
-                setMessages(prev => [...prev, {
-                    id: assistantMsgId,
-                    role: 'assistant',
-                    content: '',
-                    timestamp: new Date(),
-                    streaming: true
-                }]);
 
                 const result = await OllamaService.chat({
                     model: selectedModel,
@@ -116,163 +127,218 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
             } else {
                 // Fallback / Mock
                 setTimeout(() => {
-                    const assistantMsg: Message = { 
-                        id: (Date.now()+1).toString(), 
-                        role: 'assistant', 
-                        content: ollamaReady ? "Please select a model first." : "Ollama is not running. Please start Ollama to use AI Copilot.", 
-                        timestamp: new Date() 
-                    };
-                    setMessages(prev => [...prev, assistantMsg]);
+                    const content = ollamaReady ? "Please select a model first." : "Ollama is not running. Please start Ollama to use AI Copilot.";
+                    setMessages(prev => prev.map(m => 
+                        m.id === assistantMsgId ? { ...m, content, streaming: false } : m
+                    ));
                 }, 1000);
             }
         } catch (error) {
-            setMessages(prev => [...prev, {
-                id: Date.now().toString(),
-                role: 'assistant',
-                content: `Error: ${error instanceof Error ? error.message : String(error)}`,
-                timestamp: new Date()
-            }]);
+            const content = `Error: ${error instanceof Error ? error.message : String(error)}`;
+            setMessages(prev => prev.map(m => 
+                m.id === assistantMsgId ? { ...m, content, streaming: false } : m
+            ));
         } finally {
             setIsThinking(false);
         }
     };
 
-    const headerActions = (
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {ollamaReady !== null && (
-                <div 
-                    title={ollamaReady ? "Ollama Connected" : "Ollama Disconnected"}
-                    style={{ 
-                        width: '8px', 
-                        height: '8px', 
-                        borderRadius: '50%', 
-                        background: ollamaReady ? '#10b981' : '#ef4444',
-                        boxShadow: ollamaReady ? '0 0 10px #10b981' : 'none'
-                    }} 
-                />
-            )}
-            
-            {ollamaReady && availableModels.length > 0 && (
-                <div style={{ position: 'relative' }}>
-                    <VibeButton 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setShowModelSelector(!showModelSelector)}
-                        style={{ fontSize: '10px', color: VibeTheme.colors.accent, fontWeight: 800 }}
-                    >
-                        {selectedModel || 'SELECT MODEL'}
-                    </VibeButton>
-                    
-                    {showModelSelector && (
-                        <div style={{
-                            position: 'absolute',
-                            top: '100%',
-                            right: 0,
-                            background: '#1a1a2e',
-                            border: `1px solid ${VibeTheme.colors.glassBorder}`,
-                            borderRadius: '8px',
-                            zIndex: 100,
-                            marginTop: '4px',
-                            minWidth: '150px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-                        }}>
-                            {availableModels.map(m => (
-                                <div 
-                                    key={m}
-                                    onClick={() => { setSelectedModel(m); setShowModelSelector(false); }}
-                                    style={{
-                                        padding: '8px 12px',
-                                        fontSize: '11px',
-                                        cursor: 'pointer',
-                                        color: selectedModel === m ? VibeTheme.colors.accent : '#fff',
-                                        background: selectedModel === m ? 'rgba(99, 102, 241, 0.1)' : 'transparent'
-                                    }}
-                                >
-                                    {m}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            <VibeButton variant="ghost" size="sm" onClick={() => setMessages([messages[0]])}>
-                <VibeIcons name="Trash" size={14} />
-            </VibeButton>
-        </div>
-    );
+    const containerStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        backgroundColor: '#0a0a0f',
+        color: '#fff',
+        borderLeft: `1px solid ${VibeTheme.colors.glassBorder}`,
+        overflow: 'hidden'
+    };
 
     return (
-        <div 
-            className={`editor-panel ai-panel ${activePanelId === 'ai' ? 'active-panel' : ''}`}
-            onClick={() => setActivePanel('ai')}
-            style={styles.panel}
-        >
-            <style dangerouslySetInnerHTML={{ __html: aiAnimations }} />
-            <SovereignHeader title="AI COPILOT" icon="Sparkles" dragHandleProps={dragHandleProps} actions={headerActions} />
-
-            <div style={styles.chatArea}>
-                {messages.map(msg => (
-                    <div key={msg.id} style={{ ...styles.message, ...(msg.role === 'user' ? styles.messageUser : {}) }}>
-                        <div style={{ ...styles.avatar, ...(msg.role === 'user' ? styles.avatarUser : {}) }}>
-                            <VibeIcons name={msg.role === 'user' ? 'User' : 'Bot'} size={16} />
-                        </div>
-                        <div style={{ ...styles.bubble, ...(msg.role === 'user' ? styles.bubbleUser : {}) }}>
-                            {msg.content}
-                            {msg.role === 'assistant' && msg.commands && msg.commands.length > 0 && (
-                                <div style={{ 
-                                    marginTop: '10px', 
-                                    paddingTop: '8px', 
-                                    borderTop: '1px solid rgba(255,255,255,0.05)',
-                                    fontSize: '11px',
-                                    color: VibeTheme.colors.accent,
-                                    fontWeight: 700,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px'
-                                }}>
-                                    <VibeIcons name="CheckCircle" size={12} />
-                                    {msg.commands.length} COMMANDS EXECUTED
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                ))}
-                {isThinking && (
-                    <div style={styles.message}>
-                        <div style={styles.avatar}>
-                            <VibeIcons name="Bot" size={16} />
-                        </div>
-                        <div style={{ ...styles.bubble, opacity: 0.6 }}>
-                            <div style={{ display: 'flex', gap: '4px' }}>
-                                <span style={{ animation: 'pulse 1s infinite' }}>•</span>
-                                <span style={{ animation: 'pulse 1s infinite 0.2s' }}>•</span>
-                                <span style={{ animation: 'pulse 1s infinite 0.4s' }}>•</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                <div ref={messagesEndRef} />
+        <div style={containerStyle}>
+            <style dangerouslySetInnerHTML={{ __html: `
+                ${aiAnimations}
+                .status-bar, .assets-panel, .console-panel {
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(255,255,255,0.05) transparent;
+                }
+                .ai-message pre { background: #000; padding: 12px; border-radius: 8px; margin: 8px 0; overflow-x: auto; }
+                ::-webkit-scrollbar { width: 6px; height: 6px; }
+                ::-webkit-scrollbar-track { background: transparent; }
+                ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+                ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
+            ` }} />
+            
+            <div style={{ 
+                padding: '12px 16px', 
+                borderBottom: '1px solid rgba(255,255,255,0.05)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                background: 'rgba(255,255,255,0.02)'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <VibeIcons name="Sparkles" size={16} color={VibeTheme.colors.accent} />
+                    <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.1em' }}>NEURAL COPILOT</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <VibeButton size="xs" variant="ghost" onClick={() => setShowModelSelector(!showModelSelector)} style={{ fontSize: '10px', padding: '4px 8px' }}>
+                        {selectedModel?.split(':')[0].toUpperCase() || 'SELECT ENGINE'}
+                        <VibeIcons name="ChevronDown" size={10} style={{ marginLeft: '4px' }} />
+                    </VibeButton>
+                    <VibeButton size="xs" variant="ghost" onClick={() => setMessages([])}>
+                        <VibeIcons name="Plus" size={14} />
+                    </VibeButton>
+                </div>
             </div>
 
-            <div style={styles.inputArea}>
-                <div style={styles.quickActions}>
-                    {['Add Light', 'Create Cube', 'Physics Mesh'].map(act => (
-                        <VibeButton key={act} variant="secondary" size="sm" onClick={() => { setInput(act); handleSend(); }} style={{ borderRadius: '20px', fontSize: '10px' }}>
-                            {act}
-                        </VibeButton>
-                    ))}
+            {showModelSelector && (
+                <div style={{
+                    borderRadius: '16px',
+                    padding: '16px',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
+                    animation: 'msg-slide 0.2s ease-out'
+                }}>
+                    <div style={{ fontSize: '10px', fontWeight: 900, opacity: 0.3, marginBottom: '12px', letterSpacing: '2px', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>NEURAL ENGINES FOUND</span>
+                        <span>{availableModels.length} LISTED</span>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {availableModels.length === 0 ? (
+                            <div style={{ padding: '20px', textAlign: 'center', width: '100%', opacity: 0.5, fontSize: '12px' }}>
+                                Searching local Ollama...
+                            </div>
+                        ) : (
+                            availableModels.map(m => (
+                                <VibeButton 
+                                    key={m} 
+                                    variant={selectedModel === m ? 'primary' : 'secondary'} 
+                                    size="sm" 
+                                    onClick={() => { 
+                                        handleModelChange(m); // 🧠 STORE IN MEMORY
+                                        setShowModelSelector(false); 
+                                    }}
+                                    style={{ borderRadius: '8px', fontSize: '11px', padding: '10px 16px' }}
+                                >
+                                    {m.split(':')[0].toUpperCase()}
+                                </VibeButton>
+                            ))
+                        )}
+                    </div>
                 </div>
-                <div style={styles.inputWrapper}>
-                    <VibeInput 
-                        placeholder="Ask AI Copilot..." 
-                        value={input} 
-                        onChange={(e) => setInput(e.target.value)} 
+            )}
+
+            <div 
+                ref={messagesEndRef}
+                style={{ 
+                    flex: 1,
+                    overflowY: 'auto',
+                    padding: '24px 20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px'
+                }}
+            >
+                {messages.length === 0 && (
+                    <div style={{ opacity: 0.2, textAlign: 'center', marginTop: '100px' }}>
+                        <VibeIcons name="Bot" size={48} />
+                        <p style={{ marginTop: '16px', fontSize: '11px', fontWeight: 800 }}>VIBEENGINE NEURAL LINK READY</p>
+                    </div>
+                )}
+                {messages.map((msg, idx) => {
+                    const isLast = idx === messages.length - 1;
+                    const showDots = msg.role === 'assistant' && !msg.content.trim() && (isThinking || msg.streaming);
+
+                    return (
+                        <motion.div 
+                            key={msg.id} 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            style={{ 
+                                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                maxWidth: '85%'
+                            }}
+                        >
+                            <div style={{ 
+                                padding: '14px 18px', 
+                                borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px', 
+                                background: msg.role === 'user' ? VibeTheme.colors.accent : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${msg.role === 'user' ? 'transparent' : 'rgba(255,255,255,0.05)'}`,
+                                fontSize: '13px',
+                                lineHeight: '1.6',
+                                position: 'relative',
+                                boxShadow: msg.role === 'user' ? `0 10px 20px -10px ${VibeTheme.colors.accent}44` : 'none'
+                             }}>
+                                {showDots ? (
+                                    <div style={{ display: 'flex', gap: '4px', height: '24px', alignItems: 'center' }}>
+                                        {[0, 1, 2].map(i => (
+                                            <motion.span
+                                                key={i}
+                                                animate={{ opacity: [0.3, 1, 0.3] }}
+                                                transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
+                                                style={{ width: '5px', height: '5px', borderRadius: '50%', background: VibeTheme.colors.accent }}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
+                                )}
+
+                                {msg.role === 'assistant' && msg.commands && msg.commands.length > 0 && (
+                                    <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '9px', color: VibeTheme.colors.accent, fontWeight: 900, letterSpacing: '1px' }}>
+                                        {msg.commands.length} ELITE COMMANDS EXECUTED
+                                    </div>
+                                )}
+
+                                {isThinking && isLast && msg.role === 'assistant' && (
+                                    <VibeButton 
+                                        size="xs" 
+                                        variant="ghost" 
+                                        onClick={() => setIsThinking(false)}
+                                        style={{ marginTop: '12px', color: '#ef4444', fontSize: '9px', fontWeight: 900 }}
+                                    >
+                                        <VibeIcons name="Stop" size={10} style={{ marginRight: '6px' }} /> STOP NEURAL LINK
+                                    </VibeButton>
+                                )}
+                            </div>
+                        </motion.div>
+                    );
+                })}
+            </div>
+
+            {/* Input - Sovereign Minimalist Edition */}
+            <div style={{ padding: '20px', borderTop: `1px solid ${VibeTheme.colors.glassBorder}`, background: 'rgba(0,0,0,0.3)' }}>
+                <div style={{ 
+                    display: 'flex', 
+                    gap: '12px', 
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '14px',
+                    padding: '4px',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
+                }}>
+                    <input 
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                        style={{ border: 'none', background: 'transparent' }}
+                        placeholder="Neural Copilot'a sor veya / komut kullan..."
+                        style={{
+                            flex: 1,
+                            background: 'transparent',
+                            border: 'none',
+                            padding: '10px 16px',
+                            color: '#fff',
+                            fontSize: '13px',
+                            outline: 'none'
+                        }}
                     />
-                    <VibeButton variant="primary" size="sm" onClick={handleSend} disabled={!input.trim()}>
-                        <VibeIcons name="Send" size={14} />
+                    <VibeButton 
+                        variant="primary" 
+                        size="sm" 
+                        onClick={handleSend} 
+                        disabled={isThinking || !input.trim()}
+                        style={{ borderRadius: '10px', minWidth: '40px' }}
+                    >
+                        {isThinking ? <VibeIcons name="Loader" size={14} className="animate-spin" /> : <VibeIcons name="Send" size={14} />}
                     </VibeButton>
                 </div>
             </div>

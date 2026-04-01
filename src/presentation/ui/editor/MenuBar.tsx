@@ -38,7 +38,7 @@ export const MenuBar: React.FC = () => {
     // Stores
     const { 
         editorMode, setEditorMode, togglePanel, 
-        showAICopilot, showScriptEditor 
+        showAICopilot, showScriptEditor, showHierarchy, showConsole, showAssets, showInspector 
     } = useEditorStore();
     const { sceneName, isDirty } = useSceneStore();
     const { setShowLauncher } = useProjectStore();
@@ -82,7 +82,7 @@ export const MenuBar: React.FC = () => {
         }
     ];
 
-    const transformModes: { mode: EditorMode; icon: string; label: string }[] = [
+    const transformButtons: { mode: EditorMode; icon: string; label: string }[] = [
         { mode: 'translate', icon: 'Move', label: 'Move' },
         { mode: 'rotate', icon: 'Rotate', label: 'Rotate' },
         { mode: 'scale', icon: 'Scale', label: 'Scale' },
@@ -126,15 +126,23 @@ export const MenuBar: React.FC = () => {
 
                 <div style={styles.dividerVertical} />
 
-                {/* Transform Tools integrated into MenuBar */}
-                <div style={{ display: 'flex', gap: '2px' }}>
-                    {transformModes.map((m) => (
+                <div style={styles.dividerVertical} />
+
+                {/* 🟢 Transform Tools (Simplified Glowing Icons) */}
+                <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    {transformButtons.map((m: { mode: EditorMode; icon: string; label: string }) => (
                         <VibeButton
                             key={m.mode}
-                            variant={editorMode === m.mode ? 'primary' : 'ghost'}
+                            variant="ghost"
                             size="sm"
                             onClick={() => setEditorMode(m.mode)}
-                            style={{ padding: '4px 8px', borderRadius: '4px' }}
+                            style={{ 
+                                width: '32px', height: '32px', padding: 0,
+                                color: editorMode === m.mode ? VibeTheme.colors.accent : 'rgba(255,255,255,0.4)',
+                                background: editorMode === m.mode ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+                                filter: editorMode === m.mode ? `drop-shadow(0 0 5px ${VibeTheme.colors.accent}aa)` : 'none'
+                             }}
+                            title={m.label}
                         >
                             <VibeIcons name={m.icon as any} size={14} />
                         </VibeButton>
@@ -160,22 +168,85 @@ export const MenuBar: React.FC = () => {
                 )}
             </div>
 
-            {/* RIGHT: Scene Info & Utilities */}
+            {/* RIGHT: Layout & Utilities */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                    <VibeButton variant={showAICopilot ? 'primary' : 'ghost'} size="sm" onClick={() => togglePanel('aiCopilot')}>
-                        <VibeIcons name="Bot" size={14} />
+                <div style={styles.dividerVertical} />
+
+                {/* 🟢 Layout Toggle Suite (The only control box) */}
+                <div style={{ display: 'flex', gap: '6px', background: 'rgba(255,255,255,0.02)', padding: '2px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', marginLeft: '12px' }}>
+                    {/* Left: Hierarchy */}
+                    <VibeButton 
+                        variant="ghost" size="sm" onClick={() => togglePanel('hierarchy')} 
+                        style={{ 
+                            width: '32px', height: '32px', padding: 0, 
+                            color: showHierarchy ? VibeTheme.colors.accent : 'rgba(255,255,255,0.4)',
+                            filter: showHierarchy ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none'
+                        }}
+                    >
+                        <VibeIcons name="Sidebar" size={16} />
                     </VibeButton>
-                    <VibeButton variant={showScriptEditor ? 'primary' : 'ghost'} size="sm" onClick={() => togglePanel('scriptEditor')}>
-                        <VibeIcons name="Code" size={14} />
+                    
+                    {/* Bottom A: Assets */}
+                    <VibeButton 
+                        variant="ghost" size="sm" onClick={() => togglePanel('assets')} 
+                        style={{ 
+                            width: '32px', height: '32px', padding: 0, 
+                            color: showAssets ? '#34d399' : 'rgba(255,255,255,0.4)',
+                            filter: showAssets ? `drop-shadow(0 0 4px #34d39988)` : 'none',
+                            transform: 'rotate(90deg)'
+                        }}
+                    >
+                        <VibeIcons name="Grid" size={14} />
+                    </VibeButton>
+
+                    {/* Bottom B: Console */}
+                    <VibeButton 
+                        variant="ghost" size="sm" onClick={() => togglePanel('console')} 
+                        style={{ 
+                            width: '32px', height: '32px', padding: 0, 
+                            color: showConsole ? '#60a5fa' : 'rgba(255,255,255,0.4)',
+                            filter: showConsole ? `drop-shadow(0 0 4px #60a5fa88)` : 'none',
+                            transform: 'rotate(90deg)'
+                        }}
+                    >
+                        <VibeIcons name="Terminal" size={14} />
+                    </VibeButton>
+
+                    {/* Right A: Inspector */}
+                    <VibeButton 
+                        variant="ghost" size="sm" onClick={() => togglePanel('inspector')} 
+                        style={{ 
+                            width: '32px', height: '32px', padding: 0, 
+                            color: showInspector ? VibeTheme.colors.accent : 'rgba(255,255,255,0.4)',
+                            filter: showInspector ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none',
+                            transform: 'scaleX(-1)'
+                        }}
+                    >
+                        <VibeIcons name="Sidebar" size={16} />
+                    </VibeButton>
+
+                    {/* Right B: AI Copilot */}
+                    <VibeButton 
+                        variant="ghost" size="sm" onClick={() => togglePanel('aiCopilot')} 
+                        style={{ 
+                            width: '32px', height: '32px', padding: 0, 
+                            color: showAICopilot ? VibeTheme.colors.accent : 'rgba(255,255,255,0.4)',
+                            filter: showAICopilot ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none'
+                        }}
+                    >
+                        <VibeIcons name="Sparkles" size={14} />
                     </VibeButton>
                 </div>
 
-                <div style={styles.sceneBadge}>
-                    <span style={{ opacity: 0.5 }}>Scene:</span> {sceneName}
-                </div>
-                
-                <VibeButton variant="primary" size="sm" onClick={handleSave} style={{ borderRadius: '6px', height: '28px' }}>
+                <div style={styles.dividerVertical} />
+
+                <VibeButton 
+                    variant="primary" 
+                    size="sm" 
+                    onClick={handleSave} 
+                    style={{ borderRadius: '8px', height: '32px', display: 'flex', gap: '8px', padding: '0 16px', fontWeight: 800 }}
+                >
+                    <VibeIcons name="Save" size={14} />
                     SAVE
                 </VibeButton>
             </div>

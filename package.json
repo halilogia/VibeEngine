@@ -29,7 +29,7 @@
     "dependencies": {
         "@dimforge/rapier3d-compat": "^0.19.3",
         "@monaco-editor/react": "^4.7.0",
-        "lucide-react": "^1.7.0",
+        "framer-motion": "^12.38.0",
         "three": "^0.160.0",
         "ts-morph": "^27.0.2"
     },

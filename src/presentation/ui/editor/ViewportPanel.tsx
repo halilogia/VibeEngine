@@ -209,12 +209,34 @@ export const ViewportPanel: React.FC = () => {
         entityMeshMap.forEach((m, id) => { if (!currentIds.has(id)) { scene.remove(m); entityMeshMap.delete(id); } });
     }, [entities, rootEntityIds]);
 
-    // Selection attachment
+    // 🟢 REACTIVE GIZMO ATTACH/DETACH (RESTORED & STRENGTHENED)
     useEffect(() => {
-        if (!transformRef.current) return;
+        const controls = transformRef.current;
+        if (!controls) return;
+        
         const mesh = selectedEntityId !== null ? entityMeshMap.get(selectedEntityId) : null;
-        if (mesh) transformRef.current.attach(mesh); else transformRef.current.detach();
-    }, [selectedEntityId]);
+        
+        if (mesh) {
+            console.debug(`[VibeEngine] Attaching gizmo to entity: ${selectedEntityId}`);
+            controls.attach(mesh);
+            // Ensure mode is correct upon attachment
+            const mode = editorMode === 'translate' ? 'translate' : 
+                         editorMode === 'rotate' ? 'rotate' : 'scale';
+            controls.setMode(mode as any);
+        } else {
+            console.debug(`[VibeEngine] Detaching gizmo (no selection)`);
+            controls.detach();
+        }
+    }, [selectedEntityId, entities, editorMode]); // Depend on entities too if they change
+
+    // 🟢 REACTIVE GIZMO MODE UPDATE
+    useEffect(() => {
+        const controls = transformRef.current;
+        if (!controls) return;
+        const mode = editorMode === 'translate' ? 'translate' : 
+                     editorMode === 'rotate' ? 'rotate' : 'scale';
+        controls.setMode(mode as any);
+    }, [editorMode]);
 
     const handleClick = useCallback((e: React.MouseEvent) => {
         if (!containerRef.current || !cameraRef.current || !sceneRef.current || transformRef.current?.dragging) return;

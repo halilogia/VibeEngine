@@ -16,9 +16,10 @@ import { assetsStyles as styles } from './AssetsPanel.styles';
 interface AssetItemProps {
     asset: AssetData;
     onDelete: () => void;
+    onClick?: () => void;
 }
 
-const AssetItem: React.FC<AssetItemProps> = ({ asset, onDelete }) => {
+const AssetItem: React.FC<AssetItemProps> = ({ asset, onDelete, onClick }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const getIcon = () => {
@@ -36,6 +37,7 @@ const AssetItem: React.FC<AssetItemProps> = ({ asset, onDelete }) => {
             style={{ ...styles.assetItem, ...(isHovered ? styles.assetItemHover : {}) }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onClick={onClick}
         >
             <div style={styles.iconWrapper}>
                 <VibeIcons 
@@ -71,7 +73,10 @@ interface AssetsPanelProps {
 
 export const AssetsPanel: React.FC<AssetsPanelProps> = ({ dragHandleProps }) => {
     const { assets, removeAsset } = useSceneStore();
-    const { activePanelId, setActivePanel } = useEditorStore();
+    const { 
+        editorMode, setEditorMode, togglePanel, 
+        showAICopilot, showScriptEditor, showHierarchy, showConsole, showAssets, showInspector 
+    } = useEditorStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState<'all' | AssetData['type']>('all');
 
@@ -139,7 +144,13 @@ export const AssetsPanel: React.FC<AssetsPanelProps> = ({ dragHandleProps }) => 
                             <AssetItem 
                                 key={asset.id} 
                                 asset={asset} 
-                                onDelete={() => removeAsset(asset.id)} 
+                                onDelete={() => removeAsset(asset.id)}
+                                onClick={() => {
+                                    // 🟢 Open Script Editor on TS/TSX asset click
+                                    if (asset.type === 'script' || asset.name.endsWith('.ts') || asset.name.endsWith('.tsx')) {
+                                        togglePanel('scriptEditor');
+                                    }
+                                }}
                             />
                         ))}
                     </div>

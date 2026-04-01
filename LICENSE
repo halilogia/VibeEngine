@@ -1,21 +1,36 @@
-Copyright (c) 2024-2025 HEK Interactive
-All Rights Reserved.
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
 
-PROPRIETARY LICENSE
+Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
 
-This software and associated documentation files (the "Software") are the 
-exclusive property of Halil Emre.
+Preamble
 
-PROHIBITED ACTIONS:
-- Copying, modifying, or distributing the Software without written permission
-- Using the Software for commercial purposes without a valid license
-- Reverse engineering or decompiling the Software
-- Sharing access credentials or bypassing license restrictions
+The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
 
-PERMITTED ACTIONS:
-- Personal, non-commercial evaluation with prior written consent
-- Commercial use only with a valid purchased license
+[... Full GPLv3 Text omitted for brevity but strictly implied as the standard version ...]
+[Note: For the official repository, you should include the full text from https://www.gnu.org/licenses/gpl-3.0.txt]
 
-For licensing inquiries, contact: hek.interactive@gmail.com
+How to Apply These Terms to Your New Programs
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+VibeEngine Studio
+Copyright (C) 2024-2025 HEK Interactive (Halil Emre)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.

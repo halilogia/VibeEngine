@@ -9,6 +9,7 @@ export { SplashScreen } from './SplashScreen';
 export { StatusBar } from './StatusBar';
 export { Toolbar } from './Toolbar';
 export { ViewportToolbar } from './ViewportToolbar';
+export { TitleBar } from './TitleBar';
 
 // Panels
 export { HierarchyPanel } from './HierarchyPanel';

@@ -61,6 +61,14 @@ ipcMain.handle('pick-project-folder', async () => {
     return readProjectInfo(filePaths[0]);
 });
 
+// Window control IPCs
+ipcMain.on('window-minimize', () => mainWindow.minimize());
+ipcMain.on('window-maximize', () => {
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
+    else mainWindow.maximize();
+});
+ipcMain.on('window-close', () => mainWindow.close());
+
 // Determine if in development
 const isDev = !app.isPackaged;
 
@@ -103,20 +111,21 @@ function createMainWindow() {
         minWidth: 1200,
         minHeight: 700,
         title: 'VibeEngine',
+        frame: false, // Frameless for custom title bar
         icon: path.join(__dirname, '../assets/icon1.png'),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
             preload: path.join(__dirname, 'preload.cjs')
         },
-        backgroundColor: '#1a1a2e',
+        backgroundColor: '#050508',
         show: false
     });
 
     // Load the app
     if (isDev) {
         mainWindow.loadURL('http://localhost:5173/editor.html');
-        mainWindow.webContents.openDevTools();
+        // mainWindow.webContents.openDevTools(); // Optional
     } else {
         mainWindow.loadFile(path.join(__dirname, '../dist/editor.html'));
     }
@@ -134,7 +143,7 @@ function createMainWindow() {
         }, 10000);
     });
 
-    // Create menu
+    // Create menu (still useful for shortcuts)
     const menuTemplate = [
         {
             label: 'File',
@@ -194,7 +203,8 @@ function createMainWindow() {
     ];
 
     const menu = Menu.buildFromTemplate(menuTemplate);
-    Menu.setApplicationMenu(menu);
+    Menu.setApplicationMenu(null); // Completely disable native menu
+    mainWindow.setMenuBarVisibility(false); // Ensure it is hidden
 
     mainWindow.on('closed', () => {
         mainWindow = null;

@@ -6,6 +6,7 @@
 import React from 'react';
 import { useEditorStore, useSceneStore } from '@infrastructure/store';
 import { VibeIcons } from '@ui/common/VibeIcons';
+import { VibeTheme } from '@themes/VibeStyles';
 import { statusBarStyles as styles } from './StatusBar.styles';
 
 export const StatusBar: React.FC = () => {
@@ -31,8 +32,10 @@ export const StatusBar: React.FC = () => {
 
             <div style={styles.divider} />
             
-            <div style={styles.group}>
-                <span style={styles.modeBadge}>{editorMode.toUpperCase()}</span>
+            <div style={styles.section}>
+                <div style={{ ...styles.badge, background: 'rgba(99, 102, 241, 0.1)', color: VibeTheme.colors.accent, fontWeight: 900 }}>
+                    {editorMode === 'translate' ? 'MOVE MODE' : editorMode.toUpperCase() + ' MODE'}
+                </div>
             </div>
 
             <div style={styles.group}>
