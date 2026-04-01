@@ -35,6 +35,45 @@
     cursor: not-allowed;
 }
 
+/* Hierarchy Toolbar & Search */
+.hierarchy-toolbar {
+    padding: 6px 12px;
+    background: var(--editor-bg-tertiary);
+    border-bottom: 1px solid var(--editor-border);
+}
+
+.hierarchy-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--editor-bg-primary);
+    border: 1px solid var(--editor-border);
+    border-radius: 6px;
+    padding: 0 10px;
+    height: 28px;
+    transition: var(--editor-transition);
+}
+
+.hierarchy-search:focus-within {
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.hierarchy-search .search-icon {
+    color: var(--editor-text-muted);
+}
+
+.hierarchy-search input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 4px 0;
+    font-size: 11px;
+    color: var(--editor-text-primary);
+    outline: none;
+}
+
+
 .hierarchy-empty-state {
     display: flex;
     flex-direction: column;
@@ -71,8 +110,29 @@
     user-select: none;
 }
 
-.tree-node {
-    /* Container */
+.entity-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    color: var(--editor-text-secondary);
+}
+
+.entity-icon .icon-light { color: #fbbf24; }
+.entity-icon .icon-camera { color: #22d3ee; }
+.entity-icon .icon-physics { color: #f87171; }
+.entity-icon .icon-script { color: #818cf8; }
+.entity-icon .icon-render { color: #94a3b8; }
+.entity-icon .icon-default { color: var(--editor-text-muted); }
+
+.entity-name {
+    flex: 1;
+    font-size: 13px;
+    color: var(--editor-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .tree-expand {

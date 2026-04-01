@@ -77,7 +77,7 @@ export const ScriptEditorPanel: React.FC = () => {
     const [activeTabId, setActiveTabId] = useState('1');
     const [showTemplates, setShowTemplates] = useState(false);
     const monacoRef = useRef<Monaco | null>(null);
-    const { selectedEntityId } = useEditorStore();
+    const { activePanelId, setActivePanel, selectedEntityId } = useEditorStore();
     const { getEntity, updateComponent } = useSceneStore();
 
     const activeTab = tabs.find(t => t.id === activeTabId)!;
@@ -182,7 +182,10 @@ export const ScriptEditorPanel: React.FC = () => {
     // #endregion
 
     return (
-        <div className="script-editor-panel editor-panel">
+        <div 
+            className={`editor-panel script-editor-panel glass-panel ${activePanelId === 'scriptEditor' ? 'active-panel' : ''}`}
+            onClick={() => setActivePanel('scriptEditor')}
+        >
             {/* Header */}
             <div className="editor-panel-header script-editor-header">
                 <div className="script-tabs">

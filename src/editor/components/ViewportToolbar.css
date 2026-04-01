@@ -1,0 +1,98 @@
+/**
+ * Floating Viewport Toolbar Styles
+ */
+
+.v-toolbar-container {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    z-index: 100;
+    pointer-events: auto;
+    border-radius: var(--editor-radius-sm);
+    background: rgba(15, 15, 26, 0.4) !important;
+}
+
+.v-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.v-tool-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--editor-text-secondary);
+    cursor: pointer;
+    transition: var(--editor-transition);
+}
+
+.v-tool-btn:hover {
+    background: var(--editor-bg-hover);
+    color: var(--editor-text-primary);
+}
+
+.v-tool-btn.active {
+    background: var(--editor-accent);
+    color: white;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.v-toolbar-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--glass-border);
+    margin: 0 4px;
+}
+
+.v-toolbar-badge {
+    margin-left: 8px;
+    padding: 4px 10px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--editor-success);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.v-pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--editor-success);
+    border-radius: 50%;
+    box-shadow: 0 0 5px var(--editor-success);
+    animation: vPulse 2s infinite;
+}
+
+@keyframes vPulse {
+    0% { transform: scale(0.95); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.5; }
+    100% { transform: scale(0.95); opacity: 1; }
+}
+
+/* Visibility: only show when hovering parent if you want "stealth" UI, 
+   but for professional tools, always semi-visible is better. */
+.v-toolbar-container {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.v-toolbar-container:hover {
+    opacity: 1;
+}

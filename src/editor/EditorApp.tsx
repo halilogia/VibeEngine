@@ -4,8 +4,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { MenuBar, Toolbar, EditorLayout, SplashScreen, StatusBar } from './components';
+import { CommandPalette } from './components/CommandPalette';
 import { useKeyboardShortcuts } from './hooks';
+import { ToastContainer } from './components/ToastContainer';
 import './styles/editor.css';
+import './components/CommandPalette.css';
 import './components/SplashScreen.css';
 import './components/StatusBar.css';
 
@@ -62,6 +65,8 @@ export const EditorApp: React.FC = () => {
                 <Toolbar />
                 <EditorLayout />
                 <StatusBar />
+                <ToastContainer />
+                <CommandPalette />
             </div>
         </>
     );

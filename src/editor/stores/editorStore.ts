@@ -31,6 +31,9 @@ interface EditorState {
     showConsole: boolean;
     showAICopilot: boolean;
     showScriptEditor: boolean;
+    activePanelId: string | null;
+    shadingMode: 'lit' | 'wireframe' | 'solid';
+    showCommandPalette: boolean;
 
     // Actions
     selectEntity: (id: number | null) => void;
@@ -44,6 +47,8 @@ interface EditorState {
     pause: () => void;
     stop: () => void;
     togglePanel: (panel: 'hierarchy' | 'inspector' | 'assets' | 'console' | 'aiCopilot' | 'scriptEditor') => void;
+    setActivePanel: (id: string | null) => void;
+    setShadingMode: (mode: 'lit' | 'wireframe' | 'solid') => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -62,6 +67,9 @@ export const useEditorStore = create<EditorState>((set) => ({
     showConsole: true,
     showAICopilot: true,
     showScriptEditor: false,
+    activePanelId: 'viewport',
+    shadingMode: 'lit',
+    showCommandPalette: false,
 
     // Actions
     selectEntity: (id) => set({
@@ -103,4 +111,12 @@ export const useEditorStore = create<EditorState>((set) => ({
             case 'scriptEditor': return { showScriptEditor: !state.showScriptEditor };
         }
     }),
+ 
+    setActivePanel: (id) => set({ activePanelId: id }),
+ 
+    setShadingMode: (mode) => set({ shadingMode: mode }),
+
+    toggleCommandPalette: (show) => set((state) => ({ 
+        showCommandPalette: show !== undefined ? show : !state.showCommandPalette 
+    })),
 }));

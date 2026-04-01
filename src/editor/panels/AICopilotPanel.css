@@ -63,10 +63,30 @@
     border-radius: 8px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     z-index: 1000;
-    overflow: hidden;
+    max-height: 300px;
+    overflow-y: auto;
     backdrop-filter: blur(12px);
     animation: menu-slide 0.2s ease-out;
 }
+
+/* Custom Scrollbar for Model Menu */
+.model-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.model-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.model-menu::-webkit-scrollbar-thumb {
+    background: var(--editor-border);
+    border-radius: 10px;
+}
+
+.model-menu::-webkit-scrollbar-thumb:hover {
+    background: var(--editor-accent);
+}
+
 
 @keyframes menu-slide {
     from { opacity: 0; transform: translateY(-5px); }

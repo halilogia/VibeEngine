@@ -5,10 +5,12 @@
 import React, { useState } from 'react';
 import {
     Box, Plus, Trash2, ChevronDown, ChevronRight,
-    Move, Camera, Shield, Magnet, Code, Sun, MousePointer2
+    Move, Camera, Shield, Magnet, Code, Sun, MousePointer2, Search
 } from 'lucide-react';
 import { useSceneStore, useEditorStore, type ComponentData } from '../stores';
+import { useToastStore } from '../stores/toastStore';
 import { getComponentInfo, getAvailableComponents, type PropertyInfo } from '../bridge';
+import { ToastContainer } from '../components/ToastContainer';
 import './InspectorPanel.css';
 
 // Icon mapping
@@ -22,43 +24,110 @@ const ICONS: Record<string, React.ReactNode> = {
     Sun: <Sun size={14} />,
 };
 
-// Property Editors
+// Precision Draggable Label
+const DraggableLabel: React.FC<{
+    label: string;
+    value: number;
+    className?: string;
+    onChange: (newValue: number) => void;
+}> = ({ label, value, className, onChange }) => {
+    const isDragging = React.useRef(false);
+    const startX = React.useRef(0);
+    const startValue = React.useRef(0);
+
+    const onMouseDown = (e: React.MouseEvent) => {
+        isDragging.current = true;
+        startX.current = e.clientX;
+        startValue.current = value;
+        document.body.style.cursor = 'ew-resize';
+        
+        const onMouseMove = (moveEvent: MouseEvent) => {
+            if (!isDragging.current) return;
+            const delta = moveEvent.clientX - startX.current;
+            const step = moveEvent.shiftKey ? 0.1 : 0.01;
+            const newValue = startValue.current + delta * step;
+            onChange(Number(newValue.toFixed(3)));
+        };
+
+        const onMouseUp = () => {
+            isDragging.current = false;
+            document.body.style.cursor = 'default';
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+    };
+
+    return (
+        <span 
+            className={`draggable-label ${className}`} 
+            onMouseDown={onMouseDown}
+            title="Drag to change value"
+        >
+            {label}
+        </span>
+    );
+};
+
 const Vector3Input: React.FC<{
     value: [number, number, number];
     onChange: (value: [number, number, number]) => void;
 }> = ({ value, onChange }) => {
-    const handleChange = (index: number, val: string) => {
+    const updateValue = (index: number, val: number) => {
         const newValue: [number, number, number] = [...value];
-        newValue[index] = parseFloat(val) || 0;
+        newValue[index] = val;
         onChange(newValue);
     };
 
     return (
         <div className="vector3-group">
-            <span className="vector3-label x">X</span>
-            <input
-                type="number"
-                className="editor-input editor-input-number"
-                value={value[0]}
-                onChange={(e) => handleChange(0, e.target.value)}
-                step={0.1}
-            />
-            <span className="vector3-label y">Y</span>
-            <input
-                type="number"
-                className="editor-input editor-input-number"
-                value={value[1]}
-                onChange={(e) => handleChange(1, e.target.value)}
-                step={0.1}
-            />
-            <span className="vector3-label z">Z</span>
-            <input
-                type="number"
-                className="editor-input editor-input-number"
-                value={value[2]}
-                onChange={(e) => handleChange(2, e.target.value)}
-                step={0.1}
-            />
+            <div className="vector-field">
+                <DraggableLabel 
+                    label="X" 
+                    value={value[0]} 
+                    className="x" 
+                    onChange={(v) => updateValue(0, v)} 
+                />
+                <input
+                    type="number"
+                    className="editor-input editor-input-number"
+                    value={value[0]}
+                    onChange={(e) => updateValue(0, parseFloat(e.target.value) || 0)}
+                    step={0.1}
+                />
+            </div>
+            <div className="vector-field">
+                <DraggableLabel 
+                    label="Y" 
+                    value={value[1]} 
+                    className="y" 
+                    onChange={(v) => updateValue(1, v)} 
+                />
+                <input
+                    type="number"
+                    className="editor-input editor-input-number"
+                    value={value[1]}
+                    onChange={(e) => updateValue(1, parseFloat(e.target.value) || 0)}
+                    step={0.1}
+                />
+            </div>
+            <div className="vector-field">
+                <DraggableLabel 
+                    label="Z" 
+                    value={value[2]} 
+                    className="z" 
+                    onChange={(v) => updateValue(2, v)} 
+                />
+                <input
+                    type="number"
+                    className="editor-input editor-input-number"
+                    value={value[2]}
+                    onChange={(e) => updateValue(2, parseFloat(e.target.value) || 0)}
+                    step={0.1}
+                />
+            </div>
         </div>
     );
 };
@@ -230,13 +299,20 @@ const AddComponentMenu: React.FC<{
 
 export const InspectorPanel: React.FC = () => {
     const [showAddMenu, setShowAddMenu] = useState(false);
-    const { selectedEntityId } = useEditorStore();
+    const [compSearch, setCompSearch] = useState('');
+    const { 
+        selectedEntityId, 
+        activePanelId, setActivePanel 
+    } = useEditorStore();
     const { getEntity, renameEntity } = useSceneStore();
 
     const entity = selectedEntityId !== null ? getEntity(selectedEntityId) : undefined;
 
     return (
-        <div className="editor-panel inspector-panel glass-panel">
+        <div 
+            className={`editor-panel inspector-panel glass-panel ${activePanelId === 'inspector' ? 'active-panel' : ''}`}
+            onClick={() => setActivePanel('inspector')}
+        >
             <div className="editor-panel-header">
                 <span>Inspector</span>
             </div>
@@ -269,15 +345,30 @@ export const InspectorPanel: React.FC = () => {
                             </label>
                         </div>
 
+                        {/* Component Search */}
+                        <div className="inspector-search-wrapper">
+                            <Search size={12} className="search-icon" />
+                            <input 
+                                type="text" 
+                                placeholder="Filter components..." 
+                                className="editor-input comp-search-input"
+                                value={compSearch}
+                                onChange={(e) => setCompSearch(e.target.value)}
+                            />
+                        </div>
+
                         {/* Components */}
                         <div className="components-list">
-                            {entity.components.map((comp, idx) => (
-                                <ComponentEditor
-                                    key={`${comp.type}-${idx}`}
-                                    component={comp}
-                                    entityId={entity.id}
-                                />
-                            ))}
+                            {entity.components
+                                .filter(comp => comp.type.toLowerCase().includes(compSearch.toLowerCase()) || 
+                                               getComponentInfo(comp.type)?.label.toLowerCase().includes(compSearch.toLowerCase()))
+                                .map((comp, idx) => (
+                                    <ComponentEditor
+                                        key={`${comp.type}-${idx}`}
+                                        component={comp}
+                                        entityId={entity.id}
+                                    />
+                                ))}
                         </div>
 
                         {/* Add component button */}

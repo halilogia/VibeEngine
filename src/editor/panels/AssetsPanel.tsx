@@ -6,11 +6,36 @@ import React, { useState, useRef, useCallback } from 'react';
 import {
     Folder, File, Image, Box, Music, Code,
     Grid, List, Upload, FolderPlus, Search, Trash2, Loader,
-    ChevronRight, Home
+    ChevronRight, Home, Copy, Plus
 } from 'lucide-react';
 import { useAssetManager, type AssetEntry } from '../assets';
 import { useSceneStore, useEditorStore } from '../stores';
+import { ContextMenu, type ContextMenuItem } from '../components/ContextMenu';
 import './AssetsPanel.css';
+
+interface SearchHighlightProps {
+    text: string;
+    search: string;
+}
+
+const SearchHighlight: React.FC<SearchHighlightProps> = ({ text, search }) => {
+    if (!search || !text.toLowerCase().includes(search.toLowerCase())) {
+        return <span>{text}</span>;
+    }
+
+    const parts = text.split(new RegExp(`(${search})`, 'gi'));
+    return (
+        <span>
+            {parts.map((part, i) => 
+                part.toLowerCase() === search.toLowerCase() ? (
+                    <mark key={i} className="search-highlight">{part}</mark>
+                ) : (
+                    part
+                )
+            )}
+        </span>
+    );
+};
 
 type AssetType = 'folder' | 'model' | 'texture' | 'audio' | 'script' | 'other';
 
@@ -51,19 +76,26 @@ const getAssetType = (filename: string): AssetType => {
 export const AssetsPanel: React.FC = () => {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState('');
+    const [filterType, setFilterType] = useState<AssetType | 'all'>('all');
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { assets, loading, importModel, importTexture, removeAsset } = useAssetManager();
     const { addEntity, addComponent } = useSceneStore();
-    const { selectEntity } = useEditorStore();
+    const { 
+        selectEntity, 
+        activePanelId, setActivePanel 
+    } = useEditorStore();
+    const [contextMenu, setContextMenu] = useState<{ x: number; y: number; asset: AssetEntry } | null>(null);
 
     // Convert Map to array
     const assetList = Array.from(assets.values());
-
-    const filteredAssets = assetList.filter(a =>
-        a.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+ 
+    const filteredAssets = assetList.filter(a => {
+        const matchesSearch = a.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = filterType === 'all' || a.type === filterType;
+        return matchesSearch && matchesFilter;
+    });
 
     // Double-click to add asset to scene
     const addAssetToScene = useCallback((asset: AssetEntry) => {
@@ -125,12 +157,41 @@ export const AssetsPanel: React.FC = () => {
         e.target.value = '';
     }, [handleImport]);
 
+    const handleContextMenu = (e: React.MouseEvent, asset: AssetEntry) => {
+        e.preventDefault();
+        setContextMenu({ x: e.clientX, y: e.clientY, asset });
+    };
+
+    const contextMenuItems: ContextMenuItem[] = contextMenu ? [
+        { 
+            label: 'Add to Scene', 
+            icon: <Plus size={12} />, 
+            onClick: () => addAssetToScene(contextMenu.asset) 
+        },
+        { 
+            label: 'Copy URL', 
+            icon: <Copy size={12} />, 
+            onClick: () => {
+                navigator.clipboard.writeText(contextMenu.asset.url);
+                console.log('📋 Asset URL copied to clipboard');
+            } 
+        },
+        { divider: true, label: '' },
+        { 
+            label: 'Delete Asset', 
+            icon: <Trash2 size={12} />, 
+            danger: true, 
+            onClick: () => removeAsset(contextMenu.asset.id) 
+        },
+    ] : [];
+
     return (
         <div
-            className={`editor-panel assets-panel glass-panel ${isDragging ? 'dragging' : ''}`}
+            className={`editor-panel assets-panel glass-panel ${isDragging ? 'dragging' : ''} ${activePanelId === 'assets' ? 'active-panel' : ''}`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
+            onClick={() => setActivePanel('assets')}
         >
             {/* Hidden file input */}
             <input
@@ -169,22 +230,51 @@ export const AssetsPanel: React.FC = () => {
             </div>
 
             <div className="assets-toolbar">
-                <div className="assets-search">
-                    <Search size={14} />
-                    <input
-                        type="text"
-                        placeholder="Search assets..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                <div className="assets-filter-chips">
+                    <button 
+                        className={`filter-chip ${filterType === 'all' ? 'active' : ''}`}
+                        data-type="all"
+                        onClick={() => setFilterType('all')}
+                    >All</button>
+                    <button 
+                        className={`filter-chip ${filterType === 'model' ? 'active' : ''}`}
+                        data-type="model"
+                        onClick={() => setFilterType('model')}
+                    >Models</button>
+                    <button 
+                        className={`filter-chip ${filterType === 'texture' ? 'active' : ''}`}
+                        data-type="texture"
+                        onClick={() => setFilterType('texture')}
+                    >Textures</button>
+                    <button 
+                        className={`filter-chip ${filterType === 'script' ? 'active' : ''}`}
+                        data-type="script"
+                        onClick={() => setFilterType('script')}
+                    >Scripts</button>
+                    <button 
+                        className={`filter-chip ${filterType === 'audio' ? 'active' : ''}`}
+                        data-type="audio"
+                        onClick={() => setFilterType('audio')}
+                    >Audio</button>
                 </div>
-                <button
-                    className="panel-action-btn"
-                    title="Import Files"
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <Upload size={14} />
-                </button>
+                <div className="assets-search-row">
+                    <div className="assets-search">
+                        <Search size={14} />
+                        <input
+                            type="text"
+                            placeholder="Search assets..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <button
+                        className="panel-action-btn"
+                        title="Import Files"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <Upload size={14} />
+                    </button>
+                </div>
             </div>
 
             {/* Drop zone overlay */}
@@ -225,6 +315,7 @@ export const AssetsPanel: React.FC = () => {
                             key={asset.id}
                             className="asset-item"
                             onDoubleClick={() => addAssetToScene(asset)}
+                            onContextMenu={(e) => handleContextMenu(e, asset)}
                             title="Double-click to add to scene"
                         >
                             <div className={`asset-icon ${asset.type}`}>
@@ -234,7 +325,9 @@ export const AssetsPanel: React.FC = () => {
                                     getIcon(asset.type as AssetType)
                                 )}
                             </div>
-                            <span className="asset-name">{asset.name}</span>
+                            <span className="asset-name">
+                                <SearchHighlight text={asset.name} search={searchQuery} />
+                            </span>
                             <button
                                 className="asset-delete"
                                 onClick={(e) => { e.stopPropagation(); removeAsset(asset.id); }}
@@ -246,6 +339,15 @@ export const AssetsPanel: React.FC = () => {
                     ))
                 )}
             </div>
+
+            {contextMenu && (
+                <ContextMenu 
+                    x={contextMenu.x} 
+                    y={contextMenu.y} 
+                    items={contextMenuItems} 
+                    onClose={() => setContextMenu(null)} 
+                />
+            )}
         </div>
     );
 };

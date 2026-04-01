@@ -20,16 +20,19 @@ interface Message {
     streaming?: boolean;
 }
 
-const OLLAMA_MODELS = [
+interface OllamaModel {
+    id: string;
+    name: string;
+    provider: string;
+}
+
+const DEFAULT_MODELS: OllamaModel[] = [
     { id: 'llama3:8b', name: 'Llama 3 (8B)', provider: 'Ollama' },
-    { id: 'mistral:7b', name: 'Mistral (7B)', provider: 'Ollama' },
-    { id: 'deepseek-coder', name: 'DeepSeek Coder', provider: 'Ollama' },
-    { id: 'phi3:mini', name: 'Phi-3 Mini', provider: 'Ollama' },
-    { id: 'gemma2:2b', name: 'Gemma 2 (2B)', provider: 'Ollama' },
 ];
 // #endregion
 
 export const AICopilotPanel: React.FC = () => {
+    const { activePanelId, setActivePanel } = useEditorStore();
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -41,7 +44,8 @@ export const AICopilotPanel: React.FC = () => {
     ]);
     const [isThinking, setIsThinking] = useState(false);
     const [ollamaReady, setOllamaReady] = useState<boolean | null>(null);
-    const [selectedModel, setSelectedModel] = useState(OLLAMA_MODELS[0]);
+    const [availableModels, setAvailableModels] = useState<OllamaModel[]>(DEFAULT_MODELS);
+    const [selectedModel, setSelectedModel] = useState<OllamaModel>(DEFAULT_MODELS[0]);
     const [showModelMenu, setShowModelMenu] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
@@ -52,10 +56,20 @@ export const AICopilotPanel: React.FC = () => {
     }, [messages]);
 
     useEffect(() => {
-        OllamaService.isAvailable().then(available => {
+        OllamaService.isAvailable().then(async (available) => {
             setOllamaReady(available);
             if (available) {
                 console.log('✅ [OllamaService] Connected to local Ollama server');
+                const modelNames = await OllamaService.listModels();
+                if (modelNames.length > 0) {
+                    const fetchedModels = modelNames.map(name => ({
+                        id: name,
+                        name: name.charAt(0).toUpperCase() + name.slice(1).replace(':latest', ''),
+                        provider: 'Ollama'
+                    }));
+                    setAvailableModels(fetchedModels);
+                    setSelectedModel(fetchedModels[0]);
+                }
             } else {
                 console.warn('⚠️ [OllamaService] Ollama not reachable at localhost:11434');
             }
@@ -181,7 +195,10 @@ export const AICopilotPanel: React.FC = () => {
     };
 
     return (
-        <div className="editor-panel ai-copilot-panel glass-panel">
+        <div 
+            className={`editor-panel ai-copilot-panel glass-panel ${activePanelId === 'aiCopilot' ? 'active-panel' : ''}`}
+            onClick={() => setActivePanel('aiCopilot')}
+        >
             <div className="editor-panel-header">
                 {/* Model Selector */}
                 <div className="model-selector-container">
@@ -197,7 +214,7 @@ export const AICopilotPanel: React.FC = () => {
                     </button>
                     {showModelMenu && (
                         <div className="model-menu">
-                            {OLLAMA_MODELS.map(model => (
+                            {availableModels.map(model => (
                                 <div
                                     key={model.id}
                                     className={`model-option ${selectedModel.id === model.id ? 'active' : ''}`}

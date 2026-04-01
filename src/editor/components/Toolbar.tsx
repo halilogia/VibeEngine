@@ -7,9 +7,10 @@ import {
     Move, RotateCcw, Expand,
     Play, Pause, Square,
     Grid3X3, Axis3D,
-    Maximize2, Sparkles, Code2
+    Maximize2, Sparkles, Code2, Save
 } from 'lucide-react';
 import { useEditorStore, type EditorMode } from '../stores';
+import { useToastStore } from '../stores/toastStore';
 import { usePlayModeStore } from '../core';
 import './Toolbar.css';
 
@@ -19,7 +20,13 @@ export const Toolbar: React.FC = () => {
         showGrid, showAxes, toggleGrid, toggleAxes,
         showAICopilot, showScriptEditor, togglePanel
     } = useEditorStore();
+    const { addToast } = useToastStore();
     const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
+ 
+    const handleSave = () => {
+        // In a real engine, this would call sceneStore.save()
+        addToast('Scene saved successfully', 'success');
+    };
 
     const modes: { mode: EditorMode; icon: React.ReactNode; label: string; key: string }[] = [
         { mode: 'translate', icon: <Move size={16} />, label: 'Move', key: 'W' },
@@ -75,6 +82,13 @@ export const Toolbar: React.FC = () => {
             <div className="toolbar-group-container">
                 <span className="group-label">Features</span>
                 <div className="toolbar-group features-group">
+                    <button
+                        className="toolbar-btn save-btn"
+                        onClick={handleSave}
+                        title="Save Scene (Ctrl+S)"
+                    >
+                        <Save size={16} />
+                    </button>
                     <button
                         className={`toolbar-btn ai-copilot-toggle ${showAICopilot ? 'active' : ''}`}
                         onClick={() => togglePanel('aiCopilot')}

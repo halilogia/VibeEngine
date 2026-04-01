@@ -1,25 +1,11 @@
 /**
- * ConsolePanel - Log output
+ * ConsolePanel - Log output v2 with Store integration
  */
 
 import React, { useState } from 'react';
 import { AlertCircle, AlertTriangle, Info, Trash2, CheckCircle } from 'lucide-react';
+import { useConsoleStore, useEditorStore, type LogLevel } from '../stores';
 import './ConsolePanel.css';
-
-type LogLevel = 'info' | 'warning' | 'error' | 'success';
-
-interface LogEntry {
-    level: LogLevel;
-    message: string;
-    timestamp: Date;
-}
-
-// Initial logs
-const INITIAL_LOGS: LogEntry[] = [
-    { level: 'success', message: 'VibeEngine Editor v1.0.0-beta initialized', timestamp: new Date() },
-    { level: 'info', message: 'AI Copilot Bridge: Active', timestamp: new Date() },
-    { level: 'info', message: 'Graphics: ACESFilmic Rendering Enabled', timestamp: new Date() },
-];
 
 const getIcon = (level: LogLevel) => {
     switch (level) {
@@ -31,14 +17,13 @@ const getIcon = (level: LogLevel) => {
 };
 
 export const ConsolePanel: React.FC = () => {
-    const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOGS);
+    const { logs, clearLogs } = useConsoleStore();
+    const { activePanelId, setActivePanel } = useEditorStore();
     const [filter, setFilter] = useState<LogLevel | 'all'>('all');
 
-    const filteredLogs = logs.filter(log =>
+    const filteredLogs = logs.filter((log) =>
         filter === 'all' || log.level === filter
     );
-
-    const clearLogs = () => setLogs([]);
 
     const formatTime = (date: Date) => {
         return date.toLocaleTimeString('en-US', {
@@ -50,44 +35,51 @@ export const ConsolePanel: React.FC = () => {
     };
 
     return (
-        <div className="editor-panel console-panel glass-panel">
+        <div 
+            className={`editor-panel console-panel glass-panel ${activePanelId === 'console' ? 'active-panel' : ''}`}
+            onClick={() => setActivePanel('console')}
+        >
             <div className="editor-panel-header">
                 <span>Console</span>
                 <div className="panel-actions">
                     <div className="console-filters">
                         <button 
                             className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-                            onClick={() => setFilter('all')}
+                            onClick={(e) => { e.stopPropagation(); setFilter('all'); }}
                         >
                             All
                         </button>
                         <button 
                             className={`filter-btn info ${filter === 'info' ? 'active' : ''}`}
-                            onClick={() => setFilter('info')}
+                            onClick={(e) => { e.stopPropagation(); setFilter('info'); }}
                         >
                             Info
                         </button>
                         <button 
                             className={`filter-btn warn ${filter === 'warning' ? 'active' : ''}`}
-                            onClick={() => setFilter('warning')}
+                            onClick={(e) => { e.stopPropagation(); setFilter('warning'); }}
                         >
                             Warn
                         </button>
                         <button 
                             className={`filter-btn error ${filter === 'error' ? 'active' : ''}`}
-                            onClick={() => setFilter('error')}
+                            onClick={(e) => { e.stopPropagation(); setFilter('error'); }}
                         >
                             Error
                         </button>
                         <button 
                             className={`filter-btn success ${filter === 'success' ? 'active' : ''}`}
-                            onClick={() => setFilter('success')}
+                            onClick={(e) => { e.stopPropagation(); setFilter('success'); }}
                         >
                             Success
                         </button>
                     </div>
                     <div className="v-separator" />
-                    <button className="panel-action-btn" onClick={clearLogs} title="Clear">
+                    <button 
+                        className="panel-action-btn" 
+                        onClick={(e) => { e.stopPropagation(); clearLogs(); }} 
+                        title="Clear"
+                    >
                         <Trash2 size={14} />
                     </button>
                 </div>

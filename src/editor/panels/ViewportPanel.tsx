@@ -8,6 +8,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { useEditorStore, useSceneStore } from '../stores';
 import { Layers, Activity, MousePointer2 } from 'lucide-react';
+import { ViewportToolbar } from '../components/ViewportToolbar';
 import './ViewportPanel.css';
 
 // Map editor entity IDs to Three.js objects
@@ -53,16 +54,47 @@ export const ViewportPanel: React.FC = () => {
     const transformRef = useRef<TransformControls | null>(null);
     const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
     const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
+    const gizmoRef = useRef<{ scene: THREE.Scene, camera: THREE.PerspectiveCamera } | null>(null);
 
-    const { editorMode, showGrid, showAxes, isPlaying, selectedEntityId, selectEntity } = useEditorStore();
+    const { 
+        editorMode, showGrid, showAxes, isPlaying, selectedEntityId, selectEntity,
+        activePanelId, setActivePanel, shadingMode 
+    } = useEditorStore();
     const { entities, rootEntityIds, updateComponent } = useSceneStore();
+ 
+    // Helper to create a vertical gradient background texture
+    const createGradientBackground = () => {
+        const size = 512;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const context = canvas.getContext('2d');
+        if (!context) return null;
+
+        const gradient = context.createLinearGradient(0, 0, 0, size);
+        gradient.addColorStop(0, '#0f0f1a'); // Top (Deepest Space)
+        gradient.addColorStop(0.5, '#1a1a2e'); // Middle
+        gradient.addColorStop(1, '#2c2c4d'); // Bottom (Horizon Influence)
+
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, size, size);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        return texture;
+    };
 
     // Setup Three.js scene
     useEffect(() => {
         if (!canvasRef.current || !containerRef.current) return;
 
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a2e);
+        const bgTexture = createGradientBackground();
+        if (bgTexture) {
+            scene.background = bgTexture;
+        } else {
+            scene.background = new THREE.Color(0x1a1a2e);
+        }
         sceneRef.current = scene;
 
         const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
@@ -80,6 +112,7 @@ export const ViewportPanel: React.FC = () => {
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.0;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.autoClear = false;
         rendererRef.current = renderer;
 
         // Scene Atmosphere
@@ -137,6 +170,14 @@ export const ViewportPanel: React.FC = () => {
         axes.name = 'axes';
         scene.add(axes);
 
+        // Viewport Gizmo Setup
+        const gizmoScene = new THREE.Scene();
+        const gizmoCamera = new THREE.PerspectiveCamera(60, 1, 0.1, 10);
+        gizmoCamera.position.set(0, 0, 5);
+        const gizmoAxes = new THREE.AxesHelper(2);
+        gizmoScene.add(gizmoAxes);
+        gizmoRef.current = { scene: gizmoScene, camera: gizmoCamera };
+
         // Floor
         const floorGeo = new THREE.PlaneGeometry(20, 20);
         const floorMat = new THREE.MeshStandardMaterial({ color: 0x252536 });
@@ -151,6 +192,7 @@ export const ViewportPanel: React.FC = () => {
             if (!containerRef.current || !renderer || !camera) return;
             const { clientWidth, clientHeight } = containerRef.current;
             renderer.setSize(clientWidth, clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
             camera.aspect = clientWidth / clientHeight;
             camera.updateProjectionMatrix();
         };
@@ -163,8 +205,26 @@ export const ViewportPanel: React.FC = () => {
         let animationId: number;
         const animate = () => {
             animationId = requestAnimationFrame(animate);
-            orbit.update();
+            // Manual Clear At Start Of Frame
+            renderer.clear();
+
+            // Render main scene
+            renderer.setViewport(0, 0, containerRef.current!.clientWidth, containerRef.current!.clientHeight);
             renderer.render(scene, camera);
+
+            // Render Gizmo
+            if (gizmoRef.current) {
+                const { scene: gScene, camera: gCamera } = gizmoRef.current;
+                gCamera.position.copy(camera.position);
+                gCamera.position.sub(orbit.target);
+                gCamera.position.setLength(5);
+                gCamera.lookAt(0, 0, 0);
+                
+                renderer.clearDepth();
+                const gizmoSize = 80;
+                renderer.setViewport(10, 10, gizmoSize, gizmoSize);
+                renderer.render(gScene, gCamera);
+            }
         };
         animate();
 
@@ -281,6 +341,32 @@ export const ViewportPanel: React.FC = () => {
         }
     }, [showAxes]);
 
+    // Handle Shading Mode
+    useEffect(() => {
+        if (!sceneRef.current) return;
+        
+        sceneRef.current.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+                if (child.name === 'grid' || child.name === 'axes') return;
+                
+                const material = child.material as THREE.MeshStandardMaterial;
+                if (!material) return;
+
+                if (shadingMode === 'wireframe') {
+                    material.wireframe = true;
+                } else if (shadingMode === 'solid') {
+                    material.wireframe = false;
+                    material.flatShading = true;
+                    material.needsUpdate = true;
+                } else {
+                    material.wireframe = false;
+                    material.flatShading = false;
+                    material.needsUpdate = true;
+                }
+            }
+        });
+    }, [shadingMode, entities]);
+
     // Click to select entity
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const container = containerRef.current;
@@ -321,13 +407,22 @@ export const ViewportPanel: React.FC = () => {
     }, [selectEntity]);
 
     return (
-        <div className="viewport-panel" ref={containerRef} onClick={handleClick}>
+        <div 
+            className={`viewport-panel editor-panel ${activePanelId === 'viewport' ? 'active-panel' : ''} ${isPlaying ? 'is-playing' : ''}`}
+            ref={containerRef} 
+            onClick={(e) => {
+                setActivePanel('viewport');
+                handleClick(e);
+            }}
+        >
             <canvas ref={canvasRef} className="viewport-canvas" />
             
             {/* Elite Design: Inset shadow for depth */}
             <div className="viewport-inset-shadow" />
 
             <div className="viewport-overlay">
+                <ViewportToolbar />
+                
                 <div className="viewport-scene-stats">
                     <div className="stats-item">
                         <Activity size={12} />
@@ -346,7 +441,12 @@ export const ViewportPanel: React.FC = () => {
                 </div>
 
                 <div className="viewport-info">
-                    {isPlaying && <span className="playing-badge">▶ Playing</span>}
+                    {isPlaying && (
+                        <div className="live-status">
+                            <div className="live-dot" />
+                            <span className="live-text">LIVE</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

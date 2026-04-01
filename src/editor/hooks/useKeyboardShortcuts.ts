@@ -9,7 +9,7 @@ import { downloadScene, createDefaultScene } from '../serialization';
 import { useSceneStore } from '../stores/sceneStore';
 
 export function useKeyboardShortcuts(): void {
-    const { setEditorMode, selectEntity, selectedEntityId } = useEditorStore();
+    const { setEditorMode, selectEntity, selectedEntityId, toggleCommandPalette } = useEditorStore();
     const { removeEntity } = useSceneStore();
     const { undo, redo, canUndo, canRedo, pushState } = useUndoRedoStore();
 
@@ -76,9 +76,20 @@ export function useKeyboardShortcuts(): void {
                 e.preventDefault();
             }
 
-            // Escape - deselect
+            // Command Palette (Ctrl+P)
+            if (ctrl && e.key.toLowerCase() === 'p') {
+                toggleCommandPalette();
+                e.preventDefault();
+            }
+
+            // Escape - deselect or close palette
             if (e.key === 'Escape') {
-                selectEntity(null);
+                const { showCommandPalette } = useEditorStore.getState();
+                if (showCommandPalette) {
+                    toggleCommandPalette(false);
+                } else {
+                    selectEntity(null);
+                }
                 e.preventDefault();
             }
         };
