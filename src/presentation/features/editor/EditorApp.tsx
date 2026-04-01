@@ -1,32 +1,43 @@
 /**
- * EditorApp - Main editor application component
+ * EditorApp - Main editor application component (Elite Studio Edition)
  */
 
 import React, { useState, useEffect } from 'react';
-import { MenuBar, Toolbar, EditorLayout, SplashScreen, StatusBar } from '@ui/editor';
+import { EditorLayout, SplashScreen } from '@ui/editor';
 import { CommandPalette } from '@ui/editor/CommandPalette';
 import { useKeyboardShortcuts } from '@editor/hooks';
 import { ToastContainer } from '@ui/editor/ToastContainer';
 import { useAssetManager } from '@editor/assets';
 import { ProjectLauncher } from '@ui/editor/launcher/ProjectLauncher';
 import { useProjectStore } from '@infrastructure/store/useProjectStore';
+import { useEditorStore } from '@infrastructure/store';
+import { AnimatePresence } from 'framer-motion';
+import { VibeTheme } from '@themes/VibeStyles';
+
+import { SettingsModal } from '../../ui/editor/settings/SettingsModal';
 
 export const EditorApp: React.FC = () => {
     const [showSplash, setShowSplash] = useState(true);
     const { launchedProject, showLauncher, setShowLauncher } = useProjectStore();
+    const { 
+        showAICopilotSettings, setShowAICopilotSettings, engineConfig 
+    } = useEditorStore();
+
+    // Dynamically apply Theme and UI Scaling to the HTML document
+    useEffect(() => {
+        document.body.setAttribute('data-theme', engineConfig.editorTheme || 'Sovereign Dark');
+        document.documentElement.style.fontSize = `${(engineConfig.uiScale || 100) / 100 * 16}px`;
+    }, [engineConfig.editorTheme, engineConfig.uiScale]);
 
     // Enable keyboard shortcuts
     useKeyboardShortcuts();
     const { initializeKenneyLibrary } = useAssetManager();
 
-
     useEffect(() => {
         // Initialize the loading bridge immediately
         const bridge = {
-            progress: 0,
-            status: 'initializing' as 'initializing' | 'ready',
-            modules: {} as Record<string, 'success' | 'error'>,
-            details: 'Starting Editor...'
+            progress: 0, status: 'initializing' as 'initializing' | 'ready',
+            modules: {} as Record<string, 'success' | 'error'>, details: 'Starting Editor...'
         };
         (window as Window & { VibeLoading?: typeof bridge }).VibeLoading = bridge;
 
@@ -46,16 +57,12 @@ export const EditorApp: React.FC = () => {
                 bridge.modules[step.name] = 'success';
                 bridge.details = step.label;
                 bridge.progress = Math.round(((i + 1) / steps.length) * 100);
-                console.log(`✅ [Editor] ${step.name}: Ready`);
-
                 if (i === steps.length - 1) {
-                    bridge.status = 'ready';
-                    bridge.progress = 100;
+                    bridge.status = 'ready'; bridge.progress = 100;
                     console.log('🚀 VibeEngine Editor: All systems go!');
                 }
             }, elapsed);
         });
-
 
         // Initialize Kenney Pirate Kit Library
         initializeKenneyLibrary([
@@ -77,79 +84,56 @@ export const EditorApp: React.FC = () => {
 
 
     return (
-        <div style={{ width: '100vw', height: '100vh', background: '#000', overflow: 'hidden', position: 'relative' }}>
+        <div style={{ width: '100vw', height: '100vh', background: VibeTheme.colors.bgPrimary, overflow: 'hidden', position: 'relative' }}>
             {showSplash && (
                 <SplashScreen onComplete={() => setShowSplash(false)} />
             )}
             
-            {/* Main Editor UI - Always present now */}
             <div style={{
                 opacity: showSplash ? 0 : 1,
                 visibility: showSplash ? 'hidden' : 'visible',
                 transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                width: '100vw',
-                height: '100vh',
-                overflow: 'hidden',
-                background: '#000',
+                width: '100vw', height: '100vh', overflow: 'hidden', background: VibeTheme.colors.bgPrimary,
             }}>
                 <EditorLayout />
                 <ToastContainer />
                 <CommandPalette />
             </div>
 
-            {/* Project Launcher Overlay - Only show if manually triggered via showLauncher */}
+            {/* MODULAR ELITE MODALS */}
+            <AnimatePresence>
+                {showAICopilotSettings && <SettingsModal onClose={() => setShowAICopilotSettings(false)} projectName={launchedProject?.name} />}
+            </AnimatePresence>
+            
             {showLauncher && !showSplash && (
-                <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    zIndex: 9999,
-                    background: 'rgba(5, 5, 10, 0.85)',
-                    backdropFilter: 'blur(20px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    animation: 'vibe-fade-in 0.4s ease-out'
-                }}>
+                <div style={modalOverlayStyle}>
                     <div style={{ width: '90%', height: '85%', position: 'relative' }}>
                         <ProjectLauncher />
-                        
-                        <button 
-                            onClick={() => setShowLauncher(false)}
-                            style={{
-                                position: 'absolute',
-                                top: '2rem',
-                                right: '2rem',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                color: '#fff',
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '50%',
-                                cursor: 'pointer',
-                                fontSize: '20px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                zIndex: 100
-                            }}
-                        >
-                            ×
-                        </button>
+                        <button onClick={() => setShowLauncher(false)} style={launcherCloseButtonStyle}>×</button>
                     </div>
                 </div>
             )}
 
             <style>{`
-                @keyframes vibe-fade-in {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
+                /** Global overrides for the core modular architecture */
+                @keyframes vibe-fade-in { from { opacity: 0; } to { opacity: 1; } }
+                ::-webkit-scrollbar { width: 6px; }
+                ::-webkit-scrollbar-thumb { background: ${VibeTheme.colors.glassBorder}; border-radius: 10px; }
+                ::-webkit-scrollbar-track { background: transparent; }
             `}</style>
         </div>
     );
+};
+
+const modalOverlayStyle: React.CSSProperties = {
+    position: 'absolute', top: 0, left: 0, width: '100vw', height: '100vh',
+    zIndex: 10000, background: VibeTheme.colors.glassBg, backdropFilter: 'blur(50px) saturate(200%)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center'
+};
+
+const launcherCloseButtonStyle: React.CSSProperties = {
+    position: 'absolute', top: '2rem', right: '2rem', background: VibeTheme.colors.bgSubtle, border: `1px solid ${VibeTheme.colors.border}`, color: VibeTheme.colors.textMain,
+    width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100
 };
 
 export default EditorApp;

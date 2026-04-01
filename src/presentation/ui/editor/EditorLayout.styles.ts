@@ -24,7 +24,7 @@ export const layoutStyles = createVibeStyles({
         height: '48px', // Match the unified header height
         flexShrink: 0,
         zIndex: 1000,
-        background: 'rgba(5, 5, 10, 0.8)',
+        background: VibeTheme.colors.glassBg,
         backdropFilter: 'blur(20px)',
         borderBottom: `1px solid ${VibeTheme.colors.glassBorder}`,
     },
@@ -37,7 +37,7 @@ export const layoutStyles = createVibeStyles({
     sidebarLeft: {
         width: '260px',
         height: '100%',
-        background: '#050508',
+        background: VibeTheme.colors.bgPrimary,
         borderRight: `1px solid ${VibeTheme.colors.glassBorder}`,
         zIndex: 10,
         display: 'flex',
@@ -46,13 +46,13 @@ export const layoutStyles = createVibeStyles({
     viewportArea: {
         flex: 1,
         position: 'relative',
-        background: '#0a0a0f',
+        background: VibeTheme.colors.bgSecondary,
         overflow: 'hidden',
     },
     sidebarRight: {
         width: '320px',
         height: '100%',
-        background: 'rgba(10, 10, 15, 0.4)',
+        background: VibeTheme.colors.glassBg,
         backdropFilter: 'blur(35px)',
         borderLeft: `1px solid ${VibeTheme.colors.glassBorder}`,
         zIndex: 10,

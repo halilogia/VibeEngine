@@ -20,7 +20,7 @@ export const TitleBar: React.FC = () => {
     return (
         <div style={{
             height: '32px',
-            background: 'rgba(0, 0, 0, 0.4)',
+            background: VibeTheme.colors.glassBg,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -32,11 +32,11 @@ export const TitleBar: React.FC = () => {
             {/* Left: App Logo & Name */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.8 }}>
                 <img src="/assets/icon1.png" alt="V" style={{ height: '14px' }} />
-                <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '1px', color: '#fff' }}>VIBEENGINE STUDIO</span>
+                <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '1px', color: VibeTheme.colors.textMain }}>VIBEENGINE STUDIO</span>
             </div>
 
             {/* Center: Scene Name Placeholder */}
-            <div style={{ fontSize: '10px', opacity: 0.4, fontWeight: 600 }}>
+            <div style={{ fontSize: '10px', opacity: 0.6, fontWeight: 600, color: VibeTheme.colors.textSecondary }}>
                 SOVEREIGN ELITE EDITION
             </div>
 
@@ -64,11 +64,12 @@ const WindowControlButton: React.FC<{ icon: any, onClick: () => void, hoverColor
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                background: hover ? (hoverColor || 'rgba(255, 255, 255, 0.05)') : 'transparent',
-                transition: 'all 0.2s'
+                background: hover ? (hoverColor || VibeTheme.colors.bgSubtle) : 'transparent',
+                transition: 'all 0.2s',
+                color: hover ? (hoverColor ? '#fff' : VibeTheme.colors.textMain) : VibeTheme.colors.textSecondary,
             }}
         >
-            <VibeIcons name={icon} size={12} />
+            <VibeIcons name={icon} size={12} color="currentColor" />
         </div>
     );
 };

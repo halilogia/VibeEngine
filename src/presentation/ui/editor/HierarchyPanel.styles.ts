@@ -15,7 +15,7 @@ export const hierarchyStyles = createVibeStyles({
     },
     toolbar: {
         padding: '8px 12px',
-        background: 'rgba(255, 255, 255, 0.02)',
+        background: VibeTheme.colors.bgSubtle,
         borderBottom: `1px solid ${VibeTheme.colors.glassBorder}`,
     },
     searchWrapper: {
@@ -24,9 +24,9 @@ export const hierarchyStyles = createVibeStyles({
         gap: '8px',
         padding: '0 8px',
         height: '32px',
-        background: 'rgba(0, 0, 0, 0.2)',
+        background: VibeTheme.colors.bgSecondary,
         borderRadius: '6px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
+        border: `1px solid ${VibeTheme.colors.border}`,
     },
     content: {
         flex: 1,
@@ -46,12 +46,12 @@ export const hierarchyStyles = createVibeStyles({
         gap: '8px',
     },
     treeItemHover: {
-        background: 'rgba(255, 255, 255, 0.04)',
+        background: VibeTheme.colors.glassBg,
         color: VibeTheme.colors.textMain,
     },
     treeItemSelected: {
-        background: 'rgba(99, 102, 241, 0.15)',
-        color: '#fff',
+        background: `${VibeTheme.colors.accent}22`,
+        color: VibeTheme.colors.textMain,
         borderLeft: `2px solid ${VibeTheme.colors.accent}`,
     },
     emptyState: {
@@ -68,7 +68,7 @@ export const hierarchyStyles = createVibeStyles({
     emptyTitle: {
         fontSize: '14px',
         fontWeight: 700,
-        color: '#fff',
+        color: VibeTheme.colors.textMain,
         margin: 0,
     },
     emptyDesc: {

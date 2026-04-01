@@ -7,13 +7,13 @@ import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 
 export const statusBarStyles = createVibeStyles({
     container: {
-        position: 'fixed',
-        bottom: '20px',
+        position: 'absolute',
+        bottom: '24px',
         left: '50%',
         transform: 'translateX(-50%)',
         height: '32px',
         minWidth: '600px',
-        background: 'rgba(10, 10, 15, 0.45)',
+        background: VibeTheme.colors.glassBg,
         backdropFilter: 'blur(30px) saturate(180%)',
         WebkitBackdropFilter: 'blur(30px) saturate(180%)',
         border: `1px solid ${VibeTheme.colors.glassBorder}`,
@@ -26,7 +26,7 @@ export const statusBarStyles = createVibeStyles({
         fontSize: '11px',
         color: VibeTheme.colors.textSecondary,
         zIndex: 1000,
-        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)',
+        boxShadow: `0 12px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 0 ${VibeTheme.colors.glassBorder}`,
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     },
     group: {
@@ -38,7 +38,7 @@ export const statusBarStyles = createVibeStyles({
     divider: {
         width: '1px',
         height: '14px',
-        background: 'rgba(255, 255, 255, 0.08)',
+        background: VibeTheme.colors.glassBorder,
     },
     highlight: {
         color: VibeTheme.colors.accent,
@@ -46,10 +46,10 @@ export const statusBarStyles = createVibeStyles({
         letterSpacing: '0.3px',
     },
     fpsBadge: {
-        background: 'rgba(0, 0, 0, 0.2)',
+        background: VibeTheme.colors.bgSecondary,
         padding: '2px 10px',
         borderRadius: '20px',
-        border: '1px solid rgba(255, 255, 255, 0.03)',
+        border: `1px solid ${VibeTheme.colors.border}`,
         display: 'flex',
         alignItems: 'center',
         gap: '6px',
@@ -60,17 +60,17 @@ export const statusBarStyles = createVibeStyles({
         fontFamily: 'monospace',
     },
     modeBadge: {
-        background: 'rgba(99, 102, 241, 0.15)',
+        background: `${VibeTheme.colors.accent}22`,
         color: VibeTheme.colors.accent,
         padding: '2px 8px',
         borderRadius: '12px',
         fontWeight: 800,
         fontSize: '10px',
         letterSpacing: '1px',
-        border: `1px solid rgba(99, 102, 241, 0.2)`,
+        border: `1px solid ${VibeTheme.colors.accent}44`,
     },
     version: {
-        color: 'rgba(255, 255, 255, 0.4)',
+        color: VibeTheme.colors.textSecondary,
         fontWeight: 500,
         fontSize: '10px',
     }

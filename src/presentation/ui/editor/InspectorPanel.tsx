@@ -54,13 +54,13 @@ const Vector3Field: React.FC<Vector3FieldProps> = ({ label, value, onChange }) =
             <span style={styles.fieldLabel}>{label}</span>
             <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
                 {axes.map((axis, idx) => (
-                    <div key={axis} style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div key={axis} style={{ flex: 1, display: 'flex', alignItems: 'center', background: VibeTheme.colors.bgSubtle, borderRadius: '4px', border: `1px solid ${VibeTheme.colors.border}` }}>
                         <span style={{ fontSize: '9px', fontWeight: 900, color: VibeTheme.colors.accent, width: '16px', textAlign: 'center' }}>{axis.toUpperCase()}</span>
                         <VibeInput 
                             type="number"
                             value={String(getAxisValue(axis, idx) || 0)}
                             onChange={(e) => handleAxisChange(axis, idx, parseFloat(e.target.value) || 0)}
-                            style={{ background: 'transparent', border: 'none', height: '24px', padding: '0 6px', fontSize: '11px', width: '100%' }}
+                            style={{ background: 'transparent', border: 'none', height: '24px', padding: '0 6px', fontSize: '11px', width: '100%', color: VibeTheme.colors.textMain }}
                         />
                     </div>
                 ))}
@@ -151,8 +151,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps 
             >
                 <SovereignHeader title="INSPECTOR" icon="Activity" dragHandleProps={dragHandleProps} />
                 <div style={styles.emptyState}>
-                    <VibeIcons name="Box" size={48} style={{ opacity: 0.1, color: VibeTheme.colors.accent }} />
-                    <h3 style={{ margin: 0, color: '#fff', fontSize: '14px' }}>NO ENTITY SELECTED</h3>
+                    <VibeIcons name="Box" size={48} style={{ opacity: 0.4, color: VibeTheme.colors.textSecondary }} />
+                    <h3 style={{ margin: 0, color: VibeTheme.colors.textMain, fontSize: '14px' }}>NO ENTITY SELECTED</h3>
                     <p style={{ margin: 0, color: VibeTheme.colors.textSecondary, fontSize: '12px', maxWidth: '200px', lineHeight: 1.5 }}>
                         Select an object in the Hierarchy or Viewport to view and edit its properties.
                     </p>
@@ -247,10 +247,10 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps 
                                         padding: '8px 12px',
                                         fontSize: '11px',
                                         cursor: 'pointer',
-                                        color: '#fff',
-                                        borderBottom: `1px solid ${VibeTheme.colors.glassBorder}`
+                                        color: VibeTheme.colors.textMain,
+                                        borderBottom: `1px solid ${VibeTheme.colors.border}`
                                     }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                                    onMouseEnter={(e) => (e.currentTarget.style.background = VibeTheme.colors.bgSubtle)}
                                     onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                                 >
                                     {item}

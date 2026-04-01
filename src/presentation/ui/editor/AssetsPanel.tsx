@@ -123,7 +123,7 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
             const folder = assets.find((a: any) => a.id === currId);
             if (folder) {
                 path.unshift(folder);
-                currId = folder.parentId;
+                currId = folder.parentId || null;
             } else break;
         }
         return path;
@@ -150,11 +150,11 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
                             key={cat.id}
                             onClick={() => setActiveFilter(cat.id)}
                             style={{ 
-                                background: activeFilter === cat.id ? 'var(--vibe-accent)' : 'rgba(255,255,255,0.03)',
+                                background: activeFilter === cat.id ? VibeTheme.colors.accent : VibeTheme.colors.bgSubtle,
                                 border: 'none',
                                 padding: '4px 12px',
                                 borderRadius: '20px',
-                                color: activeFilter === cat.id ? '#fff' : 'rgba(255,255,255,0.4)',
+                                color: activeFilter === cat.id ? '#fff' : VibeTheme.colors.textSecondary,
                                 fontSize: '10px',
                                 fontWeight: 800,
                                 cursor: 'pointer',
@@ -172,11 +172,11 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         style={{
-                            background: 'rgba(0,0,0,0.2)',
-                            border: '1px solid rgba(255,255,255,0.05)',
+                            background: VibeTheme.colors.bgSecondary,
+                            border: `1px solid ${VibeTheme.colors.border}`,
                             borderRadius: '8px',
                             padding: '6px 12px',
-                            color: '#fff',
+                            color: VibeTheme.colors.textMain,
                             fontSize: '11px',
                             outline: 'none',
                             width: '100%'
@@ -201,7 +201,7 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
             <div style={styles.content}>
                 <div style={styles.breadcrumb}>
                     <span 
-                        style={{ ...styles.breadcrumbItem, color: !currentFolderId ? '#fff' : 'inherit' }}
+                        style={{ ...styles.breadcrumbItem, color: !currentFolderId ? VibeTheme.colors.textMain : 'inherit' }}
                         onClick={() => setCurrentFolderId(null)}
                     >
                         <VibeIcons name="Home" size={12} /> Root
@@ -210,7 +210,7 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
                         <React.Fragment key={b.id}>
                             <VibeIcons name="ChevronRight" size={10} style={{ opacity: 0.3 }} />
                             <span 
-                                style={{ ...styles.breadcrumbItem, color: b.id === currentFolderId ? '#fff' : 'inherit' }}
+                                style={{ ...styles.breadcrumbItem, color: b.id === currentFolderId ? VibeTheme.colors.textMain : 'inherit' }}
                                 onClick={() => setCurrentFolderId(b.id)}
                             >
                                 {b.name}
@@ -225,8 +225,8 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                             style={styles.emptyState}
                         >
-                            <VibeIcons name="Box" size={32} style={{ opacity: 0.1, color: 'var(--vibe-accent)' }} />
-                            <p style={{ margin: 0, color: 'rgba(255,255,255,0.2)', fontSize: '11px', fontWeight: 800, letterSpacing: '1px' }}>
+                            <VibeIcons name="Box" size={32} style={{ opacity: 0.3, color: VibeTheme.colors.textSecondary }} />
+                            <p style={{ margin: 0, color: VibeTheme.colors.textSecondary, fontSize: '11px', fontWeight: 800, letterSpacing: '1px' }}>
                                 {isScanning ? 'SCANNING...' : 'NO ASSETS FOUND'}
                             </p>
                         </motion.div>

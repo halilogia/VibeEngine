@@ -8,7 +8,7 @@ import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 export const toolbarStyles = createVibeStyles({
     container: {
         height: '56px',
-        background: 'rgba(10, 10, 15, 0.45)',
+        background: VibeTheme.colors.glassBg,
         backdropFilter: 'blur(30px) saturate(150%)',
         WebkitBackdropFilter: 'blur(30px) saturate(150%)',
         borderBottom: `1px solid ${VibeTheme.colors.glassBorder}`,
@@ -23,10 +23,10 @@ export const toolbarStyles = createVibeStyles({
         display: 'flex',
         alignItems: 'center',
         gap: '6px',
-        background: 'rgba(255, 255, 255, 0.03)',
+        background: VibeTheme.colors.bgSubtle,
         padding: '4px',
         borderRadius: '12px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
+        border: `1px solid ${VibeTheme.colors.border}`,
     },
     section: {
         display: 'flex',
@@ -40,13 +40,13 @@ export const toolbarStyles = createVibeStyles({
         display: 'flex',
         gap: '8px',
         padding: '4px 16px',
-        background: 'rgba(0, 0, 0, 0.3)',
+        background: VibeTheme.colors.bgSecondary,
         borderRadius: '30px',
         border: `1px solid ${VibeTheme.colors.glassBorder}`,
     },
     divider: {
         width: '1px',
         height: '24px',
-        background: 'rgba(255, 255, 255, 0.08)',
+        background: VibeTheme.colors.glassBorder,
     }
 });

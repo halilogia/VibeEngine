@@ -14,7 +14,7 @@ export const consoleStyles = createVibeStyles({
     },
     toolbar: {
         padding: '8px 16px',
-        background: 'rgba(255, 255, 255, 0.02)',
+        background: VibeTheme.colors.bgSubtle,
         borderBottom: `1px solid ${VibeTheme.colors.glassBorder}`,
         display: 'flex',
         alignItems: 'center',
@@ -23,10 +23,10 @@ export const consoleStyles = createVibeStyles({
     filters: {
         display: 'flex',
         gap: '4px',
-        background: 'rgba(255, 255, 255, 0.03)',
+        background: VibeTheme.colors.glassBg,
         padding: '4px',
         borderRadius: '20px',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
+        border: `1px solid ${VibeTheme.colors.border}`,
     },
     content: {
         flex: 1,
@@ -40,11 +40,11 @@ export const consoleStyles = createVibeStyles({
         gap: '14px',
         padding: '10px 16px',
         borderLeft: '4px solid transparent',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.02)',
+        borderBottom: `1px solid ${VibeTheme.colors.border}`,
         transition: 'all 0.1s ease',
     },
     entryHover: {
-        background: 'rgba(255, 255, 255, 0.03)',
+        background: VibeTheme.colors.bgSubtle,
     },
     time: {
         flexShrink: 0,
@@ -56,7 +56,7 @@ export const consoleStyles = createVibeStyles({
     },
     message: {
         flex: 1,
-        color: 'rgba(255, 255, 255, 0.9)',
+        color: VibeTheme.colors.textMain,
         lineHeight: 1.5,
         wordBreak: 'break-word',
     },

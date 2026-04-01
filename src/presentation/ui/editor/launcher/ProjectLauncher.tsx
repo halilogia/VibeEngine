@@ -52,9 +52,7 @@ export const ProjectLauncher: React.FC = () => {
                 fontSize: '3.5rem',
                 fontWeight: 900,
                 letterSpacing: '-0.05em',
-                background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.4) 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: 'var(--vibe-text-main)',
                 marginBottom: '0.5rem'
             }}>
                 {t('launcher.title')}
@@ -182,7 +180,7 @@ export const ProjectLauncher: React.FC = () => {
                             </div>
                         </div>
 
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: '#fff' }}>{project.name}</h3>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--vibe-text-main)' }}>{project.name}</h3>
                         <p style={{ fontSize: '0.875rem', color: 'var(--vibe-text-secondary)', marginBottom: '2rem', opacity: 0.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.path}</p>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

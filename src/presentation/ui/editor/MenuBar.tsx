@@ -15,6 +15,7 @@ import { usePlayModeStore } from '@presentation/features/editor/core';
 import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '@presentation/features/editor/serialization';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
+import { useTranslation } from 'react-i18next';
 import { menuBarStyles as styles } from './MenuBar.styles';
 
 interface MenuItem {
@@ -23,6 +24,7 @@ interface MenuItem {
     shortcut?: string;
     action?: () => void;
     divider?: boolean;
+    variant?: 'primary';
 }
 
 interface MenuSection {
@@ -31,16 +33,18 @@ interface MenuSection {
 }
 
 export const MenuBar: React.FC = () => {
+    const { t } = useTranslation();
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     
     // Stores
     const { 
-        editorMode, setEditorMode, togglePanel, 
-        showAICopilot, showScriptEditor, showHierarchy, showConsole, showAssets, showInspector 
+        togglePanel, 
+        showAICopilot, showHierarchy, showConsole, showAssets, showInspector,
+        showAICopilotSettings, setShowAICopilotSettings
     } = useEditorStore();
-    const { sceneName, isDirty } = useSceneStore();
+    const { sceneName } = useSceneStore();
     const { setShowLauncher } = useProjectStore();
     const { addToast } = useToastStore();
     const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
@@ -67,46 +71,35 @@ export const MenuBar: React.FC = () => {
         {
             label: 'VibeEngine',
             items: [
-                { label: 'About VibeEngine', icon: <VibeIcons name="Activity" size={14} />, action: () => addToast('VibeEngine Studio v1.0 - Sovereign Elite Edition 🏛️', 'info') },
-                { label: 'App Settings', icon: <VibeIcons name="Settings" size={14} />, shortcut: 'Ctrl+,', action: () => { togglePanel('aiCopilot'); addToast('Neural Vault Access Granted.', 'success'); } },
+                { label: t('menu.app_settings'), icon: <VibeIcons name="Settings" size={14} />, shortcut: 'Ctrl+,', action: () => { useEditorStore.getState().setShowAICopilotSettings(true, 'project'); } },
                 { divider: true, label: '' },
-                { label: 'Quit Studio', icon: <VibeIcons name="Pause" size={14} />, action: () => { addToast('Closing Engine Studio...', 'warning'); setTimeout(() => window.close(), 1000); } },
+                { label: t('menu.quit'), icon: <VibeIcons name="Pause" size={14} />, action: () => { addToast('Closing Engine Studio...', 'warning'); setTimeout(() => window.close(), 1000); } },
             ]
         },
         {
-            label: 'File',
+            label: t('menu.file'),
             items: [
-                { label: 'Manage Projects', icon: <VibeIcons name="Layers" size={14} />, shortcut: 'Ctrl+L', action: handleOpenLauncher },
+                { label: t('menu.manage_projects'), icon: <VibeIcons name="Layers" size={14} />, shortcut: 'Ctrl+L', action: handleOpenLauncher },
                 { divider: true, label: '' },
-                { label: 'New Scene', icon: <VibeIcons name="Plus" size={14} />, action: () => { createDefaultScene(); addToast('New Scene', 'info'); } },
-                { label: 'Open Scene...', icon: <VibeIcons name="Search" size={14} />, action: handleOpen },
-                { label: 'Save Scene', icon: <VibeIcons name="Save" size={14} />, action: handleSave },
+                { label: t('menu.new_scene'), icon: <VibeIcons name="Plus" size={14} />, action: () => { createDefaultScene(); addToast('New Scene', 'info'); } },
+                { label: t('menu.open_scene'), icon: <VibeIcons name="Search" size={14} />, action: handleOpen },
+                { label: t('menu.save_scene'), icon: <VibeIcons name="Save" size={14} />, action: handleSave },
             ]
         },
         {
-            label: 'Build',
+            label: t('menu.build'),
             items: [
-                { label: 'Export HTML', icon: <VibeIcons name="Save" size={14} />, action: () => exportToHTML(sceneName) },
+                { label: t('menu.export_html'), icon: <VibeIcons name="Save" size={14} />, action: () => exportToHTML(sceneName) },
             ]
         }
-    ];
-
-    const transformButtons: { mode: EditorMode; icon: string; label: string }[] = [
-        { mode: 'translate', icon: 'Move', label: 'Move' },
-        { mode: 'rotate', icon: 'Rotate', label: 'Rotate' },
-        { mode: 'scale', icon: 'Scale', label: 'Scale' },
     ];
 
     return (
         <div className="unified-header" style={styles.container}>
             <input type="file" ref={fileInputRef} accept=".json" style={{ display: 'none' }} onChange={handleFileChange} />
 
-            {/* LEFT: Branding & Menu & Transform Tools */}
+            {/* LEFT: Menu & Transform Tools */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={styles.logoGroup} onClick={handleOpenLauncher}>
-                    <img src="/assets/icon1.png" alt="V" style={{ height: '20px' }} />
-                </div>
-
                 {menus.map(menu => (
                     <div
                         key={menu.label}
@@ -159,13 +152,13 @@ export const MenuBar: React.FC = () => {
                 <div style={styles.dividerVertical} />
 
                 {/* 🟢 Layout Toggle Suite (The only control box) */}
-                <div style={{ display: 'flex', gap: '6px', background: 'rgba(255,255,255,0.02)', padding: '2px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', marginLeft: '12px' }}>
+                <div style={{ display: 'flex', gap: '6px', background: VibeTheme.colors.glassBg, padding: '2px', borderRadius: '10px', border: `1px solid ${VibeTheme.colors.glassBorder}`, marginLeft: '12px' }}>
                     {/* Left: Hierarchy */}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('hierarchy')} 
                         style={{ 
                             width: '32px', height: '32px', padding: 0, 
-                            color: showHierarchy ? VibeTheme.colors.accent : 'rgba(255,255,255,0.4)',
+                            color: showHierarchy ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary,
                             filter: showHierarchy ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none'
                         }}
                     >
@@ -177,7 +170,7 @@ export const MenuBar: React.FC = () => {
                         variant="ghost" size="sm" onClick={() => togglePanel('assets')} 
                         style={{ 
                             width: '32px', height: '32px', padding: 0, 
-                            color: showAssets ? '#34d399' : 'rgba(255,255,255,0.4)',
+                            color: showAssets ? '#34d399' : VibeTheme.colors.textSecondary,
                             filter: showAssets ? `drop-shadow(0 0 4px #34d39988)` : 'none',
                             transform: 'rotate(90deg)'
                         }}
@@ -190,7 +183,7 @@ export const MenuBar: React.FC = () => {
                         variant="ghost" size="sm" onClick={() => togglePanel('console')} 
                         style={{ 
                             width: '32px', height: '32px', padding: 0, 
-                            color: showConsole ? '#60a5fa' : 'rgba(255,255,255,0.4)',
+                            color: showConsole ? '#60a5fa' : VibeTheme.colors.textSecondary,
                             filter: showConsole ? `drop-shadow(0 0 4px #60a5fa88)` : 'none',
                             transform: 'rotate(90deg)'
                         }}
@@ -203,7 +196,7 @@ export const MenuBar: React.FC = () => {
                         variant="ghost" size="sm" onClick={() => togglePanel('inspector')} 
                         style={{ 
                             width: '32px', height: '32px', padding: 0, 
-                            color: showInspector ? VibeTheme.colors.accent : 'rgba(255,255,255,0.4)',
+                            color: showInspector ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary,
                             filter: showInspector ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none',
                             transform: 'scaleX(-1)'
                         }}
@@ -216,7 +209,7 @@ export const MenuBar: React.FC = () => {
                         variant="ghost" size="sm" onClick={() => togglePanel('aiCopilot')} 
                         style={{ 
                             width: '32px', height: '32px', padding: 0, 
-                            color: showAICopilot ? VibeTheme.colors.accent : 'rgba(255,255,255,0.4)',
+                            color: showAICopilot ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary,
                             filter: showAICopilot ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none'
                         }}
                     >

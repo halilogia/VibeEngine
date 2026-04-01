@@ -57,12 +57,6 @@ export const StatusBar: React.FC = () => {
                 </div>
             </div>
 
-            <div style={styles.divider} />
-            
-            <div style={{ ...styles.group, ...styles.version }}>
-                <VibeIcons name="Cpu" size={12} />
-                <span>VibeEngine v1.0.0 Sovereign Elite</span>
-            </div>
         </div>
     );
 };

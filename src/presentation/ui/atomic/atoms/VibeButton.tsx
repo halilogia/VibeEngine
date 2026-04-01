@@ -84,7 +84,9 @@ export const VibeButton: React.FC<VibeButtonProps> = ({
             return {
                 ...s,
                 transform: 'scale(0.96)',
-                background: variant === 'primary' ? 'var(--editor-accent-hover)' : 'rgba(255, 255, 255, 0.1)',
+                background: variant === 'primary' ? VibeTheme.colors.accent : VibeTheme.colors.bgSubtle,
+                filter: variant === 'primary' ? 'brightness(0.9)' : 'none',
+                color: variant === 'primary' ? '#fff' : VibeTheme.colors.textMain,
             };
         }
 
@@ -93,10 +95,11 @@ export const VibeButton: React.FC<VibeButtonProps> = ({
              return {
                 ...s,
                 transform: 'translateY(-1px)',
-                background: variant === 'primary' ? 'var(--editor-accent-hover)' : 'rgba(255, 255, 255, 0.08)',
-                borderColor: variant === 'ghost' ? 'rgba(255, 255, 255, 0.1)' : variantStyle.borderColor,
-                boxShadow: variant === 'primary' ? '0 8px 25px rgba(99, 102, 241, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.2)',
-                color: '#fff',
+                background: variant === 'primary' ? VibeTheme.colors.accent : VibeTheme.colors.bgSubtle,
+                filter: variant === 'primary' ? 'brightness(1.15)' : 'none',
+                borderColor: variant === 'ghost' ? VibeTheme.colors.glassBorder : variantStyle.borderColor,
+                boxShadow: variant === 'primary' ? `0 8px 25px ${VibeTheme.colors.accent}60` : `0 4px 12px rgba(0,0,0,0.1)`,
+                color: variant === 'primary' ? '#fff' : VibeTheme.colors.textMain,
             };
         }
 

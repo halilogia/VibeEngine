@@ -16,6 +16,7 @@ import { usePlayModeStore } from '@presentation/features/editor/core/PlayModeMan
 import { VibeTheme } from '@themes/VibeStyles';
 import { VibeIcons } from '@ui/common/VibeIcons';
 import { ViewportToolbar } from '@ui/editor/ViewportToolbar';
+import { StatusBar } from './StatusBar';
 import { viewportStyles as styles, viewportAnimations } from './ViewportPanel.styles';
 
 // Map editor entity IDs to Three.js objects
@@ -121,13 +122,25 @@ export const ViewportPanel: React.FC = () => {
         camera.position.set(10, 10, 10);
         cameraRef.current = camera;
 
-        const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true });
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: canvasRef.current, 
+            antialias: true,
+            powerPreference: 'high-performance',
+            stencil: false,
+            depth: true
+        });
         renderer.shadowMap.enabled = true;
+        renderer.setPixelRatio(window.devicePixelRatio);
         rendererRef.current = renderer;
 
         const composer = new EffectComposer(renderer);
         composer.addPass(new RenderPass(scene, camera));
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(1024,1024), 0.5, 0.4, 0.85);
+        
+        // Dynamic Bloom Resolution
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(containerRef.current.clientWidth, containerRef.current.clientHeight), 
+            0.5, 0.4, 0.85
+        );
         composer.addPass(bloomPass);
         composer.addPass(new OutputPass());
         composerRef.current = composer;
@@ -171,17 +184,11 @@ export const ViewportPanel: React.FC = () => {
         axes.name = 'axes';
         scene.add(axes);
 
-        const handleResize = () => {
-            if (!containerRef.current || !renderer || !camera) return;
-            const { clientWidth, clientHeight } = containerRef.current;
-            renderer.setSize(clientWidth, clientHeight);
-            composer.setSize(clientWidth, clientHeight);
-            camera.aspect = clientWidth / clientHeight;
-            camera.updateProjectionMatrix();
-        };
+        let needsResize = false;
+        const handleResize = () => { needsResize = true; };
         const resizeObserver = new ResizeObserver(handleResize);
         resizeObserver.observe(containerRef.current);
-        handleResize();
+        needsResize = true; // Initial trigger
 
         let animationId: number;
         let lastTime = performance.now();
@@ -189,17 +196,28 @@ export const ViewportPanel: React.FC = () => {
 
         const animate = () => {
             animationId = requestAnimationFrame(animate);
-            
-            // 🛡️ Guard: Prevent rendering on zero-sized framebuffers
-            if (!containerRef.current || containerRef.current.clientWidth === 0 || containerRef.current.clientHeight === 0) {
-                return;
+
+            // 🛠️ Optimized Resize: Sync with Animation Loop to prevent layout-thrashing
+            if (needsResize && containerRef.current) {
+                const { clientWidth, clientHeight } = containerRef.current;
+                if (clientWidth > 0 && clientHeight > 0) {
+                    renderer.setSize(clientWidth, clientHeight, false);
+                    composer.setSize(clientWidth, clientHeight);
+                    camera.aspect = clientWidth / clientHeight;
+                    camera.updateProjectionMatrix();
+                    
+                    // Stabilize Bloom Pass
+                    const bloom = composer.passes[1] as any;
+                    if (bloom && bloom.resolution) {
+                        bloom.resolution.set(clientWidth, clientHeight);
+                    }
+                }
+                needsResize = false;
             }
 
-            // 🟢 Simulation State Sync (Only update scene logic if playing)
-            const { isPlaying } = usePlayModeStore.getState();
-            if (isPlaying) {
-                // Here we would trigger engine.update() or physics.step()
-                // For now, it ensures the visual representation of activity is live
+            // 🛡️ Guard: Prevent rendering on empty framebuffers
+            if (!containerRef.current || containerRef.current.clientWidth === 0 || containerRef.current.clientHeight === 0) {
+                return;
             }
 
             // 🔴 Real-time FPS Calculation
@@ -207,13 +225,12 @@ export const ViewportPanel: React.FC = () => {
             const currentTime = performance.now();
             if (currentTime >= lastTime + 1000) {
                 const currentFps = Math.round((frames * 1000) / (currentTime - lastTime));
-                (window as any).VibeFPS = currentFps; // 🛡️ Register to global for StatusBar
+                (window as any).VibeFPS = currentFps;
                 frames = 0;
                 lastTime = currentTime;
             }
 
             orbit.update();
-            renderer.clear();
             composer.render();
         };
         animate();
@@ -302,6 +319,7 @@ export const ViewportPanel: React.FC = () => {
             
             <div style={styles.overlay}>
                 <ViewportToolbar />
+                <StatusBar />
                 
                 {/* Viewport is now completely clean - Sovereign Elite Standard */}
                 {/* Viewport content is now completely clean of HUD elements */}

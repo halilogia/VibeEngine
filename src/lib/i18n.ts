@@ -28,6 +28,10 @@ const resources = {
         open_scene: 'Open Scene...',
         save_scene: 'Save Scene',
         manage_projects: 'Manage Projects',
+        about_engine: 'About VibeEngine',
+        app_settings: 'App Settings',
+        quit: 'Quit Studio',
+        export_html: 'Export HTML'
       },
       copilot: {
         title: 'NEURAL COPILOT',
@@ -42,6 +46,29 @@ const resources = {
         inspector: 'INSPECTOR',
         assets: 'ASSETS',
         console: 'CONSOLE',
+      },
+      settings: {
+        title: 'STUDIO CONFIG',
+        game_info: 'Game Info',
+        interface: 'Interface',
+        input: 'Input Options',
+        rendering: 'Rendering',
+        neural: 'Neural Intelligence',
+        apply: 'Apply Settings',
+        cancel: 'Cancel',
+        autosave: 'Changes auto-save to vibe_config.json',
+        config_desc_game: 'Configuration for the active game subsystem.',
+        config_desc: 'Configuration for the {{tab}} subsystem.',
+        game_metadata: 'Game Metadata',
+        active_game_title: 'Active Game Title',
+        studio_org: 'Studio Organization',
+        bundle_id: 'Bundle Identifier',
+        target_version: 'Target Build Version',
+        system_architecture: 'System Architecture',
+        core_engine: 'Core Engine',
+        neural_link: 'Neural Link',
+        render_backend: 'Rendering Backend',
+        editor_version: 'Editor Version'
       }
     }
   },
@@ -66,6 +93,10 @@ const resources = {
         open_scene: 'Sahne Aç...',
         save_scene: 'Sahneyi Kaydet',
         manage_projects: 'Projeleri Yönet',
+        about_engine: 'VibeEngine Hakkında',
+        app_settings: 'Uygulama Ayarları',
+        quit: 'Stüdyodan Çık',
+        export_html: 'HTML Dışa Aktar'
       },
       copilot: {
         title: 'NEURAL COPILOT',
@@ -81,6 +112,29 @@ const resources = {
         assets: 'Varlıklar',
         console: 'Konsol',
         ai_copilot: 'Neural Copilot'
+      },
+      settings: {
+        title: 'STÜDYO YAPILANDIRMASI',
+        game_info: 'Oyun Bilgisi',
+        interface: 'Arayüz',
+        input: 'Girdi Seçenekleri',
+        rendering: 'Görüntüleme',
+        neural: 'Yapay Zeka (Neural)',
+        apply: 'Ayarları Uygula',
+        cancel: 'İptal',
+        autosave: 'Değişiklikler vibe_config.json dosyasına kaydedilir.',
+        config_desc_game: 'Aktif oyun alt sistemi için yapılandırma.',
+        config_desc: '{{tab}} alt sistemi için yapılandırma.',
+        game_metadata: 'Oyun Üstverisi',
+        active_game_title: 'Aktif Oyun Adı',
+        studio_org: 'Stüdyo / Organizasyon',
+        bundle_id: 'Paket (Bundle) Kimliği',
+        target_version: 'Hedef Derleme Sürümü',
+        system_architecture: 'Sistem Mimarisi',
+        core_engine: 'Çekirdek Motor (Core Engine)',
+        neural_link: 'Yapay Zeka (Neural Link)',
+        render_backend: 'Görüntü İşleyici (Renderer)',
+        editor_version: 'Editör Sürümü'
       }
     }
   }

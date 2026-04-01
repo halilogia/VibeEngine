@@ -17,18 +17,18 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
     const [status, setStatus] = useState('Initializing Engine...');
     const [userReady, setUserReady] = useState(false);
 
-    const handleStart = () => {
-        setUserReady(true);
+    useEffect(() => {
         try {
             const audio = new Audio('./assets/start.mp3');
             audio.volume = 0.5;
             audio.play().catch(err => {
-                // Silently handle AbortError which occurs on rapid transitions
-                if (err.name !== 'AbortError') {
-                    console.warn('Audio play failed:', err);
-                }
+                if (err.name !== 'AbortError') console.warn('Audio play failed:', err);
             });
         } catch (e) {}
+    }, []);
+
+    const handleStart = () => {
+        setUserReady(true);
     };
 
     useEffect(() => {
