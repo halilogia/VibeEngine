@@ -22,13 +22,9 @@ import { VibeErrorBoundary } from '@ui/common/VibeErrorBoundary';
 
 export const EditorLayout: React.FC = () => {
     const { 
-        showHierarchy, showInspector, showConsole, showAssets, showAICopilot, showScriptEditor, setActivePanel 
+        showHierarchy, showInspector, showConsole, showAssets, showAICopilot, showScriptEditor, setActivePanel,
+        leftWidth, rightWidth, bottomHeight, setPanelSize
     } = useEditorStore();
-
-    // 🟢 Sidebar & Bottom Panel Resizing State
-    const [leftWidth, setLeftWidth] = useState(260);
-    const [rightWidth, setRightWidth] = useState(420);
-    const [bottomHeight, setBottomHeight] = useState(300);
 
     const handleResize = useCallback((dir: 'L' | 'R' | 'B') => (e: React.MouseEvent) => {
         const startX = e.clientX;
@@ -37,9 +33,9 @@ export const EditorLayout: React.FC = () => {
         const startH = bottomHeight;
 
         const onMove = (moveEvent: MouseEvent) => {
-            if (dir === 'L') setLeftWidth(Math.max(160, startW + (moveEvent.clientX - startX)));
-            if (dir === 'R') setRightWidth(Math.max(260, startW - (moveEvent.clientX - startX)));
-            if (dir === 'B') setBottomHeight(Math.max(100, startH - (moveEvent.clientY - startY)));
+            if (dir === 'L') setPanelSize('left', Math.max(160, startW + (moveEvent.clientX - startX)));
+            if (dir === 'R') setPanelSize('right', Math.max(260, startW - (moveEvent.clientX - startX)));
+            if (dir === 'B') setPanelSize('bottom', Math.max(100, startH - (moveEvent.clientY - startY)));
         };
         const onUp = () => {
             document.removeEventListener('mousemove', onMove);
@@ -66,30 +62,42 @@ export const EditorLayout: React.FC = () => {
                 )}
 
                 {/* 2. Center Viewport Area */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ flex: 1, position: 'relative' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', minWidth: 0 }}>
+                    <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
                         <VibeErrorBoundary name="Viewport"><ViewportPanel /></VibeErrorBoundary>
                     </div>
 
                     {/* 🟢 Bottom Tray (Assets & Console) - Sovereign Guarantee */}
                     {(showAssets || showConsole) && (
                         <div style={{ 
+                            height: `${bottomHeight}px`,
+                            position: 'relative',
                             display: 'flex', 
                             flexDirection: 'column', 
-                            zIndex: 100, 
+                            zIndex: 1000, 
                             borderTop: `1px solid ${VibeTheme.colors.glassBorder}`,
-                            background: '#050508'
+                            background: '#050508',
+                            flexShrink: 0
                         }}>
                             <div 
                                 onMouseDown={handleResize('B')} 
                                 className="h-resizer" 
                                 title="Resize Panel"
-                                style={{ height: '4px', background: 'rgba(255,255,255,0.05)', cursor: 'row-resize', width: '100%', zIndex: 110 }}
+                                style={{ 
+                                    height: '6px', 
+                                    background: 'rgba(255,255,255,0.05)', 
+                                    cursor: 'row-resize', 
+                                    width: '100%',
+                                    position: 'absolute',
+                                    top: 0,
+                                    zIndex: 1100 
+                                }}
                             />
                             <div style={{ 
-                                height: `${bottomHeight}px`, 
+                                flex: 1,
                                 display: 'flex', 
-                                overflow: 'hidden'
+                                overflow: 'hidden',
+                                marginTop: '4px'
                             }}>
                                 {showAssets && <div style={{ flex: 1, borderRight: showConsole ? `1px solid ${VibeTheme.colors.glassBorder}` : 'none', overflow: 'hidden' }}>
                                     <VibeErrorBoundary name="Assets"><AssetsPanel /></VibeErrorBoundary>

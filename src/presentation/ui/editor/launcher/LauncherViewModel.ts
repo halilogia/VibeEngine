@@ -11,7 +11,8 @@ export const useLauncherViewModel = () => {
     launchProject,
     setLoading,
     setError,
-    addProject
+    addProject,
+    removeProject
   } = useProjectStore();
 
   const pickProjectFolder = async () => {
@@ -40,6 +41,11 @@ export const useLauncherViewModel = () => {
     console.log(`Proje seçildi: ${project.name}`);
   };
 
+  const handleProjectRemove = (path: string) => {
+    removeProject(path);
+    console.log(`Proje kütüphaneden kaldırıldı: ${path}`);
+  };
+
   const launchActiveProject = () => {
     if (selectedProject) {
       launchProject(selectedProject);
@@ -54,6 +60,7 @@ export const useLauncherViewModel = () => {
     error,
     pickProjectFolder,
     handleProjectSelect,
+    handleProjectRemove,
     launchActiveProject
   };
 };

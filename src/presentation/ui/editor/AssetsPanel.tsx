@@ -75,7 +75,8 @@ export const AssetsPanel: React.FC<AssetsPanelProps> = ({ dragHandleProps }) => 
     const { assets, removeAsset } = useSceneStore();
     const { 
         editorMode, setEditorMode, togglePanel, 
-        showAICopilot, showScriptEditor, showHierarchy, showConsole, showAssets, showInspector 
+        showAICopilot, showScriptEditor, showHierarchy, showConsole, showAssets, showInspector,
+        activePanelId, setActivePanel
     } = useEditorStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState<'all' | AssetData['type']>('all');

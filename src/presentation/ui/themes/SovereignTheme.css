@@ -1,0 +1,39 @@
+/**
+ * 🏛️ VibeEngine - Sovereign Elite Pure CSS Theme
+ * Native, Zero-Runtime, and Ultra-Performant.
+ */
+
+:root {
+    /* 💎 Colors - Elite Palette */
+    --vibe-accent: #6366f1;
+    --vibe-accent-hover: #4f46e5;
+    --vibe-bg-primary: #05050a;
+    --vibe-bg-secondary: #0a0a20;
+    --vibe-bg-subtle: rgba(255, 255, 255, 0.03);
+    --vibe-border: rgba(255, 255, 255, 0.08);
+    --vibe-glass-bg: rgba(10, 10, 20, 0.7);
+    --vibe-glass-border: rgba(255, 255, 255, 0.12);
+    --vibe-text-main: #ffffff;
+    --vibe-text-secondary: rgba(255, 255, 255, 0.65);
+    
+    /* 🧠 Semantic Colors */
+    --vibe-error: #ef4444;
+    --vibe-success: #10b981;
+    --vibe-warning: #f59e0b;
+
+    /* ⚛️ Geometry & FX */
+    --vibe-radius-panel: 16px;
+    --vibe-radius-button: 10px;
+    --vibe-radius-pill: 100px;
+    
+    --vibe-blur-standard: blur(32px);
+    --vibe-blur-deep: blur(64px);
+
+    /* 🛡️ Elevations */
+    --vibe-shadow-panel: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+    --vibe-shadow-button: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    /* ⚡ Transitions */
+    --vibe-transition-standard: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --vibe-transition-smooth: 0.3s ease-out;
+}

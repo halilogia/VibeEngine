@@ -181,11 +181,11 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
                     <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.1em' }}>NEURAL COPILOT</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <VibeButton size="xs" variant="ghost" onClick={() => setShowModelSelector(!showModelSelector)} style={{ fontSize: '10px', padding: '4px 8px' }}>
+                    <VibeButton size="sm" variant="ghost" onClick={() => setShowModelSelector(!showModelSelector)} style={{ fontSize: '10px', padding: '4px 8px' }}>
                         {selectedModel?.split(':')[0].toUpperCase() || 'SELECT ENGINE'}
                         <VibeIcons name="ChevronDown" size={10} style={{ marginLeft: '4px' }} />
                     </VibeButton>
-                    <VibeButton size="xs" variant="ghost" onClick={() => setMessages([])}>
+                    <VibeButton size="sm" variant="ghost" onClick={() => setMessages([])}>
                         <VibeIcons name="Plus" size={14} />
                     </VibeButton>
                 </div>
@@ -196,7 +196,9 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
                     borderRadius: '16px',
                     padding: '16px',
                     boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
-                    animation: 'msg-slide 0.2s ease-out'
+                    animation: 'msg-slide 0.2s ease-out',
+                    background: 'rgba(10, 10, 15, 0.95)',
+                    border: `1px solid ${VibeTheme.colors.glassBorder}`
                 }}>
                     <div style={{ fontSize: '10px', fontWeight: 900, opacity: 0.3, marginBottom: '12px', letterSpacing: '2px', display: 'flex', justifyContent: 'space-between' }}>
                         <span>NEURAL ENGINES FOUND</span>
@@ -291,12 +293,12 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
 
                                 {isThinking && isLast && msg.role === 'assistant' && (
                                     <VibeButton 
-                                        size="xs" 
+                                        size="sm" 
                                         variant="ghost" 
                                         onClick={() => setIsThinking(false)}
                                         style={{ marginTop: '12px', color: '#ef4444', fontSize: '9px', fontWeight: 900 }}
                                     >
-                                        <VibeIcons name="Stop" size={10} style={{ marginRight: '6px' }} /> STOP NEURAL LINK
+                                        <VibeIcons name="Pause" size={10} style={{ marginRight: '6px' }} /> STOP NEURAL LINK
                                     </VibeButton>
                                 )}
                             </div>
@@ -338,7 +340,7 @@ export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps 
                         disabled={isThinking || !input.trim()}
                         style={{ borderRadius: '10px', minWidth: '40px' }}
                     >
-                        {isThinking ? <VibeIcons name="Loader" size={14} className="animate-spin" /> : <VibeIcons name="Send" size={14} />}
+                        {isThinking ? <VibeIcons name="Pause" size={14} /> : <VibeIcons name="Send" size={14} />}
                     </VibeButton>
                 </div>
             </div>

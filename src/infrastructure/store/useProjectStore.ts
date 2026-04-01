@@ -29,6 +29,7 @@ interface ProjectState {
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
   addProject: (project: ProjectInfo) => void;
+  removeProject: (path: string) => void;
 }
 
 export const useProjectStore = create<ProjectState>()(
@@ -48,6 +49,10 @@ export const useProjectStore = create<ProjectState>()(
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
       addProject: (project) => set((state) => ({ projects: [project, ...state.projects.filter((item) => item.path !== project.path)] })),
+      removeProject: (path) => set((state) => ({ 
+        projects: state.projects.filter((p) => p.path !== path),
+        selectedProject: state.selectedProject?.path === path ? null : state.selectedProject
+      })),
     }),
     {
       name: 'vibe-engine-project-store',

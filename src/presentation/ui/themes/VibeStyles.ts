@@ -22,22 +22,27 @@ export const createVibeStyles = <T extends VibeStyleObject>(styles: T): T => {
  */
 export const VibeTheme = {
     colors: {
-        accent: '#6366f1',
-        accentHover: '#4f46e5',
-        bgPrimary: '#05050a',
-        bgSecondary: '#0a0a15',
-        border: 'rgba(255, 255, 255, 0.08)',
-        textMain: '#ffffff',
-        textSecondary: 'rgba(255, 255, 255, 0.65)',
-        glassBg: 'rgba(10, 10, 15, 0.7)',
-        glassBorder: 'rgba(255, 255, 255, 0.12)',
+        accent: 'var(--vibe-accent)',
+        accentHover: 'var(--vibe-accent-hover)',
+        bgPrimary: 'var(--vibe-bg-primary)',
+        bgSecondary: 'var(--vibe-bg-secondary)',
+        bgSubtle: 'var(--vibe-bg-subtle)',
+        border: 'var(--vibe-border)',
+        textMain: 'var(--vibe-text-main)',
+        textSecondary: 'var(--vibe-text-secondary)',
+        glassBg: 'var(--vibe-glass-bg)',
+        glassBorder: 'var(--vibe-glass-border)',
+        error: 'var(--vibe-error)',
+        success: 'var(--vibe-success)',
+        warning: 'var(--vibe-warning)',
     },
     blur: {
-        standard: 'blur(45px)',
-        deep: 'blur(60px)',
+        standard: 'var(--vibe-blur-standard)',
+        deep: 'var(--vibe-blur-deep)',
     },
     radius: {
-        panel: '14px',
-        pill: '100px',
+        panel: 'var(--vibe-radius-panel)',
+        button: 'var(--vibe-radius-button)',
+        pill: 'var(--vibe-radius-pill)',
     }
 } as const;
