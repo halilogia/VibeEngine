@@ -3,10 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-    Box, Plus, Trash2, ChevronDown, ChevronRight,
-    Move, Camera, Shield, Magnet, Code, Sun, MousePointer2, Search
-} from 'lucide-react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
 import { useSceneStore, useEditorStore, type ComponentData } from '../stores';
 import { useToastStore } from '../stores/toastStore';
 import { getComponentInfo, getAvailableComponents, type PropertyInfo } from '../bridge';
@@ -15,13 +12,13 @@ import './InspectorPanel.css';
 
 // Icon mapping
 const ICONS: Record<string, React.ReactNode> = {
-    Move: <Move size={14} />,
-    Box: <Box size={14} />,
-    Camera: <Camera size={14} />,
-    Shield: <Shield size={14} />,
-    Magnet: <Magnet size={14} />,
-    Code: <Code size={14} />,
-    Sun: <Sun size={14} />,
+    Move: <VibeIcons name="Move" size={14} />,
+    Box: <VibeIcons name="Box" size={14} />,
+    Camera: <VibeIcons name="Camera" size={14} />,
+    Shield: <VibeIcons name="Shield" size={14} />,
+    Magnet: <VibeIcons name="Magnet" size={14} />,
+    Code: <VibeIcons name="Code" size={14} />,
+    Sun: <VibeIcons name="Sun" size={14} />,
 };
 
 // Precision Draggable Label
@@ -223,8 +220,8 @@ const ComponentEditor: React.FC<{
     return (
         <div className="component-section">
             <div className="component-header" onClick={() => setExpanded(!expanded)}>
-                {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                {ICONS[info?.icon || 'Box'] || <Box size={14} />}
+                {expanded ? <VibeIcons name="ChevronDown" size={14} /> : <VibeIcons name="ChevronRight" size={14} />}
+                {ICONS[info?.icon || 'Box'] || <VibeIcons name="Box" size={14} />}
                 <span className="component-name">{info?.label || component.type}</span>
                 {component.type !== 'Transform' && (
                     <button
@@ -234,7 +231,7 @@ const ComponentEditor: React.FC<{
                             removeComponent(entityId, component.type);
                         }}
                     >
-                        <Trash2 size={12} />
+                        <VibeIcons name="Trash" size={12} />
                     </button>
                 )}
             </div>
@@ -289,7 +286,7 @@ const AddComponentMenu: React.FC<{
                     className="add-component-item"
                     onClick={() => handleAdd(comp.type)}
                 >
-                    {ICONS[comp.icon] || <Box size={14} />}
+                    {ICONS[comp.icon] || <VibeIcons name="Box" size={14} />}
                     <span>{comp.label}</span>
                 </div>
             ))}
@@ -313,14 +310,24 @@ export const InspectorPanel: React.FC = () => {
             className={`editor-panel inspector-panel glass-panel ${activePanelId === 'inspector' ? 'active-panel' : ''}`}
             onClick={() => setActivePanel('inspector')}
         >
-            <div className="editor-panel-header">
-                <span>Inspector</span>
+            <div className="panel-header">
+                <div className="panel-header-left">
+                    <VibeIcons name="Activity" size={16} />
+                    <h2>INSPECTOR</h2>
+                </div>
+                <div className="panel-header-actions">
+                    <button className="panel-action-btn" title="Settings">
+                        <VibeIcons name="Settings" size={14} />
+                    </button>
+                </div>
             </div>
 
             <div className="editor-panel-content">
                 {!entity ? (
                     <div className="inspector-empty-state">
-                        <MousePointer2 size={40} className="empty-icon" />
+                        <div className="empty-state-icon">
+                            <VibeIcons name="Cursor" size={40} />
+                        </div>
                         <h3>No entity selected</h3>
                         <p>Select an object in the Hierarchy or Viewport to view and edit its properties.</p>
                     </div>

@@ -3,18 +3,20 @@
  */
 
 import React, { useState } from 'react';
-import { AlertCircle, AlertTriangle, Info, Trash2, CheckCircle } from 'lucide-react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
+
 import { useConsoleStore, useEditorStore, type LogLevel } from '../stores';
 import './ConsolePanel.css';
 
 const getIcon = (level: LogLevel) => {
     switch (level) {
-        case 'error': return <AlertCircle size={14} />;
-        case 'warning': return <AlertTriangle size={14} />;
-        case 'success': return <CheckCircle size={14} />;
-        default: return <Info size={14} />;
+        case 'error': return <VibeIcons name="AlertCircle" size={14} />;
+        case 'warning': return <VibeIcons name="AlertTriangle" size={14} />;
+        case 'success': return <VibeIcons name="CheckCircle" size={14} />;
+        default: return <VibeIcons name="Sparkles" size={14} />;
     }
 };
+
 
 export const ConsolePanel: React.FC = () => {
     const { logs, clearLogs } = useConsoleStore();
@@ -39,9 +41,12 @@ export const ConsolePanel: React.FC = () => {
             className={`editor-panel console-panel glass-panel ${activePanelId === 'console' ? 'active-panel' : ''}`}
             onClick={() => setActivePanel('console')}
         >
-            <div className="editor-panel-header">
-                <span>Console</span>
-                <div className="panel-actions">
+            <div className="panel-header">
+                <div className="panel-header-left">
+                    <VibeIcons name="Terminal" size={16} />
+                    <h2>CONSOLE</h2>
+                </div>
+                <div className="panel-header-actions">
                     <div className="console-filters">
                         <button 
                             className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
@@ -80,7 +85,7 @@ export const ConsolePanel: React.FC = () => {
                         onClick={(e) => { e.stopPropagation(); clearLogs(); }} 
                         title="Clear"
                     >
-                        <Trash2 size={14} />
+                        <VibeIcons name="Trash" size={14} />
                     </button>
                 </div>
             </div>

@@ -34,6 +34,9 @@ interface EditorState {
     activePanelId: string | null;
     shadingMode: 'lit' | 'wireframe' | 'solid';
     showCommandPalette: boolean;
+    showBloom: boolean;
+    showEnvironment: boolean;
+
 
     // Actions
     selectEntity: (id: number | null) => void;
@@ -49,7 +52,10 @@ interface EditorState {
     togglePanel: (panel: 'hierarchy' | 'inspector' | 'assets' | 'console' | 'aiCopilot' | 'scriptEditor') => void;
     setActivePanel: (id: string | null) => void;
     setShadingMode: (mode: 'lit' | 'wireframe' | 'solid') => void;
+    toggleBloom: () => void;
+    toggleEnvironment: () => void;
 }
+
 
 export const useEditorStore = create<EditorState>((set) => ({
     // Initial state
@@ -70,6 +76,9 @@ export const useEditorStore = create<EditorState>((set) => ({
     activePanelId: 'viewport',
     shadingMode: 'lit',
     showCommandPalette: false,
+    showBloom: true,
+    showEnvironment: true,
+
 
     // Actions
     selectEntity: (id) => set({
@@ -119,4 +128,8 @@ export const useEditorStore = create<EditorState>((set) => ({
     toggleCommandPalette: (show) => set((state) => ({ 
         showCommandPalette: show !== undefined ? show : !state.showCommandPalette 
     })),
+ 
+    toggleBloom: () => set((state) => ({ showBloom: !state.showBloom })),
+    toggleEnvironment: () => set((state) => ({ showEnvironment: !state.showEnvironment })),
 }));
+

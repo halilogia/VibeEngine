@@ -1,17 +1,11 @@
-/**
- * AssetsPanel v2 - Asset browser with drag-drop import
- */
-
 import React, { useState, useRef, useCallback } from 'react';
-import {
-    Folder, File, Image, Box, Music, Code,
-    Grid, List, Upload, FolderPlus, Search, Trash2, Loader,
-    ChevronRight, Home, Copy, Plus
-} from 'lucide-react';
+import { VibeIcons, type VibeIconName } from '../../presentation/components/VibeIcons';
+
 import { useAssetManager, type AssetEntry } from '../assets';
 import { useSceneStore, useEditorStore } from '../stores';
 import { ContextMenu, type ContextMenuItem } from '../components/ContextMenu';
 import './AssetsPanel.css';
+
 
 interface SearchHighlightProps {
     text: string;
@@ -41,14 +35,15 @@ type AssetType = 'folder' | 'model' | 'texture' | 'audio' | 'script' | 'other';
 
 const getIcon = (type: AssetType) => {
     switch (type) {
-        case 'folder': return <Folder size={20} />;
-        case 'model': return <Box size={20} />;
-        case 'texture': return <Image size={20} />;
-        case 'audio': return <Music size={20} />;
-        case 'script': return <Code size={20} />;
-        default: return <File size={20} />;
+        case 'folder': return <VibeIcons name="Folder" size={20} />;
+        case 'model': return <VibeIcons name="Box" size={20} />;
+        case 'texture': return <VibeIcons name="Image" size={20} />;
+        case 'audio': return <VibeIcons name="Music" size={20} />;
+        case 'script': return <VibeIcons name="Code" size={20} />;
+        default: return <VibeIcons name="File" size={20} />;
     }
 };
+
 
 const getAssetType = (filename: string): AssetType => {
     const ext = filename.split('.').pop()?.toLowerCase();
@@ -77,10 +72,12 @@ export const AssetsPanel: React.FC = () => {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState<AssetType | 'all'>('all');
+    const [activeTab, setActiveTab] = useState<'project' | 'library'>('project');
     const [isDragging, setIsDragging] = useState(false);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const { assets, loading, importModel, importTexture, removeAsset } = useAssetManager();
+    const { assets, libraryAssets, loading, importModel, importTexture, removeAsset } = useAssetManager();
     const { addEntity, addComponent } = useSceneStore();
     const { 
         selectEntity, 
@@ -88,14 +85,15 @@ export const AssetsPanel: React.FC = () => {
     } = useEditorStore();
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; asset: AssetEntry } | null>(null);
 
-    // Convert Map to array
-    const assetList = Array.from(assets.values());
+    // Convert Map to array based on active tab
+    const assetList = Array.from(activeTab === 'project' ? assets.values() : libraryAssets.values());
  
     const filteredAssets = assetList.filter(a => {
         const matchesSearch = a.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesFilter = filterType === 'all' || a.type === filterType;
-        return matchesSearch && matchesFilter;
+        const matchesType = filterType === 'all' || a.type === filterType;
+        return matchesSearch && matchesType;
     });
+
 
     // Double-click to add asset to scene
     const addAssetToScene = useCallback((asset: AssetEntry) => {
@@ -165,12 +163,12 @@ export const AssetsPanel: React.FC = () => {
     const contextMenuItems: ContextMenuItem[] = contextMenu ? [
         { 
             label: 'Add to Scene', 
-            icon: <Plus size={12} />, 
+            icon: <VibeIcons name="Plus" size={12} />, 
             onClick: () => addAssetToScene(contextMenu.asset) 
         },
         { 
             label: 'Copy URL', 
-            icon: <Copy size={12} />, 
+            icon: <VibeIcons name="Copy" size={12} />, 
             onClick: () => {
                 navigator.clipboard.writeText(contextMenu.asset.url);
                 console.log('📋 Asset URL copied to clipboard');
@@ -179,10 +177,11 @@ export const AssetsPanel: React.FC = () => {
         { divider: true, label: '' },
         { 
             label: 'Delete Asset', 
-            icon: <Trash2 size={12} />, 
+            icon: <VibeIcons name="Trash" size={12} />, 
             danger: true, 
             onClick: () => removeAsset(contextMenu.asset.id) 
         },
+
     ] : [];
 
     return (
@@ -204,28 +203,37 @@ export const AssetsPanel: React.FC = () => {
             />
 
             <div className="editor-panel-header">
-                <div className="assets-breadcrumbs">
-                    <Home size={12} className="breadcrumb-icon" onClick={() => {}} />
-                    <ChevronRight size={10} className="breadcrumb-separator" />
-                    <span className="breadcrumb-item">Assets</span>
-                    <ChevronRight size={10} className="breadcrumb-separator" />
-                    <span className="breadcrumb-item active">MobRunner</span>
+                <div className="assets-tabs">
+                    <button 
+                        className={`assets-tab ${activeTab === 'project' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('project')}
+                    >
+                        Project
+                    </button>
+                    <button 
+                        className={`assets-tab ${activeTab === 'library' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('library')}
+                    >
+                        Library <span className="library-badge">Kenney</span>
+                    </button>
                 </div>
                 <div className="panel-actions">
+
                     <button
                         className={`panel-action-btn ${viewMode === 'grid' ? 'active' : ''}`}
                         onClick={() => setViewMode('grid')}
                         title="Grid View"
                     >
-                        <Grid size={14} />
+                        <VibeIcons name="Grid" size={14} />
                     </button>
                     <button
                         className={`panel-action-btn ${viewMode === 'list' ? 'active' : ''}`}
                         onClick={() => setViewMode('list')}
                         title="List View"
                     >
-                        <List size={14} />
+                        <VibeIcons name="List" size={14} />
                     </button>
+
                 </div>
             </div>
 
@@ -259,7 +267,7 @@ export const AssetsPanel: React.FC = () => {
                 </div>
                 <div className="assets-search-row">
                     <div className="assets-search">
-                        <Search size={14} />
+                        <VibeIcons name="Search" size={14} />
                         <input
                             type="text"
                             placeholder="Search assets..."
@@ -272,15 +280,16 @@ export const AssetsPanel: React.FC = () => {
                         title="Import Files"
                         onClick={() => fileInputRef.current?.click()}
                     >
-                        <Upload size={14} />
+                        <VibeIcons name="Upload" size={14} />
                     </button>
+
                 </div>
             </div>
 
             {/* Drop zone overlay */}
             {isDragging && (
                 <div className="drop-zone-overlay">
-                    <Upload size={48} />
+                    <VibeIcons name="Upload" size={48} />
                     <span>Drop files to import</span>
                 </div>
             )}
@@ -288,27 +297,34 @@ export const AssetsPanel: React.FC = () => {
             {/* Loading indicator */}
             {loading && (
                 <div className="loading-indicator">
-                    <Loader size={20} className="spin" />
+                    <VibeIcons name="Loader" size={20} className="spin" />
                     <span>Importing...</span>
                 </div>
             )}
+
 
             <div className={`assets-content ${viewMode}`}>
                 {filteredAssets.length === 0 ? (
                     <div className="assets-empty-state">
                         <div className="empty-state-icon">
-                            <Upload size={40} />
-                            <Box size={20} className="floating-icon" />
+                            <VibeIcons name="Upload" size={40} />
+                            <VibeIcons name="Box" size={20} className="floating-icon" />
                         </div>
-                        <h3>No assets found</h3>
-                        <p>Drag & drop models, textures, or audio files here to start building your world.</p>
-                        <button 
-                            className="editor-btn primary"
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            <Upload size={14} /> Import Assets
-                        </button>
+                        <h3>{activeTab === 'project' ? 'No project assets' : 'No library assets'}</h3>
+                        <p>{activeTab === 'project' 
+                            ? 'Drag & drop models, textures, or audio files here to start building your world.' 
+                            : 'Wait for the library to initialize or check your connection.'}
+                        </p>
+                        {activeTab === 'project' && (
+                            <button 
+                                className="editor-btn primary"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <VibeIcons name="Upload" size={14} /> Import Assets
+                            </button>
+                        )}
                     </div>
+
                 ) : (
                     filteredAssets.map((asset) => (
                         <div
@@ -333,9 +349,10 @@ export const AssetsPanel: React.FC = () => {
                                 onClick={(e) => { e.stopPropagation(); removeAsset(asset.id); }}
                                 title="Delete"
                             >
-                                <Trash2 size={12} />
+                                <VibeIcons name="Trash" size={12} />
                             </button>
                         </div>
+
                     ))
                 )}
             </div>

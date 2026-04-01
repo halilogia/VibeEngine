@@ -30,8 +30,11 @@ export interface AssetEntry {
 interface AssetManagerState {
     /** Collection of all registered assets */
     assets: Map<string, AssetEntry>;
+    /** Collection of built-in library assets (engine-level) */
+    libraryAssets: Map<string, AssetEntry>;
     /** Whether an import operation is in progress */
     loading: boolean;
+
     /** Error message if an operation failed */
     error: string | null;
 
@@ -41,7 +44,10 @@ interface AssetManagerState {
     importTexture: (file: File) => Promise<AssetEntry | null>;
     /** Populates the manager with assets from a specific directory */
     loadAssetsFromDirectory: (basePath: string, files: string[]) => void;
+    /** Initializes the built-in Kenney Pirate Kit library */
+    initializeKenneyLibrary: (models: string[]) => void;
     /** Retrieves an asset by its ID */
+
     getAsset: (id: string) => AssetEntry | undefined;
     /** Removes an asset and disposes its resources */
     removeAsset: (id: string) => void;
@@ -65,8 +71,10 @@ function generateId(): string {
  */
 export const useAssetManager = create<AssetManagerState>((set, get) => ({
     assets: new Map(),
+    libraryAssets: new Map(),
     loading: false,
     error: null,
+
 
     /**
      * Imports a GLTF/GLB file using THREE.GLTFLoader.
@@ -146,7 +154,7 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
         }
     },
 
-    getAsset: (id) => get().assets.get(id),
+    getAsset: (id) => get().assets.get(id) || get().libraryAssets.get(id),
 
     /**
      * Removes an asset and ensures its geometry/material memory is freed.
@@ -221,6 +229,31 @@ export const useAssetManager = create<AssetManagerState>((set, get) => ({
             return { assets: newAssets };
         });
     },
+
+    /**
+     * Initializes the Kenney Pirate Kit library using static paths.
+     */
+    initializeKenneyLibrary: (models) => {
+        set((state) => {
+            const newLibrary = new Map(state.libraryAssets);
+            const basePath = '/kenney-kit/kenney_pirate-kit/Models/GLB format/';
+
+            for (const name of models) {
+                const id = `kenney_${name.split('.')[0]}`;
+                const entry: AssetEntry = {
+                    id,
+                    name: name.split('.')[0].replace(/-/g, ' '),
+                    type: 'model',
+                    url: basePath + name,
+                    thumbnail: undefined // could add previews later
+                };
+                newLibrary.set(id, entry);
+            }
+
+            return { libraryAssets: newLibrary };
+        });
+    },
+
 
     /**
      * Resets the manager and cleans up all GPU resources.

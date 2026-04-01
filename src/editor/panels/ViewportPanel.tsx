@@ -6,7 +6,12 @@ import React, { useRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { useEditorStore, useSceneStore } from '../stores';
+
 import { Layers, Activity, MousePointer2 } from 'lucide-react';
 import { ViewportToolbar } from '../components/ViewportToolbar';
 import './ViewportPanel.css';
@@ -52,14 +57,17 @@ export const ViewportPanel: React.FC = () => {
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const orbitRef = useRef<OrbitControls | null>(null);
     const transformRef = useRef<TransformControls | null>(null);
+    const composerRef = useRef<EffectComposer | null>(null);
     const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
+
     const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
     const gizmoRef = useRef<{ scene: THREE.Scene, camera: THREE.PerspectiveCamera } | null>(null);
 
     const { 
         editorMode, showGrid, showAxes, isPlaying, selectedEntityId, selectEntity,
-        activePanelId, setActivePanel, shadingMode 
+        activePanelId, setActivePanel, shadingMode, showBloom, showEnvironment 
     } = useEditorStore();
+
     const { entities, rootEntityIds, updateComponent } = useSceneStore();
  
     // Helper to create a vertical gradient background texture
@@ -115,7 +123,29 @@ export const ViewportPanel: React.FC = () => {
         renderer.autoClear = false;
         rendererRef.current = renderer;
 
+        // Post-Processing Setup
+        const composer = new EffectComposer(renderer);
+        const renderPass = new RenderPass(scene, camera);
+        composer.addPass(renderPass);
+
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            0.5, // strength
+            0.4, // radius
+            0.85 // threshold
+        );
+        composer.addPass(bloomPass);
+
+        const outputPass = new OutputPass();
+        composer.addPass(outputPass);
+        composerRef.current = composer;
+
+        // Reactive Bloom Control
+        bloomPass.enabled = showBloom;
+
+
         // Scene Atmosphere
+
         scene.fog = new THREE.FogExp2(0x1a1a2e, 0.02);
 
         // Orbit controls
@@ -193,9 +223,11 @@ export const ViewportPanel: React.FC = () => {
             const { clientWidth, clientHeight } = containerRef.current;
             renderer.setSize(clientWidth, clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
+            composer?.setSize(clientWidth, clientHeight);
             camera.aspect = clientWidth / clientHeight;
             camera.updateProjectionMatrix();
         };
+
 
         const resizeObserver = new ResizeObserver(handleResize);
         resizeObserver.observe(containerRef.current);
@@ -208,9 +240,14 @@ export const ViewportPanel: React.FC = () => {
             // Manual Clear At Start Of Frame
             renderer.clear();
 
-            // Render main scene
+            // Render main scene with Post-Processing
             renderer.setViewport(0, 0, containerRef.current!.clientWidth, containerRef.current!.clientHeight);
-            renderer.render(scene, camera);
+            if (composerRef.current) {
+                composerRef.current.render();
+            } else {
+                renderer.render(scene, camera);
+            }
+
 
             // Render Gizmo
             if (gizmoRef.current) {
@@ -366,8 +403,28 @@ export const ViewportPanel: React.FC = () => {
             }
         });
     }, [shadingMode, entities]);
+ 
+    // Reactive Graphics Control
+    useEffect(() => {
+        if (composerRef.current) {
+            const bloomPass = composerRef.current.passes.find(p => p instanceof UnrealBloomPass) as UnrealBloomPass;
+            if (bloomPass) {
+                bloomPass.enabled = showBloom;
+            }
+        }
+    }, [showBloom]);
+ 
+    useEffect(() => {
+        if (!sceneRef.current) return;
+        // Adjust environmental lighting intensity
+        const ambient = sceneRef.current.children.find(c => c instanceof THREE.AmbientLight) as THREE.AmbientLight;
+        if (ambient) {
+            ambient.intensity = showEnvironment ? 0.6 : 0.2;
+        }
+    }, [showEnvironment]);
 
     // Click to select entity
+
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const container = containerRef.current;
         const camera = cameraRef.current;

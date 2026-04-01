@@ -3,11 +3,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import {
-    Save, FolderOpen, FilePlus, Settings, Download,
-    Undo, Redo, Copy, Clipboard, Trash2,
-    Grid3X3, Axis3D, Package, Database
-} from 'lucide-react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
 import { useEditorStore, useSceneStore } from '../stores';
 import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '../serialization';
 import { LocalSceneStorage } from '../storage/LocalSceneStorage';

@@ -3,12 +3,7 @@
  */
 
 import React from 'react';
-import {
-    Move, RotateCcw, Expand,
-    Play, Pause, Square,
-    Grid3X3, Axis3D,
-    Maximize2, Sparkles, Code2, Save
-} from 'lucide-react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
 import { useEditorStore, type EditorMode } from '../stores';
 import { useToastStore } from '../stores/toastStore';
 import { usePlayModeStore } from '../core';
@@ -18,9 +13,11 @@ export const Toolbar: React.FC = () => {
     const { 
         editorMode, setEditorMode, 
         showGrid, showAxes, toggleGrid, toggleAxes,
-        showAICopilot, showScriptEditor, togglePanel
+        showAICopilot, showScriptEditor, togglePanel,
+        showBloom, toggleBloom, showEnvironment, toggleEnvironment
     } = useEditorStore();
     const { addToast } = useToastStore();
+
     const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
  
     const handleSave = () => {
@@ -29,16 +26,15 @@ export const Toolbar: React.FC = () => {
     };
 
     const modes: { mode: EditorMode; icon: React.ReactNode; label: string; key: string }[] = [
-        { mode: 'translate', icon: <Move size={16} />, label: 'Move', key: 'W' },
-        { mode: 'rotate', icon: <RotateCcw size={16} />, label: 'Rotate', key: 'E' },
-        { mode: 'scale', icon: <Expand size={16} />, label: 'Scale', key: 'R' },
+        { mode: 'translate', icon: <VibeIcons name="Move" size={16} />, label: 'Move', key: 'W' },
+        { mode: 'rotate', icon: <VibeIcons name="Rotate" size={16} />, label: 'Rotate', key: 'E' },
+        { mode: 'scale', icon: <VibeIcons name="Scale" size={16} />, label: 'Scale', key: 'R' },
     ];
 
     return (
-        <div className="toolbar">
-            {/* Transform modes */}
-            <div className="toolbar-group-container">
-                <span className="group-label">Transform</span>
+        <div className="toolbar studio-toolbar">
+            <div className="toolbar-left-group">
+                {/* Transform modes */}
                 <div className="toolbar-group">
                     {modes.map(m => (
                         <button
@@ -51,91 +47,90 @@ export const Toolbar: React.FC = () => {
                         </button>
                     ))}
                 </div>
-            </div>
 
-            <div className="toolbar-divider" />
+                <div className="toolbar-divider" />
 
-            {/* View controls */}
-            <div className="toolbar-group-container">
-                <span className="group-label">View</span>
+                {/* View controls */}
                 <div className="toolbar-group">
                     <button
                         className={`toolbar-btn ${showGrid ? 'active' : ''}`}
                         onClick={toggleGrid}
                         title="Toggle Grid"
                     >
-                        <Grid3X3 size={16} />
+                        <VibeIcons name="Grid" size={16} />
                     </button>
                     <button
                         className={`toolbar-btn ${showAxes ? 'active' : ''}`}
                         onClick={toggleAxes}
                         title="Toggle Axes"
                     >
-                        <Axis3D size={16} />
+                        <VibeIcons name="Axis" size={16} />
+                    </button>
+                </div>
+
+                {/* Elite Graphics Control */}
+                <div className="toolbar-group">
+                    <button
+                        className={`toolbar-btn graphics-toggle ${showBloom ? 'active' : ''}`}
+                        onClick={toggleBloom}
+                        title="Elite Bloom Overlay"
+                    >
+                        <VibeIcons name="Sparkles" size={16} />
+                    </button>
+                    <button
+                        className={`toolbar-btn ${showEnvironment ? 'active' : ''}`}
+                        onClick={toggleEnvironment}
+                        title="Studio Lighting"
+                    >
+                        <VibeIcons name="Axis" size={16} style={{ transform: 'rotate(45deg)' }} />
                     </button>
                 </div>
             </div>
 
-            <div className="toolbar-spacer" />
-
-            {/* AI Co-pilot & Script Editor */}
-            <div className="toolbar-group-container">
-                <span className="group-label">Features</span>
-                <div className="toolbar-group features-group">
-                    <button
-                        className="toolbar-btn save-btn"
-                        onClick={handleSave}
-                        title="Save Scene (Ctrl+S)"
-                    >
-                        <Save size={16} />
-                    </button>
-                    <button
-                        className={`toolbar-btn ai-copilot-toggle ${showAICopilot ? 'active' : ''}`}
-                        onClick={() => togglePanel('aiCopilot')}
-                        title="AI Co-pilot Chat"
-                    >
-                        <Sparkles size={16} />
-                    </button>
-                    <button
-                        className={`toolbar-btn ${showScriptEditor ? 'active' : ''}`}
-                        onClick={() => togglePanel('scriptEditor')}
-                        title="Script Editor"
-                    >
-                        <Code2 size={16} />
-                    </button>
-                </div>
-            </div>
-
-            <div className="toolbar-spacer" />
-
-            {/* Play controls */}
-            <div className="toolbar-group play-controls">
+            {/* Play controls (CENTERED) */}
+            <div className="toolbar-center-group play-controls">
                 {!isPlaying ? (
                     <button className="toolbar-btn play-btn" onClick={play} title="Play Scene">
-                        <Play size={16} />
+                        <VibeIcons name="Play" size={16} fill="currentColor" />
                     </button>
                 ) : (
                     <>
                         <button
-                            className={`toolbar-btn ${isPaused ? 'active' : ''}`}
+                            className={`toolbar-btn pause-btn ${isPaused ? 'active' : ''}`}
                             onClick={pause}
                             title="Pause"
                         >
-                            <Pause size={16} />
+                            <VibeIcons name="Pause" size={16} fill="currentColor" />
                         </button>
                         <button className="toolbar-btn stop-btn" onClick={stop} title="Stop & Restore">
-                            <Square size={16} />
+                            <VibeIcons name="Square" size={16} fill="currentColor" />
                         </button>
                     </>
                 )}
             </div>
 
-            <div className="toolbar-spacer" />
-
-            {/* Maximize */}
-            <div className="toolbar-group">
-                <button className="toolbar-btn" title="Maximize Viewport">
-                    <Maximize2 size={16} />
+            {/* Features (RIGHT) */}
+            <div className="toolbar-right-group">
+                <button
+                    className={`toolbar-btn ai-copilot-toggle ${showAICopilot ? 'active' : ''}`}
+                    onClick={() => togglePanel('aiCopilot')}
+                    title="AI Copilot Studio"
+                >
+                    <VibeIcons name="Sparkles" size={16} />
+                </button>
+                <button
+                    className={`toolbar-btn ${showScriptEditor ? 'active' : ''}`}
+                    onClick={() => togglePanel('scriptEditor')}
+                    title="Script Editor"
+                >
+                    <VibeIcons name="Code" size={16} />
+                </button>
+                <button
+                    className="toolbar-btn save-btn primary"
+                    onClick={handleSave}
+                    title="Save Scene (Ctrl+S)"
+                >
+                    <VibeIcons name="Save" size={16} />
                 </button>
             </div>
         </div>

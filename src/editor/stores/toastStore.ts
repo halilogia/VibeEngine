@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { vibeId } from '../../domain/utils/id';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -18,7 +19,8 @@ interface ToastState {
 export const useToastStore = create<ToastState>((set) => ({
     toasts: [],
     addToast: (message, type = 'info', duration = 3000) => {
-        const id = Math.random().toString(36).substring(2, 9);
+        const id = vibeId('toast');
+
         const newToast: Toast = { id, message, type, duration };
         
         set((state) => ({ toasts: [...state.toasts, newToast] }));

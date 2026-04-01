@@ -2,6 +2,33 @@
  * Editor Theme - CSS Variables for dark theme
  */
 
+/* 🌊 VibeScroll - Custom Glassmorphic Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.2) rgba(0, 0, 0, 0.05);
+}
+
 :root {
   /* Colors - Deep Space Elite Palette */
   --editor-bg-primary: #0a0a0f;

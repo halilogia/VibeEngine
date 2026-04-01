@@ -3,10 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { 
-    ChevronRight, ChevronDown, Boxes, Plus, Trash2, Search, 
-    Sun, Video, Shield, Sparkles, Box, Copy 
-} from 'lucide-react';
+import { VibeIcons } from '../../presentation/components/VibeIcons';
 import { useSceneStore, useEditorStore, type EntityData } from '../stores';
 import { ContextMenu, type ContextMenuItem } from '../components/ContextMenu';
 import './HierarchyPanel.css';
@@ -39,13 +36,13 @@ const SearchHighlight: React.FC<SearchHighlightProps> = ({ text, search }) => {
 const getEntityIcon = (entity: EntityData) => {
     const componentTypes = entity.components.map(c => c.type);
     
-    if (componentTypes.includes('Light')) return <Sun size={14} className="icon-light" />;
-    if (componentTypes.includes('Camera')) return <Video size={14} className="icon-camera" />;
-    if (componentTypes.includes('Physics')) return <Shield size={14} className="icon-physics" />;
-    if (componentTypes.includes('Script')) return <Sparkles size={14} className="icon-script" />;
-    if (componentTypes.includes('Render')) return <Box size={14} className="icon-render" />;
+    if (componentTypes.includes('Light')) return <VibeIcons name="Sun" size={14} className="icon-light" />;
+    if (componentTypes.includes('Camera')) return <VibeIcons name="Video" size={14} className="icon-camera" />;
+    if (componentTypes.includes('Physics')) return <VibeIcons name="Shield" size={14} className="icon-physics" />;
+    if (componentTypes.includes('Script')) return <VibeIcons name="Sparkles" size={14} className="icon-script" />;
+    if (componentTypes.includes('Render')) return <VibeIcons name="Box" size={14} className="icon-render" />;
     
-    return <Boxes size={14} className="icon-default" />;
+    return <VibeIcons name="Layers" size={14} className="icon-default" />;
 };
 
 interface TreeNodeProps {
@@ -79,13 +76,13 @@ const TreeNode: React.FC<TreeNodeProps> = ({ entity, depth, searchQuery, onConte
                             setExpanded(!expanded);
                         }}
                     >
-                        {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                        {expanded ? <VibeIcons name="ChevronDown" size={14} /> : <VibeIcons name="ChevronRight" size={14} />}
                     </span>
                 ) : (
                     <span className="tree-expand-placeholder" />
                 )}
 
-                <Box size={14} className="tree-item-icon" />
+                <VibeIcons name="Box" size={14} className="tree-item-icon" />
                 <span className="tree-item-label">
                     <SearchHighlight text={entity.name} search={searchQuery} />
                 </span>
@@ -153,18 +150,18 @@ export const HierarchyPanel: React.FC = () => {
     const contextMenuItems: ContextMenuItem[] = contextMenu ? [
         { 
             label: 'Duplicate', 
-            icon: <Copy size={12} />, 
+            icon: <VibeIcons name="Copy" size={12} />, 
             onClick: () => handleDuplicate(contextMenu.entityId) 
         },
         { 
             label: 'Rename', 
-            icon: <Plus size={12} />, 
+            icon: <VibeIcons name="Plus" size={12} />, 
             onClick: () => { /* Select first then prompt? */ } 
         },
         { divider: true, label: '' },
         { 
             label: 'Delete', 
-            icon: <Trash2 size={12} />, 
+            icon: <VibeIcons name="Trash" size={12} />, 
             danger: true, 
             onClick: () => handleDelete(contextMenu.entityId) 
         },
@@ -181,11 +178,14 @@ export const HierarchyPanel: React.FC = () => {
             className={`editor-panel hierarchy-panel glass-panel ${activePanelId === 'hierarchy' ? 'active-panel' : ''}`}
             onClick={() => setActivePanel('hierarchy')}
         >
-            <div className="editor-panel-header">
-                <span>Hierarchy</span>
-                <div className="panel-actions">
+            <div className="panel-header">
+                <div className="panel-header-left">
+                    <VibeIcons name="Layers" size={16} />
+                    <h2>HIERARCHY</h2>
+                </div>
+                <div className="panel-header-actions">
                     <button className="panel-action-btn" onClick={handleAddEntity} title="Add Entity">
-                        <Plus size={14} />
+                        <VibeIcons name="Plus" size={14} />
                     </button>
                     <button
                         className="panel-action-btn"
@@ -193,14 +193,14 @@ export const HierarchyPanel: React.FC = () => {
                         disabled={selectedEntityId === null}
                         title="Delete Entity"
                     >
-                        <Trash2 size={14} />
+                        <VibeIcons name="Trash" size={14} />
                     </button>
                 </div>
             </div>
 
             <div className="hierarchy-toolbar">
                 <div className="hierarchy-search">
-                    <Search size={12} className="search-icon" />
+                    <VibeIcons name="Search" size={14} />
                     <input
                         type="text"
                         placeholder="Filter entities..."
@@ -213,12 +213,14 @@ export const HierarchyPanel: React.FC = () => {
             <div className="editor-panel-content">
                 {filteredRootIds.length === 0 ? (
                     <div className="hierarchy-empty-state">
-                        <Box size={40} className="empty-icon" />
+                        <div className="empty-state-icon">
+                            <VibeIcons name="Box" size={40} />
+                        </div>
                         <h3>{searchQuery ? 'No matches' : 'No entities in scene'}</h3>
                         <p>{searchQuery ? 'Try a different search term or clear filters.' : 'Create your first object to start building.'}</p>
                         {!searchQuery && (
                             <button className="editor-btn primary" onClick={handleAddEntity}>
-                                <Plus size={14} /> Add Entity
+                                <VibeIcons name="Plus" size={14} /> Add Entity
                             </button>
                         )}
                     </div>

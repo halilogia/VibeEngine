@@ -11,12 +11,16 @@ import './styles/editor.css';
 import './components/CommandPalette.css';
 import './components/SplashScreen.css';
 import './components/StatusBar.css';
+import { useAssetManager } from './assets/AssetManager';
+
 
 export const EditorApp: React.FC = () => {
     const [showSplash, setShowSplash] = useState(true);
 
     // Enable keyboard shortcuts
     useKeyboardShortcuts();
+    const { initializeKenneyLibrary } = useAssetManager();
+
 
     useEffect(() => {
         // Initialize the loading bridge immediately
@@ -53,7 +57,26 @@ export const EditorApp: React.FC = () => {
                 }
             }, elapsed);
         });
+
+
+        // Initialize Kenney Pirate Kit Library
+        initializeKenneyLibrary([
+            'barrel.glb', 'boat-row-large.glb', 'boat-row-small.glb', 'bottle-large.glb', 
+            'bottle.glb', 'cannon-ball.glb', 'cannon-mobile.glb', 'cannon.glb', 
+            'castle-door.glb', 'castle-gate.glb', 'castle-wall.glb', 'castle-window.glb', 
+            'chest.glb', 'crate-bottles.glb', 'crate.glb', 'flag-pirate.glb', 
+            'grass-patch.glb', 'mast-ropes.glb', 'mast.glb', 'palm-bend.glb', 
+            'palm-detailed-bend.glb', 'palm-detailed-straight.glb', 'palm-straight.glb', 
+            'patch-grass-foliage.glb', 'patch-grass.glb', 'patch-sand-foliage.glb', 
+            'patch-sand.glb', 'rocks-a.glb', 'rocks-b.glb', 'rocks-c.glb', 
+            'rocks-sand-a.glb', 'rocks-sand-b.glb', 'rocks-sand-c.glb', 
+            'ship-ghost.glb', 'ship-large.glb', 'ship-medium.glb', 'ship-pirate-large.glb', 
+            'ship-pirate-medium.glb', 'ship-pirate-small.glb', 'ship-small.glb', 
+            'ship-wreck.glb', 'tower-complete-large.glb', 'tower-complete-small.glb', 
+            'tower-watch.glb'
+        ]);
     }, []);
+
 
     return (
         <>

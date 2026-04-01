@@ -3,65 +3,78 @@
  */
 
 .toolbar {
-    height: var(--editor-toolbar-height);
-    background: var(--editor-bg-primary);
+    height: 48px;
+    background: var(--editor-bg-secondary);
     border-bottom: 1px solid var(--editor-border);
     display: flex;
     align-items: center;
     padding: 0 12px;
-    gap: 8px;
-    z-index: 1000;
+    gap: 12px;
+    z-index: 100;
 }
 
-.toolbar-group-container {
+.studio-toolbar {
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(15px);
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.toolbar-left-group, .toolbar-right-group {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 8px;
+    flex: 1;
 }
 
-.group-label {
-    font-size: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--editor-text-muted);
-    font-weight: 700;
-    opacity: 0.6;
+.toolbar-right-group {
+    justify-content: flex-end;
+}
+
+.toolbar-center-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 12px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .toolbar-group {
     display: flex;
     align-items: center;
-    gap: 2px;
-    background: var(--editor-bg-secondary);
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.03);
     padding: 2px;
-    border-radius: 6px;
-    border: 1px solid var(--editor-border);
+    border-radius: 8px;
 }
 
 .toolbar-btn {
+    width: 32px;
+    height: 32px;
+    position: relative;
+    color: var(--editor-text-secondary);
+    background: transparent;
+    border-radius: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
     border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--editor-text-secondary);
     cursor: pointer;
-    transition: var(--editor-transition);
 }
 
 .toolbar-btn:hover {
-    background: var(--editor-bg-hover);
+    background: rgba(255, 255, 255, 0.08);
     color: var(--editor-text-primary);
+    transform: translateY(-1px);
 }
 
 .toolbar-btn.active {
     background: var(--editor-accent);
-    color: var(--editor-text-primary);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    color: white;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
 }
 
 .toolbar-btn.ai-copilot-toggle.active {
