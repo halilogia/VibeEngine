@@ -211,6 +211,128 @@ export function loadSceneFromFile(file: File): Promise<void> {
 }
 
 /**
+ * Import scene from Runtime Exporter JSON string (MobRunner format)
+ * Supports both VibeEngine format and Runtime Exporter format (sceneName, nextEntityId)
+ */
+export function importRuntimeScene(json: string): void {
+    deserializeScene(json);
+}
+
+/**
+ * Universal scene import — auto-detects format and normalizes
+ * Supports: VibeEngine, MobRunner, Universal Three.js Exporter, GLTF JSON
+ */
+export function importUniversalScene(json: string): { format: string; entityCount: number } {
+    const raw = JSON.parse(json);
+    
+    // Detect format
+    const hasMetadata = raw._metadata && raw._metadata.source;
+    const hasSceneName = typeof raw.sceneName === 'string';
+    const hasNextEntityId = typeof raw.nextEntityId === 'number';
+    const hasEntities = Array.isArray(raw.entities);
+    
+    let format = 'unknown';
+    if (hasMetadata && raw._metadata.source.includes('Universal')) {
+        format = 'universal-three';
+    } else if (hasSceneName && hasNextEntityId && hasEntities) {
+        format = 'runtime-exporter';
+    } else if (raw.version && raw.name && hasEntities) {
+        format = 'vibe-engine';
+    } else if (raw.scenes || raw.nodes || raw.asset) {
+        format = 'gltf';
+    }
+    
+    // Normalize GLTF-like format
+    if (format === 'gltf') {
+        const normalized = normalizeGLTF(raw);
+        deserializeScene(JSON.stringify(normalized));
+        return { format, entityCount: normalized.entities.length };
+    }
+    
+    // All other formats are compatible with deserializeScene
+    deserializeScene(json);
+    
+    const entityCount = raw.entities ? raw.entities.length : 0;
+    return { format, entityCount };
+}
+
+/**
+ * Normalize GLTF JSON to VibeEngine format
+ */
+function normalizeGLTF(gltf: any): SerializedScene {
+    const entities: SerializedEntity[] = [];
+    const rootIds: number[] = [];
+    let nextId = 1;
+    
+    const nodes = gltf.nodes || [];
+    const meshes = gltf.meshes || [];
+    
+    const processNode = (node: any, parentId: number | null) => {
+        const id = nextId++;
+        const entity: SerializedEntity = {
+            id,
+            name: node.name || `node_${id}`,
+            parentId,
+            enabled: true,
+            tags: ['imported'],
+            components: []
+        };
+        
+        // Transform
+        const pos = node.translation || [0, 0, 0];
+        const rot = node.rotation ? [
+            node.rotation[0] * 180 / Math.PI,
+            node.rotation[1] * 180 / Math.PI,
+            node.rotation[2] * 180 / Math.PI
+        ] : [0, 0, 0];
+        const scl = node.scale || [1, 1, 1];
+        
+        entity.components.push({
+            type: 'Transform',
+            data: { position: pos, rotation: rot, scale: scl },
+            enabled: true
+        });
+        
+        // Render (if has mesh reference)
+        if (node.mesh !== undefined && meshes[node.mesh]) {
+            entity.components.push({
+                type: 'Render',
+                data: { meshType: 'mesh', color: '#808080' },
+                enabled: true
+            });
+        }
+        
+        entities.push(entity);
+        
+        if (parentId === null) rootIds.push(id);
+        
+        // Process children
+        if (node.children) {
+            for (const childIdx of node.children) {
+                if (nodes[childIdx]) {
+                    processNode(nodes[childIdx], id);
+                }
+            }
+        }
+    };
+    
+    // Process root nodes
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const hasParent = nodes.some((n: any) => n.children && n.children.includes(i));
+        if (!hasParent) {
+            processNode(node, null);
+        }
+    }
+    
+    return {
+        version: '1.0.0',
+        name: gltf.asset?.generator || 'GLTF_Imported',
+        entities,
+    };
+}
+
+/**
  * Create default scene with basic entities
  */
 export function createDefaultScene(): void {

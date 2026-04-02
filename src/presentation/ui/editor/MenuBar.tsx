@@ -12,7 +12,8 @@ import { useEditorStore, useSceneStore, type EditorMode } from '@infrastructure/
 import { useProjectStore } from '@infrastructure/store/useProjectStore';
 import { useToastStore } from '@infrastructure/store/toastStore';
 import { usePlayModeStore } from '@presentation/features/editor/core';
-import { downloadScene, loadSceneFromFile, createDefaultScene, exportToCapacitor } from '@presentation/features/editor/serialization';
+import { downloadScene, loadSceneFromFile, createDefaultScene, exportToCapacitor, importRuntimeScene, importUniversalScene } from '@presentation/features/editor/serialization';
+import { ProjectScanner } from '@infrastructure/services/ProjectScanner';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { useTranslation } from 'react-i18next';
@@ -67,11 +68,49 @@ export const MenuBar: React.FC = () => {
         addToast('Scene saved', 'success');
     };
 
+    const handleCaptureSnapshot = async () => {
+        const url = prompt('Yakalayacağınız projenin URL\'sini girin (örn: http://localhost:5174):', 'http://localhost:5174');
+        if (!url) return;
+
+        addToast('📸 Sanal Sahne Yakalanıyor... (5-10 sn sürebilir)', 'info');
+        
+        try {
+            const result = await ProjectScanner.captureScene(url);
+            if (result.success && result.data) {
+                useSceneStore.getState().loadScene({
+                    sceneName: 'Captured Scene',
+                    version: '1.0.0',
+                    nextEntityId: result.data.entities.length + 1,
+                    entities: result.data.entities,
+                    rootEntityIds: result.data.rootEntityIds
+                });
+                addToast('✅ Sahne başarıyla yakalandı!', 'success');
+            } else {
+                addToast(`❌ Yakalama başarısız: ${result.error}`, 'error');
+            }
+        } catch (e) {
+            addToast('❌ Beklenmedik hata', 'error');
+        }
+    };
+
+    const handleImportUniversalScene = () => {
+        const jsonInput = prompt('Scene JSON verisini yapıştırın (VibeEngine, MobRunner, Universal Three.js, GLTF):');
+        if (!jsonInput) return;
+
+        try {
+            const result = importUniversalScene(jsonInput);
+            addToast(`✅ ${result.format} formatından ${result.entityCount} entity import edildi!`, 'success');
+        } catch (e) {
+            addToast('❌ Import başarısız: Geçersiz JSON formatı', 'error');
+        }
+    };
+
     const menus: MenuSection[] = [
         {
             label: 'VibeEngine',
             items: [
                 { label: t('menu.app_settings'), icon: <VibeIcons name="Settings" size={14} />, shortcut: 'Ctrl+,', action: () => { useEditorStore.getState().setShowAICopilotSettings(true, 'project'); } },
+                { label: 'Sanal Sahne Yakala (Snapshot)', icon: <VibeIcons name="Sparkles" size={14} />, action: handleCaptureSnapshot },
                 { divider: true, label: '' },
                 { label: t('menu.quit'), icon: <VibeIcons name="Pause" size={14} />, action: () => { addToast('Closing Engine Studio...', 'warning'); setTimeout(() => window.close(), 1000); } },
             ]
@@ -83,6 +122,7 @@ export const MenuBar: React.FC = () => {
                 { divider: true, label: '' },
                 { label: t('menu.new_scene'), icon: <VibeIcons name="Plus" size={14} />, action: () => { createDefaultScene(); addToast('New Scene', 'info'); } },
                 { label: t('menu.open_scene'), icon: <VibeIcons name="Search" size={14} />, action: handleOpen },
+                { label: 'Import Scene (Universal)', icon: <VibeIcons name="Download" size={14} />, action: handleImportUniversalScene },
                 { label: t('menu.save_scene'), icon: <VibeIcons name="Save" size={14} />, action: handleSave },
                 { divider: true, label: '' },
             ]

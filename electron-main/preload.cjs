@@ -11,7 +11,8 @@ contextBridge.exposeInMainWorld('ProjectScanner', {
     saveFile: (path, content) => ipcRenderer.invoke('save-file', path, content),
     setActiveProject: (path) => ipcRenderer.invoke('set-active-project', path),
     copyFolder: (src, dest) => ipcRenderer.invoke('copy-folder', src, dest),
-    runCommand: (command, cwd) => ipcRenderer.invoke('run-command', command, cwd)
+    runCommand: (command, cwd) => ipcRenderer.invoke('run-command', command, cwd),
+    captureScene: (url) => ipcRenderer.invoke('capture-scene', url)
 });
 
 contextBridge.exposeInMainWorld('windowControls', {

@@ -79,8 +79,30 @@ export const useLauncherViewModel = () => {
               deserializeScene(rootRes.content);
               console.log(`✅ Scene auto-loaded from: ${rootScene}`);
             } else {
-              // 🏛️ Workspace is ready but no engine scene found yet.
-              console.warn('⚠️ No VibeEngine scene found in project. Please save a scene to create the workspace data.');
+              // 🏛️ Sovereign Automation: If project is empty, try to hijack from local dev server!
+              console.log('🔍 No scene found. Attempting automatic "Ultimate Snapshot" from local dev server...');
+              
+              // We assume standard ports (MobRunner uses 5174, Vite default is 5173)
+              const backupUrls = ['http://localhost:5174', 'http://localhost:5173', 'http://localhost:5175'];
+              
+              for (const url of backupUrls) {
+                try {
+                  const result = await ProjectScanner.captureScene(url);
+                  if (result.success && result.data) {
+                    deserializeScene(result.data);
+                    console.log(`✅ Ultimate Snapshot SUCCESS from ${url}! Scene loaded automatically.`);
+                    
+                    // Trigger a toast (optional via sync)
+                    break; 
+                  }
+                } catch (err) {
+                  // Keep trying
+                }
+              }
+
+              if (useSceneStore.getState().entities.size === 0) {
+                console.warn('⚠️ No VibeEngine scene found and automatic hijack failed. Please save a scene manually.');
+              }
             }
           }
         } catch (e) {

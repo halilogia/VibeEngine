@@ -8,10 +8,6 @@ const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
 
-protocol.registerSchemesAsPrivileged([
-    { scheme: 'vibe-asset', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }
-]);
-
 let activeProjectPath = '';
 
 function readProjectInfo(projectPath) {
@@ -54,7 +50,9 @@ function readProjectInfo(projectPath) {
         hasDomain
     };
 }
-// 📁 FileSystem Operations
+
+// ─── FileSystem Operations ───────────────────────────────────────────────────
+
 ipcMain.handle('create-folder', async (event, folderPath) => {
     try {
         if (!fs.existsSync(folderPath)) {
@@ -122,7 +120,20 @@ ipcMain.handle('save-file', async (event, filePath, content) => {
     }
 });
 
-// 🚀 NEW: Elite Build Services
+ipcMain.handle('delete-asset', async (event, assetPath) => {
+    try {
+        if (fs.existsSync(assetPath)) {
+            await shell.trashItem(assetPath);
+            return { success: true };
+        }
+        return { success: false, error: 'File not found' };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+// ─── Build Services ──────────────────────────────────────────────────────────
+
 ipcMain.handle('copy-folder', async (event, src, dest) => {
     try {
         if (!fs.existsSync(src)) return { success: false, error: 'Source not found' };
@@ -161,35 +172,13 @@ ipcMain.handle('run-command', async (event, command, cwd) => {
     });
 });
 
-console.log('💎 VIBEENGINE ANALYTICS: IPC HANDLERS READY');
-
-ipcMain.handle('delete-asset', async (event, assetPath) => {
-    try {
-        if (fs.existsSync(assetPath)) {
-            await shell.trashItem(assetPath);
-            return { success: true };
-        }
-        return { success: false, error: 'File not found' };
-    } catch (e) {
-        return { success: false, error: e.message };
-    }
-});
+// ─── Project Management ──────────────────────────────────────────────────────
 
 ipcMain.handle('set-active-project', async (event, projectPath) => {
     console.log(`💎 VIBEENGINE: Active Project Workspace set to ${projectPath}`);
     activeProjectPath = projectPath;
     return { success: true };
 });
-
-// Window control IPCs
-ipcMain.on('window-minimize', () => { if(mainWindow) mainWindow.minimize() });
-ipcMain.on('window-maximize', () => {
-    if (!mainWindow) return;
-    if (mainWindow.isMaximized()) mainWindow.unmaximize();
-    else mainWindow.maximize();
-});
-ipcMain.on('window-close', () => { if(mainWindow) mainWindow.close() });
-
 
 ipcMain.handle('pick-project-folder', async () => {
     const { canceled, filePaths } = await require('electron').dialog.showOpenDialog({
@@ -207,7 +196,7 @@ ipcMain.handle('pick-project-folder', async () => {
 ipcMain.handle('scan-project-assets', async (event, projectPath) => {
     let scanPath = path.join(projectPath, 'src');
     if (!fs.existsSync(scanPath)) {
-        scanPath = projectPath; // 🟢 Fallback to root if src is missing
+        scanPath = projectPath;
     }
 
     const assets = [];
@@ -231,7 +220,7 @@ ipcMain.handle('scan-project-assets', async (event, projectPath) => {
                     parentId,
                     size: 0
                 });
-                scan(fullPath, id); // 🟢 Recurse with current folder as parent
+                scan(fullPath, id);
             } else {
                 const ext = path.extname(file).toLowerCase();
                 let type = 'other';
@@ -266,30 +255,223 @@ ipcMain.handle('scan-project-assets', async (event, projectPath) => {
     }
 });
 
-// Determine if in development
+// ─── Live Scene Capture (Runtime Exporter) ───────────────────────────────────
+
+ipcMain.handle('capture-scene', async (event, url) => {
+    console.log(`📸 VIBEENGINE: Capturing scene from ${url}...`);
+    
+    const captureWin = new BrowserWindow({
+        show: false,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            webSecurity: false
+        }
+    });
+
+    try {
+        await captureWin.loadURL(url);
+        
+        // Wait for page to fully load
+        await captureWin.webContents.executeJavaScript(`
+            new Promise((resolve) => {
+                if (document.readyState === 'complete') resolve('ready');
+                else window.addEventListener('load', () => resolve('ready'));
+            })
+        `);
+        
+        // Additional wait for game init
+        await new Promise(r => setTimeout(r, 3000));
+        
+        const sceneData = await captureWin.webContents.executeJavaScript(`
+            new Promise((resolve) => {
+                let attempts = 0;
+                const maxAttempts = 100;
+                const check = () => {
+                    attempts++;
+                    
+                    const scene = window.scene 
+                        || window.gameScene 
+                        || (window.application && window.application.scene)
+                        || (window.game && window.game.scene);
+                    
+                    if (!scene) {
+                        if (attempts < maxAttempts) {
+                            setTimeout(check, 300);
+                        } else {
+                            resolve({ error: 'No scene found after ' + maxAttempts + ' attempts' });
+                        }
+                        return;
+                    }
+                    
+                    const children = scene.children || [];
+                    if (children.length === 0 && attempts < maxAttempts) {
+                        setTimeout(check, 300);
+                        return;
+                    }
+                    
+                    console.log('✅ Found scene with ' + children.length + ' children');
+                    
+                    const entities = [];
+                    const rootEntityIds = [];
+                    let nextId = 1;
+
+                    const processNode = (node, parentId) => {
+                        const id = nextId++;
+                        const name = node.name || (node.type + '_' + id);
+                        
+                        if (node.isLight) return;
+                        if (node.name === 'grid' || node.name === 'axes') return;
+                        if (node.name === 'ambientLight' || node.name === 'directionalLight') return;
+                        
+                        const isMesh = node.isMesh;
+                        const isGroup = node.isGroup || node.type === 'Group';
+
+                        if (!isMesh && !isGroup) {
+                            if (node.children) {
+                                for (let i = 0; i < node.children.length; i++) {
+                                    processNode(node.children[i], id);
+                                }
+                            }
+                            return;
+                        }
+
+                        const components = [
+                            {
+                                type: 'Transform',
+                                data: {
+                                    position: [
+                                        parseFloat(node.position.x.toFixed(3)),
+                                        parseFloat(node.position.y.toFixed(3)),
+                                        parseFloat(node.position.z.toFixed(3))
+                                    ],
+                                    rotation: [
+                                        parseFloat((node.rotation.x * 180 / Math.PI).toFixed(2)),
+                                        parseFloat((node.rotation.y * 180 / Math.PI).toFixed(2)),
+                                        parseFloat((node.rotation.z * 180 / Math.PI).toFixed(2))
+                                    ],
+                                    scale: [
+                                        parseFloat(node.scale.x.toFixed(3)),
+                                        parseFloat(node.scale.y.toFixed(3)),
+                                        parseFloat(node.scale.z.toFixed(3))
+                                    ]
+                                },
+                                enabled: true
+                            }
+                        ];
+
+                        if (isMesh) {
+                            let modelPath = node.userData && node.userData.modelPath;
+                            if (!modelPath) {
+                                const lowerName = name.toLowerCase();
+                                if (lowerName.includes('building')) modelPath = 'assets/models/environment/buildings/' + name.split('_')[0] + '.glb';
+                                else if (lowerName.includes('road')) modelPath = 'assets/models/environment/roads/road-straight.glb';
+                                else if (lowerName.includes('fence')) modelPath = 'assets/models/environment/fences/fence.glb';
+                                else if (lowerName.includes('tree')) modelPath = 'assets/models/environment/trees/tree-small.glb';
+                                else if (lowerName.includes('light')) modelPath = 'assets/models/environment/roads/light-square.glb';
+                            }
+
+                            components.push({
+                                type: 'Render',
+                                data: {
+                                    meshType: modelPath ? 'model' : 'cube',
+                                    modelPath: modelPath || '',
+                                    color: '#ffffff'
+                                },
+                                enabled: true
+                            });
+                        }
+
+                        const entity = {
+                            id,
+                            name,
+                            parentId: parentId || null,
+                            children: [],
+                            components,
+                            enabled: true,
+                            tags: [node.type.toLowerCase()]
+                        };
+
+                        entities.push(entity);
+
+                        if (parentId === null || parentId === undefined) {
+                            rootEntityIds.push(id);
+                        } else {
+                            for (let i = 0; i < entities.length; i++) {
+                                if (entities[i].id === parentId) {
+                                    entities[i].children.push(id);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (node.children) {
+                            for (let i = 0; i < node.children.length; i++) {
+                                processNode(node.children[i], id);
+                            }
+                        }
+                    };
+
+                    for (let i = 0; i < children.length; i++) {
+                        processNode(children[i], null);
+                    }
+                    
+                    resolve({ entities, rootEntityIds, count: entities.length });
+                };
+                check();
+            });
+        `);
+
+        captureWin.close();
+        if (sceneData.error) {
+            console.error('Capture failed:', sceneData.error);
+            return { success: false, error: sceneData.error };
+        }
+
+        console.log(`✅ Capture SUCCESS: ${sceneData.entities.length} entities found.`);
+        return { success: true, data: sceneData };
+    } catch (e) {
+        console.error('Capture error:', e);
+        if (captureWin && !captureWin.isDestroyed()) captureWin.close();
+        return { success: false, error: e.message };
+    }
+});
+
+console.log('💎 VIBEENGINE ANALYTICS: IPC HANDLERS READY');
+
+// ─── Window Management ───────────────────────────────────────────────────────
+
+ipcMain.on('window-minimize', () => { if(mainWindow) mainWindow.minimize() });
+ipcMain.on('window-maximize', () => {
+    if (!mainWindow) return;
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
+    else mainWindow.maximize();
+});
+ipcMain.on('window-close', () => { if(mainWindow) mainWindow.close() });
+
+// ─── App Lifecycle ───────────────────────────────────────────────────────────
+
 const isDev = !app.isPackaged;
 
 let splashWindow = null;
 let mainWindow = null;
 
-// Create splash screen first
 function createSplashWindow() {
     splashWindow = new BrowserWindow({
         width: 300,
         height: 300,
-        frame: false,           // No window frame
-        transparent: true,      // Transparent background
+        frame: false,
+        transparent: true,
         alwaysOnTop: true,
         center: true,
         resizable: false,
-        skipTaskbar: true,      // Don't show in taskbar
+        skipTaskbar: true,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true
         }
     });
 
-    // Load splash HTML
     if (isDev) {
         splashWindow.loadURL('http://localhost:5173/splash.html');
     } else {
@@ -308,7 +490,7 @@ function createMainWindow() {
         minWidth: 1200,
         minHeight: 700,
         title: 'VibeEngine',
-        frame: false, // Frameless for custom title bar
+        frame: false,
         icon: path.join(__dirname, '../assets/icon1.png'),
         webPreferences: {
             nodeIntegration: false,
@@ -319,17 +501,14 @@ function createMainWindow() {
         show: false
     });
 
-    // Load the app
     if (isDev) {
         mainWindow.loadURL('http://localhost:5173/editor.html');
-        mainWindow.webContents.openDevTools({ mode: 'detach' }); // 🛠️ FORCE OPEN FOR DEEP ANALYSIS
+        mainWindow.webContents.openDevTools({ mode: 'detach' });
     } else {
         mainWindow.loadFile(path.join(__dirname, '../dist/editor.html'));
     }
 
-    // Show main window when ready, close splash
     mainWindow.once('ready-to-show', () => {
-        // Wait for splash animation to complete (10 seconds)
         setTimeout(() => {
             if (splashWindow) {
                 splashWindow.close();
@@ -340,7 +519,6 @@ function createMainWindow() {
         }, 10000);
     });
 
-    // Create menu (still useful for shortcuts)
     const menuTemplate = [
         {
             label: 'File',
@@ -399,9 +577,9 @@ function createMainWindow() {
         }
     ];
 
-    const menu = Menu.buildFromTemplate(menuTemplate);
-    Menu.setApplicationMenu(null); // Completely disable native menu
-    mainWindow.setMenuBarVisibility(false); // Ensure it is hidden
+    Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(null);
+    mainWindow.setMenuBarVisibility(false);
 
     mainWindow.on('closed', () => {
         mainWindow = null;
@@ -414,17 +592,10 @@ function sendToRenderer(channel, data) {
     }
 }
 
-// App events - Start with splash, then main window
 app.whenReady().then(() => {
-    // Register custom protocol for assets
     protocol.registerFileProtocol('vibe-asset', (request, callback) => {
         const url = request.url.replace('vibe-asset://', '');
         const decodedUrl = decodeURI(url);
-        
-        // Priority:
-        // 1. If absolute path and exists, use it
-        // 2. If active project set, look in [project]/public/assets
-        // 3. Fallback to [project] root
         
         try {
             if (fs.existsSync(decodedUrl)) {
@@ -446,7 +617,7 @@ app.whenReady().then(() => {
             console.error('Protocol error:', e);
         }
         
-        callback({ error: -6 }); // net::ERR_FILE_NOT_FOUND
+        callback({ error: -6 });
     });
 
     createSplashWindow();
