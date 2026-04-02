@@ -12,7 +12,7 @@ import { useEditorStore, useSceneStore, type EditorMode } from '@infrastructure/
 import { useProjectStore } from '@infrastructure/store/useProjectStore';
 import { useToastStore } from '@infrastructure/store/toastStore';
 import { usePlayModeStore } from '@presentation/features/editor/core';
-import { downloadScene, loadSceneFromFile, createDefaultScene, exportToHTML } from '@presentation/features/editor/serialization';
+import { downloadScene, loadSceneFromFile, createDefaultScene, exportToCapacitor } from '@presentation/features/editor/serialization';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { useTranslation } from 'react-i18next';
@@ -84,12 +84,13 @@ export const MenuBar: React.FC = () => {
                 { label: t('menu.new_scene'), icon: <VibeIcons name="Plus" size={14} />, action: () => { createDefaultScene(); addToast('New Scene', 'info'); } },
                 { label: t('menu.open_scene'), icon: <VibeIcons name="Search" size={14} />, action: handleOpen },
                 { label: t('menu.save_scene'), icon: <VibeIcons name="Save" size={14} />, action: handleSave },
+                { divider: true, label: '' },
             ]
         },
         {
             label: t('menu.build'),
             items: [
-                { label: t('menu.export_html'), icon: <VibeIcons name="Save" size={14} />, action: () => exportToHTML(sceneName) },
+                { label: 'Export for Capacitor', icon: <VibeIcons name="Layers" size={14} />, action: () => exportToCapacitor(sceneName) },
             ]
         }
     ];

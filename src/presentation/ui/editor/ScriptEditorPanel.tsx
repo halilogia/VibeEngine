@@ -69,7 +69,7 @@ export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandle
         activePanelId, setActivePanel, engineConfig,
         isScriptFullScreen, setScriptFullScreen,
         openFiles, activeFileId, closeFile, setActiveFile, updateFileContent,
-        togglePanel, showConsole, showScriptEditor
+        togglePanel, showConsole, showScriptEditor, showAICopilot, showInspector
     } = useEditorStore();
     const { selectedEntityId, entities } = useSceneStore();
     
@@ -148,7 +148,11 @@ export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandle
             style={styles.panel}
         >
             <div 
-                style={{ ...styles.header, cursor: isScriptFullScreen ? 'row-resize' : 'default' }}
+                style={{ 
+                    ...styles.header, 
+                    cursor: isScriptFullScreen ? 'row-resize' : 'default',
+                    paddingRight: (showAICopilot && !isScriptFullScreen) ? '80px' : '12px' // 🛡️ AI Panel Shield
+                }}
                 {...dragHandleProps}
             >
                 <div style={styles.tabs}>
@@ -164,29 +168,31 @@ export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandle
                     ))}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingRight: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                     {selectedEntity && (
                         <div style={styles.badge}>RECEPTOR: {selectedEntity.name.toUpperCase()}</div>
                     )}
                     
-                    {isScriptFullScreen ? (
-                        <VibeButton variant="ghost" size="sm" onClick={() => setScriptFullScreen(false, true)} style={{ color: VibeTheme.colors.accent }}>
-                            <VibeIcons name="ChevronDown" size={16} /> MINIMIZE
-                        </VibeButton>
-                    ) : (
-                        <VibeButton variant="ghost" size="sm" onClick={() => setScriptFullScreen(true)}>
-                            <VibeIcons name="ChevronUp" size={16} /> MAXIMIZE
-                        </VibeButton>
-                    )}
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                        {isScriptFullScreen ? (
+                            <VibeButton variant="ghost" size="sm" onClick={() => setScriptFullScreen(false, true)} style={{ color: VibeTheme.colors.accent }}>
+                                <VibeIcons name="ChevronDown" size={16} />
+                            </VibeButton>
+                        ) : (
+                            <VibeButton variant="ghost" size="sm" onClick={() => setScriptFullScreen(true)}>
+                                <VibeIcons name="ChevronUp" size={16} />
+                            </VibeButton>
+                        )}
 
-                    <VibeButton 
-                        variant="primary" 
-                        size="sm" 
-                        style={{ height: '24px', opacity: 0.9 }}
-                        onClick={handleSave}
-                    >
-                        <VibeIcons name="Save" size={14} /> SAVE
-                    </VibeButton>
+                        <VibeButton 
+                            variant="primary" 
+                            size="sm" 
+                            style={{ height: '28px', padding: '0 12px' }}
+                            onClick={handleSave}
+                        >
+                            <VibeIcons name="Save" size={14} /> SAVE
+                        </VibeButton>
+                    </div>
                 </div>
             </div>
 

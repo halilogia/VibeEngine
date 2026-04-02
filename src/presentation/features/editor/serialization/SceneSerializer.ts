@@ -2,7 +2,8 @@
  * SceneSerializer - Save/Load scene data to JSON
  */
 
-import { useSceneStore, type EntityData, type ComponentData } from '@infrastructure/store';
+import { useSceneStore, type EntityData, type ComponentData, useProjectStore } from '@infrastructure/store';
+import { ProjectScanner } from '@infrastructure/services/ProjectScanner';
 
 export interface SerializedScene {
     version: string;
@@ -54,7 +55,13 @@ export function serializeScene(): string {
  * Deserialize JSON string to scene
  */
 export function deserializeScene(json: string): void {
-    const data: SerializedScene = JSON.parse(json);
+    const raw = JSON.parse(json);
+    // Support both VibeEngine format (name) and Runtime Exporter format (sceneName)
+    const data: SerializedScene = {
+        version: raw.version || '1.0.0',
+        name: raw.name || raw.sceneName || 'Imported Scene',
+        entities: raw.entities || []
+    };
     const store = useSceneStore.getState();
 
     // Clear existing scene
@@ -65,8 +72,36 @@ export function deserializeScene(json: string): void {
 
     // Create entities (first pass - create all)
     const entityMap = new Map<number, EntityData>();
+    const seenEntities = new Set<string>();
 
     for (const entity of data.entities) {
+        // 🏛️ Sovereign Asset Normalization: Fix model paths if they are just directories
+        const render = entity.components?.find((c: any) => c.type === 'Render');
+        const transform = entity.components?.find((c: any) => c.type === 'Transform');
+        
+        if (render && render.data.meshType === 'model') {
+            let path = render.data.modelPath || '';
+            if (path && path.endsWith('/')) {
+                const baseName = entity.name.replace(/_\d+$/, '');
+                render.data.modelPath = path + (baseName.endsWith('.glb') ? baseName : baseName + '.glb');
+            }
+        }
+
+        // 🛡️ Deduplication Heuristic: MobRunner sometimes exports parent and child with same model
+        // If this is a child with same name/model as parent and zero transform, it's likely a duplicate
+        const pId = entity.parentId;
+        if (pId !== null && pId !== undefined && render && render.data.meshType === 'model') {
+            const parent = data.entities.find((e: any) => e.id === pId);
+            const pRender = parent?.components?.find((c: any) => c.type === 'Render');
+            if (pRender && pRender.data.meshType === 'model' && pRender.data.modelPath === render.data.modelPath) {
+                // Same model as parent, check if transform is identity
+                const pos = transform?.data.position || [0,0,0];
+                if (pos[0] === 0 && pos[1] === 0 && pos[2] === 0) {
+                    continue; // Skip this duplicate entity
+                }
+            }
+        }
+
         const entityData: EntityData = {
             id: entity.id,
             name: entity.name,
@@ -83,15 +118,19 @@ export function deserializeScene(json: string): void {
     const rootIds: number[] = [];
 
     for (const entity of data.entities) {
-        const entityData = entityMap.get(entity.id)!;
+        const entityData = entityMap.get(entity.id);
+        if (!entityData) continue; // Skip if entity was filtered out by deduplication
 
-        if (entity.parentId === null) {
+        if (entity.parentId === null || entity.parentId === undefined) {
             rootIds.push(entity.id);
         } else {
             entityData.parentId = entity.parentId;
             const parent = entityMap.get(entity.parentId);
             if (parent) {
                 parent.children.push(entity.id);
+            } else {
+                // If parent was filtered out, make this a root entity
+                rootIds.push(entity.id);
             }
         }
     }
@@ -106,10 +145,38 @@ export function deserializeScene(json: string): void {
 }
 
 /**
- * Download scene as JSON file
+ * Save scene (Direct to workspace if active, or Download as JSON)
  */
-export function downloadScene(filename: string = 'scene.json'): void {
+export async function downloadScene(filename: string = 'scene.json'): Promise<void> {
     const json = serializeScene();
+    const launchedProject = useProjectStore.getState().launchedProject;
+
+    // 🚀 Ultimate Studio: Direct Save to Workspace!
+    if (launchedProject && launchedProject.path) {
+        try {
+            // Standard VibeEngine level path: src/levels/[sceneName].json
+            const sceneName = useSceneStore.getState().sceneName || 'main';
+            const projectRelativePath = `src/levels/${sceneName}.json`;
+            const absolutePath = `${launchedProject.path}/${projectRelativePath}`;
+            
+            console.log(`💎 VIBEENGINE: Direct saving to workspace... ${absolutePath}`);
+            const result = await ProjectScanner.saveFile(absolutePath, json);
+            
+            if (result.success) {
+                console.log('✅ Scene saved directly to project workspace!');
+                
+                // Also trigger a small "Saved" notification if possible, 
+                // but for now we'll just log success.
+                return;
+            } else {
+                console.warn('⚠️ Direct save failed, falling back to download:', result.error);
+            }
+        } catch (e) {
+            console.error('❌ Error during direct save:', e);
+        }
+    }
+
+    // Default Fallback: Browser Download
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 

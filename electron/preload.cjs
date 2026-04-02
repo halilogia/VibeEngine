@@ -8,7 +8,10 @@ contextBridge.exposeInMainWorld('ProjectScanner', {
     readFile: (path) => ipcRenderer.invoke('read-file', path),
     renameAsset: (oldPath, newPath) => ipcRenderer.invoke('rename-asset', oldPath, newPath),
     deleteAsset: (path) => ipcRenderer.invoke('delete-asset', path),
-    saveFile: (path, content) => ipcRenderer.invoke('save-file', path, content)
+    saveFile: (path, content) => ipcRenderer.invoke('save-file', path, content),
+    setActiveProject: (path) => ipcRenderer.invoke('set-active-project', path),
+    copyFolder: (src, dest) => ipcRenderer.invoke('copy-folder', src, dest),
+    runCommand: (command, cwd) => ipcRenderer.invoke('run-command', command, cwd)
 });
 
 contextBridge.exposeInMainWorld('windowControls', {

@@ -21,6 +21,7 @@ declare global {
       renameAsset: (oldPath: string, newPath: string) => Promise<{ success: boolean; error?: string }>;
       deleteAsset: (path: string) => Promise<{ success: boolean; error?: string }>;
       saveFile: (path: string, content: string) => Promise<{ success: boolean; error?: string }>;
+      setActiveProject: (path: string) => Promise<{ success: boolean; error?: string }>;
     };
   }
 }
@@ -82,6 +83,13 @@ export class ProjectScanner {
   static async saveFile(filePath: string, content: string): Promise<{ success: boolean; error?: string }> {
     if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
       return await window.ProjectScanner.saveFile(filePath, content);
+    }
+    return { success: false, error: 'Bridge not available' };
+  }
+
+  static async setActiveProject(projectPath: string): Promise<{ success: boolean; error?: string }> {
+    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+      return await window.ProjectScanner.setActiveProject(projectPath);
     }
     return { success: false, error: 'Bridge not available' };
   }

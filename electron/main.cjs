@@ -3,9 +3,16 @@
  * VibeEngine - Desktop Application with Splash Screen
  */
 
-const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, shell, ipcMain, protocol } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { exec } = require('child_process');
+
+protocol.registerSchemesAsPrivileged([
+    { scheme: 'vibe-asset', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }
+]);
+
+let activeProjectPath = '';
 
 function readProjectInfo(projectPath) {
     const projectDataPath = path.join(projectPath, 'project-data.json');
@@ -103,12 +110,55 @@ ipcMain.handle('read-file', async (event, filePath) => {
 ipcMain.handle('save-file', async (event, filePath, content) => {
     console.log(`[IPC] save-file: ${filePath}`);
     try {
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
         fs.writeFileSync(filePath, content, 'utf-8');
         return { success: true };
     } catch (e) {
         console.error(`[IPC] save-file failed: ${e.message}`);
         return { success: false, error: e.message };
     }
+});
+
+// 🚀 NEW: Elite Build Services
+ipcMain.handle('copy-folder', async (event, src, dest) => {
+    try {
+        if (!fs.existsSync(src)) return { success: false, error: 'Source not found' };
+        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+
+        const copyRecursive = (source, destination) => {
+            const files = fs.readdirSync(source);
+            for (const file of files) {
+                const curSource = path.join(source, file);
+                const curDest = path.join(destination, file);
+                if (fs.lstatSync(curSource).isDirectory()) {
+                    if (!fs.existsSync(curDest)) fs.mkdirSync(curDest);
+                    copyRecursive(curSource, curDest);
+                } else {
+                    fs.copyFileSync(curSource, curDest);
+                }
+            }
+        };
+
+        copyRecursive(src, dest);
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('run-command', async (event, command, cwd) => {
+    return new Promise((resolve) => {
+        exec(command, { cwd }, (error, stdout, stderr) => {
+            if (error) {
+                resolve({ success: false, error: error.message, stderr });
+                return;
+            }
+            resolve({ success: true, stdout, stderr });
+        });
+    });
 });
 
 console.log('💎 VIBEENGINE ANALYTICS: IPC HANDLERS READY');
@@ -123,6 +173,12 @@ ipcMain.handle('delete-asset', async (event, assetPath) => {
     } catch (e) {
         return { success: false, error: e.message };
     }
+});
+
+ipcMain.handle('set-active-project', async (event, projectPath) => {
+    console.log(`💎 VIBEENGINE: Active Project Workspace set to ${projectPath}`);
+    activeProjectPath = projectPath;
+    return { success: true };
 });
 
 // Window control IPCs
@@ -360,6 +416,39 @@ function sendToRenderer(channel, data) {
 
 // App events - Start with splash, then main window
 app.whenReady().then(() => {
+    // Register custom protocol for assets
+    protocol.registerFileProtocol('vibe-asset', (request, callback) => {
+        const url = request.url.replace('vibe-asset://', '');
+        const decodedUrl = decodeURI(url);
+        
+        // Priority:
+        // 1. If absolute path and exists, use it
+        // 2. If active project set, look in [project]/public/assets
+        // 3. Fallback to [project] root
+        
+        try {
+            if (fs.existsSync(decodedUrl)) {
+                return callback({ path: decodedUrl });
+            }
+            
+            if (activeProjectPath) {
+                const publicPath = path.join(activeProjectPath, 'public', 'assets', decodedUrl);
+                if (fs.existsSync(publicPath)) {
+                    return callback({ path: publicPath });
+                }
+                
+                const rootPath = path.join(activeProjectPath, decodedUrl);
+                if (fs.existsSync(rootPath)) {
+                    return callback({ path: rootPath });
+                }
+            }
+        } catch (e) {
+            console.error('Protocol error:', e);
+        }
+        
+        callback({ error: -6 }); // net::ERR_FILE_NOT_FOUND
+    });
+
     createSplashWindow();
     createMainWindow();
 });

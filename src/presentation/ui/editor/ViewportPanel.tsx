@@ -11,7 +11,8 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import { useEditorStore, useSceneStore } from '@infrastructure/store';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { useEditorStore, useSceneStore, useProjectStore } from '@infrastructure/store';
 import { ViewportToolbar } from '@ui/editor/ViewportToolbar';
 import { StatusBar } from './StatusBar';
 import { usePlayModeStore } from '@presentation/features/editor/core';
@@ -33,13 +34,61 @@ function disposeObject(obj: THREE.Object3D) {
     });
 }
 
-function createMeshForEntity(meshType: string, color: string): THREE.Mesh {
+const modelLoader = new GLTFLoader();
+const modelCache = new Map<string, THREE.Group>();
+
+function createMeshForEntity(meshType: string, color: string, modelPath?: string, entityId?: number, onModelLoaded?: (group: THREE.Group) => void, hasWorkspace?: boolean): THREE.Object3D {
+    if (meshType === 'model' && modelPath) {
+        const group = new THREE.Group();
+        group.name = 'placeholder';
+        // Add a placeholder box while loading
+        const placeholder = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1, 1),
+            new THREE.MeshStandardMaterial({ color, wireframe: true, transparent: true, opacity: 0 })
+        );
+        placeholder.visible = false;
+        group.add(placeholder);
+
+        // Load model
+        let fullPath = modelPath;
+        if (hasWorkspace && !fullPath.startsWith('vibe-asset://') && !fullPath.startsWith('http')) {
+            const cleanPath = modelPath.startsWith('/') ? modelPath.slice(1) : modelPath;
+            fullPath = `vibe-asset://${cleanPath}`;
+        } else if (!fullPath.startsWith('vibe-asset://') && !fullPath.startsWith('http')) {
+            fullPath = modelPath.startsWith('/') ? modelPath : `/${modelPath}`;
+        }
+        
+        if (modelCache.has(fullPath)) {
+            const cached = modelCache.get(fullPath)!;
+            const model = cached.clone();
+            onModelLoaded?.(model);
+            return model;
+        }
+
+        modelLoader.load(fullPath, (gltf) => {
+            const model = gltf.scene;
+            model.traverse((node) => {
+                if (node instanceof THREE.Mesh) {
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                }
+            });
+            modelCache.set(fullPath, model);
+            onModelLoaded?.(model.clone());
+        }, undefined, (error) => {
+            console.error(`Error loading model at ${fullPath}:`, error);
+        });
+
+        return group;
+    }
+
     let geometry: THREE.BufferGeometry;
     switch (meshType) {
         case 'sphere': geometry = new THREE.SphereGeometry(0.5, 16, 16); break;
         case 'cylinder': geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 16); break;
         case 'plane': geometry = new THREE.PlaneGeometry(1, 1); break;
         case 'capsule': geometry = new THREE.CapsuleGeometry(0.3, 0.5, 4, 8); break;
+        case 'group': return new THREE.Group();
         case 'cube':
         default: geometry = new THREE.BoxGeometry(1, 1, 1);
     }
@@ -70,6 +119,7 @@ export const ViewportPanel: React.FC = () => {
 
     const { isPlaying } = usePlayModeStore();
     const { entities, rootEntityIds, updateComponent } = useSceneStore();
+    const { launchedProject } = useProjectStore();
 
     const createGradientBackground = () => {
         const size = 512;
@@ -129,8 +179,9 @@ export const ViewportPanel: React.FC = () => {
         scene.background = bgTexture || new THREE.Color(0x1a1a2e);
         sceneRef.current = scene;
 
-        const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
-        camera.position.set(10, 10, 10);
+        const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 5000); // 🏛️ Elite Far Plane
+        camera.position.set(150, 150, 150);
+        camera.lookAt(0, 0, -200);
         cameraRef.current = camera;
 
         const renderer = new THREE.WebGLRenderer({ 
@@ -160,6 +211,8 @@ export const ViewportPanel: React.FC = () => {
 
         const orbit = new OrbitControls(camera, canvasRef.current);
         orbit.enableDamping = true;
+        orbit.target.set(0, 0, -100); // 🎯 Center of MobRunner track
+        orbit.update();
         orbitRef.current = orbit;
 
         const transform = new TransformControls(camera, canvasRef.current);
@@ -277,24 +330,81 @@ export const ViewportPanel: React.FC = () => {
     }, []);
 
     // Sync entities to Three.js
+    // Sync entities to Three.js with Hierarchy support
     useEffect(() => {
         const scene = sceneRef.current;
         if (!scene) return;
         const currentIds = new Set<number>();
-        const syncEntity = (id: number) => {
+
+        const syncEntity = (id: number, parentObject: THREE.Object3D) => {
             const entity = entities.get(id);
             if (!entity) return;
             currentIds.add(id);
+
             let mesh = entityMeshMap.get(id);
             const render = entity.components.find(c => c.type === 'Render');
             const transform = entity.components.find(c => c.type === 'Transform');
-            if (render) {
+
+            if (render || entity.children.length > 0) {
                 if (!mesh) {
-                    mesh = createMeshForEntity(render.data.meshType || 'cube', render.data.color || '#6366f1');
+                    const onModelLoaded = (loadedGroup: THREE.Group) => {
+                        // 🧹 Elite Deep Clean: Find and delete ANY previous instances for this ID
+                        const existing = entityMeshMap.get(id);
+                        if (existing) {
+                            existing.traverse((node: any) => {
+                                if (node.geometry) node.geometry.dispose();
+                                if (node.material) {
+                                    const mats = Array.isArray(node.material) ? node.material : [node.material];
+                                    mats.forEach((m: any) => m.dispose());
+                                }
+                            });
+                            existing.parent?.remove(existing);
+                        }
+                        
+                        loadedGroup.userData.entityId = id;
+                        loadedGroup.userData.isModel = true;
+                        
+                        // Add to current parent (Scene or Parent Object)
+                        const currentEntity = entities.get(id);
+                        const parentId = currentEntity?.parentId;
+                        const parentContainer = parentId !== null && parentId !== undefined ? entityMeshMap.get(parentId) : scene;
+                        
+                        if (parentContainer) {
+                            parentContainer.add(loadedGroup);
+                        } else {
+                            scene.add(loadedGroup);
+                        }
+                        
+                        entityMeshMap.set(id, loadedGroup);
+                        
+                        // Force sync transform
+                        const t = entities.get(id)?.components.find(c => c.type === 'Transform');
+                        if (t) {
+                            const p = t.data.position || [0,0,0], r = t.data.rotation || [0,0,0], s = t.data.scale || [1,1,1];
+                            loadedGroup.position.set(p[0], p[1], p[2]);
+                            loadedGroup.rotation.set(THREE.MathUtils.degToRad(r[0]), THREE.MathUtils.degToRad(r[1]), THREE.MathUtils.degToRad(r[2]));
+                            loadedGroup.scale.set(s[0], s[1], s[2]);
+                        }
+                    };
+
+                    mesh = createMeshForEntity(
+                        render?.data.meshType || (entity.children.length > 0 ? 'group' : 'cube'), 
+                        render?.data.color || '#6366f1', 
+                        render?.data.modelPath,
+                        id,
+                        onModelLoaded,
+                        !!launchedProject
+                    );
                     mesh.userData.entityId = id;
-                    scene.add(mesh);
+                    parentObject.add(mesh);
                     entityMeshMap.set(id, mesh);
                 }
+
+                // Ensure it's attached to the right parent if hierarchy changed
+                if (mesh.parent !== parentObject) {
+                    parentObject.add(mesh);
+                }
+
                 if (transform && !transformRef.current?.dragging) {
                     const p = transform.data.position || [0,0,0], r = transform.data.rotation || [0,0,0], s = transform.data.scale || [1,1,1];
                     mesh.position.set(p[0], p[1], p[2]);
@@ -302,10 +412,20 @@ export const ViewportPanel: React.FC = () => {
                     mesh.scale.set(s[0], s[1], s[2]);
                 }
             }
-            entity.children.forEach(syncEntity);
+
+            // Recurse children
+            entity.children.forEach(childId => syncEntity(childId, mesh || parentObject));
         };
-        rootEntityIds.forEach(syncEntity);
-        entityMeshMap.forEach((m, id) => { if (!currentIds.has(id)) { scene.remove(m); entityMeshMap.delete(id); } });
+
+        rootEntityIds.forEach(id => syncEntity(id, scene));
+
+        // Cleanup removed entities
+        entityMeshMap.forEach((m, id) => { 
+            if (!currentIds.has(id)) { 
+                m.parent?.remove(m); 
+                entityMeshMap.delete(id); 
+            } 
+        });
     }, [entities, rootEntityIds]);
 
     // REACTIVE GIZMO

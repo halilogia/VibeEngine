@@ -14,9 +14,40 @@ import { useEditorStore } from '@infrastructure/store';
 import { AnimatePresence } from 'framer-motion';
 import { VibeTheme } from '@themes/VibeStyles';
 
+import { useConsoleStore } from '@infrastructure/store/consoleStore';
+import { usePlayModeStore } from './core';
 import { SettingsModal } from '../../ui/editor/settings/SettingsModal';
 
 export const EditorApp: React.FC = () => {
+    const { isPlaying } = usePlayModeStore();
+    const addLog = useConsoleStore(state => state.addLog);
+
+    // 🕵️ Console Agent: Intercept all system logs and mirror to UI Console
+    useEffect(() => {
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+
+        console.log = (...args) => {
+            originalLog(...args);
+            addLog('info', args.map(a => String(a)).join(' '));
+        };
+        console.warn = (...args) => {
+            originalWarn(...args);
+            addLog('warn', args.map(a => String(a)).join(' '));
+        };
+        console.error = (...args) => {
+            originalError(...args);
+            addLog('error', args.map(a => String(a)).join(' '));
+        };
+
+        return () => {
+            console.log = originalLog;
+            console.warn = originalWarn;
+            console.error = originalError;
+        };
+    }, [addLog]);
+
     const [showSplash, setShowSplash] = useState(true);
     const { launchedProject, showLauncher, setShowLauncher } = useProjectStore();
     const { 
@@ -32,6 +63,13 @@ export const EditorApp: React.FC = () => {
     // Enable keyboard shortcuts
     useKeyboardShortcuts();
     const { initializeKenneyLibrary } = useAssetManager();
+
+    useEffect(() => {
+        // 🏛️ Sovereign Unity Hub Logic: Show launcher if no project is active
+        if (!launchedProject) {
+            setShowLauncher(true);
+        }
+    }, [launchedProject, setShowLauncher]);
 
     useEffect(() => {
         // Initialize the loading bridge immediately

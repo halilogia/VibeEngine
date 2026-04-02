@@ -18,7 +18,7 @@ interface LogEntryProps {
 
 const LogEntry: React.FC<LogEntryProps> = ({ log }) => {
     const [isHovered, setIsHovered] = useState(false);
-    
+
     const getIcon = () => {
         switch (log.level) {
             case 'error': return 'Trash';
@@ -37,26 +37,55 @@ const LogEntry: React.FC<LogEntryProps> = ({ log }) => {
         }
     };
 
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        // We could add a tiny success toast here if needed
+    };
+
     return (
         <div 
             style={{ 
                 ...styles.entry, 
                 ...styles[log.level],
-                ...(isHovered ? styles.entryHover : {})
+                ...(isHovered ? styles.entryHover : {}),
+                userSelect: 'text', // 🖱️ Allow manual selection
+                cursor: 'text',
+                position: 'relative'
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             <span style={styles.time}>{new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
             <VibeIcons name={getIcon()} size={12} style={{ color: getIconColor(), marginTop: '2px' }} />
-            <span style={{ 
-                ...styles.message,
-                color: log.level === 'error' ? VibeTheme.colors.error : 
-                       log.level === 'warn' ? VibeTheme.colors.warning : 
-                       VibeTheme.colors.textMain
-            }}>
+            <span style={styles.message}>
                 {log.message}
             </span>
+            
+            <div 
+                className="copy-btn"
+                title="Copy to clipboard"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard(log.message);
+                }}
+                style={{
+                    position: 'absolute',
+                    right: '10px',           // 🚨 Slightly inwards from the edge
+                    top: '10px',
+                    padding: '8px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(99, 102, 241, 0.25)',
+                    borderRadius: '8px',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    border: `1px solid ${VibeTheme.colors.accent}44`,
+                    zIndex: 100
+                }}
+            >
+                <VibeIcons name="Layers" size={14} style={{ color: VibeTheme.colors.accent }} />
+            </div>
         </div>
     );
 };
@@ -80,12 +109,20 @@ export const ConsolePanel: React.FC<ConsolePanelProps> = ({ dragHandleProps }) =
         }
     }, [logs, filter]);
 
+    const copyAll = () => {
+        const text = filteredLogs.map(l => `[${new Date(l.timestamp).toLocaleTimeString()}] ${l.level.toUpperCase()}: ${l.message}`).join('\n');
+        navigator.clipboard.writeText(text);
+    };
+
     const headerActions = (
-        <>
+        <div style={{ display: 'flex', gap: '4px' }}>
+            <VibeButton variant="ghost" size="sm" onClick={copyAll} title="Copy All Logs">
+                <VibeIcons name="Layers" size={14} />
+            </VibeButton>
             <VibeButton variant="ghost" size="sm" onClick={clearLogs} title="Clear Logs">
                 <VibeIcons name="Trash" size={14} />
             </VibeButton>
-        </>
+        </div>
     );
 
     return (

@@ -11,6 +11,7 @@ export const consoleStyles = createVibeStyles({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        boxSizing: 'border-box',
     },
     toolbar: {
         padding: '8px 16px',
@@ -30,18 +31,23 @@ export const consoleStyles = createVibeStyles({
     },
     content: {
         flex: 1,
-        overflow: 'auto',
+        overflowX: 'hidden',          
+        overflowY: 'auto',
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: '12px',
+        paddingRight: '4px',          // Clean UI padding
     },
     entry: {
         display: 'flex',
         alignItems: 'flex-start',
         gap: '14px',
         padding: '10px 16px',
+        paddingRight: '40px',         // Modest safe zone for the copy button
         borderLeft: '4px solid transparent',
         borderBottom: `1px solid ${VibeTheme.colors.border}`,
         transition: 'all 0.1s ease',
+        position: 'relative',         // ⚓ Anchor for the copy button
+        overflow: 'hidden',
     },
     entryHover: {
         background: VibeTheme.colors.bgSubtle,
@@ -56,9 +62,12 @@ export const consoleStyles = createVibeStyles({
     },
     message: {
         flex: 1,
+        minWidth: 0,                  // 🚨 CRITICAL: Allows flex item to shrink and wrap
         color: VibeTheme.colors.textMain,
         lineHeight: 1.5,
-        wordBreak: 'break-word',
+        wordBreak: 'break-all',
+        whiteSpace: 'pre-wrap',
+        overflowWrap: 'anywhere'
     },
     info: { borderLeftColor: '#60a5fa' },
     warn: { borderLeftColor: '#fbbf24', background: 'rgba(251, 191, 36, 0.03)' },

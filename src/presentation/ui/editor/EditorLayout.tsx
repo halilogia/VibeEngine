@@ -79,7 +79,12 @@ export const EditorLayout: React.FC = () => {
             <TitleBar />
             <div style={styles.topBar}><MenuBar /></div>
 
-            <div style={styles.mainContent}>
+            <div style={{ 
+                ...styles.mainContent, 
+                display: 'flex',
+                flexDirection: 'row',
+                position: 'relative'
+            }}>
                 {/* 1. Left Sidebar (Hierarchy) */}
                 <AnimatePresence>
                     {showHierarchy && (
@@ -98,8 +103,16 @@ export const EditorLayout: React.FC = () => {
                     )}
                 </AnimatePresence>
 
-                {/* 2. Center Viewport Area */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', minWidth: 0 }}>
+                {/* 2. Center Viewport Area - Sovereign Stable Flex */}
+                <div style={{ 
+                    flex: 1, 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    position: 'relative', 
+                    overflow: 'hidden', 
+                    minWidth: 0,
+                    height: '100%'
+                }}>
                     <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
                         <VibeErrorBoundary name="Viewport"><ViewportPanel /></VibeErrorBoundary>
                     </div>
@@ -122,10 +135,13 @@ export const EditorLayout: React.FC = () => {
                                     right: isScriptFullScreen ? (showAICopilot ? rightWidth : 0) : 0,
                                     display: 'flex', 
                                     flexDirection: 'column', 
-                                    zIndex: isScriptFullScreen ? 9999 : 1000, 
+                                    zIndex: isScriptFullScreen ? 9999 : 5, 
                                     borderTop: `1px solid ${VibeTheme.colors.glassBorder}`,
                                     background: VibeTheme.colors.bgPrimary,
-                                    flexShrink: 0,
+                                    flexShrink: 1,
+                                    width: '100%',
+                                    maxWidth: '100%',
+                                    boxSizing: 'border-box'
                                 }}
                             >
                                 <div 
@@ -141,9 +157,9 @@ export const EditorLayout: React.FC = () => {
                                                 animate={{ width: (showConsole || showScriptEditor) ? assetsWidth : '100%', opacity: 1 }}
                                                 exit={{ width: 0, opacity: 0 }}
                                                 transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
-                                                style={{ flexShrink: 0, overflow: 'hidden' }}
+                                                style={{ flexShrink: (showConsole || showScriptEditor) ? 0 : 1, minWidth: 0, overflow: 'hidden' }}
                                             >
-                                                <div style={{ width: (showConsole || showScriptEditor) ? assetsWidth : '100%', minWidth: '200px', height: '100%' }}>
+                                                <div style={{ width: '100%', height: '100%' }}>
                                                     <VibeErrorBoundary name="Assets"><AssetsPanel /></VibeErrorBoundary>
                                                 </div>
                                             </motion.div>
@@ -161,9 +177,9 @@ export const EditorLayout: React.FC = () => {
                                                 animate={{ width: showScriptEditor ? consoleWidth : '100%', opacity: 1 }}
                                                 exit={{ width: 0, opacity: 0 }}
                                                 transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
-                                                style={{ flexShrink: 0, overflow: 'hidden' }}
+                                                style={{ flex: showScriptEditor ? '0 0 auto' : 1, minWidth: 0, overflow: 'hidden' }}
                                             >
-                                                <div style={{ width: showScriptEditor ? consoleWidth : '100%', minWidth: '200px', height: '100%' }}>
+                                                <div style={{ width: '100%', height: '100%' }}>
                                                     <VibeErrorBoundary name="Console"><ConsolePanel /></VibeErrorBoundary>
                                                 </div>
                                             </motion.div>
@@ -178,10 +194,10 @@ export const EditorLayout: React.FC = () => {
                                         {showScriptEditor && (
                                             <motion.div 
                                                 initial={{ width: 0, opacity: 0 }}
-                                                animate={{ width: (showAssets || showConsole) && !isScriptFullScreen ? 'auto' : '100%', opacity: 1 }}
+                                                animate={{ width: '100%', opacity: 1 }}
                                                 exit={{ width: 0, opacity: 0 }}
                                                 transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
-                                                style={{ flex: 1, overflow: 'hidden' }}
+                                                style={{ flex: 1, flexGrow: 1, minWidth: 0, overflow: 'hidden' }}
                                             >
                                                 <div style={{ width: '100%', height: '100%' }}>
                                                     <VibeErrorBoundary name="Script Editor">
@@ -198,10 +214,18 @@ export const EditorLayout: React.FC = () => {
                 </div>
 
                 {/* 3. Right Sidebar Area (Inspector & AI Copilot) */}
-                <div style={{ display: 'flex', zIndex: 2000 }}>
-                    {/* The main right resizer (Separates Viewport from the whole Right block) */}
+                <div style={{ 
+                    display: 'flex', 
+                    position: 'relative',
+                    zIndex: 10, 
+                    flexShrink: 0, 
+                    background: VibeTheme.colors.bgPrimary, 
+                    borderLeft: `1px solid ${VibeTheme.colors.glassBorder}`,
+                    overflow: 'hidden'
+                }}>
+                    {/* The main right resizer */}
                     {(showInspector || showAICopilot) && (
-                        <div onMouseDown={handleResize('R')} className="v-resizer v-resizer-vertical" />
+                        <div onMouseDown={handleResize('R')} className="v-resizer v-resizer-vertical" style={{ position: 'absolute', left: 0, zIndex: 100 }} />
                     )}
 
                     <AnimatePresence>
@@ -230,9 +254,15 @@ export const EditorLayout: React.FC = () => {
                                 animate={{ width: rightWidth, opacity: 1 }}
                                 exit={{ width: 0, opacity: 0 }}
                                 transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
-                                style={{ display: 'flex', flexShrink: 0, overflow: 'hidden' }}
+                                style={{ display: 'flex', flexShrink: 0, overflow: 'hidden', position: 'relative', zIndex: 1 }}
                             >
-                                <div style={{ ...styles.sidebarRight, width: rightWidth, borderLeft: (showInspector ? `1px solid ${VibeTheme.colors.glassBorder}` : 'none') }} onClick={() => setActivePanel('ai')}>
+                                <div style={{ 
+                                    ...styles.sidebarRight, 
+                                    width: rightWidth, 
+                                    minWidth: rightWidth, // 🚨 FORCE width recognition
+                                    borderLeft: (showInspector ? `1px solid ${VibeTheme.colors.glassBorder}` : 'none'),
+                                    zIndex: 1 
+                                }} onClick={() => setActivePanel('ai')}>
                                     <VibeErrorBoundary name="AI Copilot"><AICopilotPanel /></VibeErrorBoundary>
                                 </div>
                             </motion.div>
