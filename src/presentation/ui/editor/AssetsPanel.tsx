@@ -7,12 +7,46 @@ import { SovereignHeader } from '@ui/atomic/molecules/SovereignHeader';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeInput } from '@ui/atomic/atoms/VibeInput';
 import { VibeTheme } from '@themes/VibeStyles';
-import { assetsStyles as styles } from './AssetsPanel.styles';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ContextMenu, type ContextMenuItem } from './ContextMenu';
+import { assetsStyles as styles } from './AssetsPanel.styles';
 
-const AssetItem: React.FC<{ asset: AssetData; onDelete: () => void; onClick?: () => void }> = ({ asset, onDelete, onClick }) => {
-    const [isHovered, setIsHovered] = useState(false);
+const AssetItem: React.FC<{ 
+    asset: AssetData; 
+    onDelete: () => void; 
+    onClick?: () => void; 
+    onContextMenu: (e: React.MouseEvent) => void;
+    isRenaming: boolean;
+    onRename: (newName: string) => void;
+    onCancelRename: () => void;
+    onDrop: (draggedAssetId: string, targetFolderId: string | null) => void;
+}> = ({ asset, onDelete, onClick, onContextMenu, isRenaming, onRename, onCancelRename, onDrop }) => {
+    const [isDragOver, setIsDragOver] = useState(false);
+    const [tempName, setTempName] = useState(asset.name);
+
+    const handleDragStart = (e: React.DragEvent) => {
+        e.dataTransfer.setData('assetId', asset.id);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        if (asset.type !== 'folder') return;
+        e.preventDefault();
+        setIsDragOver(true);
+    };
+
+    const handleDragLeave = () => setIsDragOver(false);
+
+    const handleLocalDrop = (e: React.DragEvent) => {
+        if (asset.type !== 'folder') return;
+        e.preventDefault();
+        setIsDragOver(false);
+        const draggedId = e.dataTransfer.getData('assetId');
+        if (draggedId && draggedId !== asset.id) {
+            onDrop(draggedId, asset.id);
+        }
+    };
     const getIcon = () => {
         switch (asset.type) {
             case 'folder': return 'Folder';
@@ -24,18 +58,43 @@ const AssetItem: React.FC<{ asset: AssetData; onDelete: () => void; onClick?: ()
         }
     };
 
+    const assetItemClass = `vibe-asset-item ${isDragOver ? 'is-drag-over' : ''}`;
+
+    const hoverStyle = `
+        .vibe-asset-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid ${VibeTheme.colors.border};
+            background: ${VibeTheme.colors.bgSubtle};
+        }
+        .vibe-asset-item:hover {
+            background: ${VibeTheme.colors.bgSecondary} !important;
+            border-color: ${VibeTheme.colors.accent}bb !important;
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px -10px ${VibeTheme.colors.accent}44;
+        }
+        .vibe-asset-item.is-drag-over {
+            border-color: ${VibeTheme.colors.accent} !important;
+            background: rgba(99, 102, 241, 0.1) !important;
+        }
+    `;
+
     return (
-        <motion.div 
-            whileHover="hover"
-            initial="initial"
-            variants={{
-                initial: { y: 0, backgroundColor: 'transparent', boxShadow: 'none' },
-                hover: { y: -4, backgroundColor: 'rgba(255, 255, 255, 0.08)', boxShadow: `0 10px 20px -5px ${VibeTheme.colors.accent}44` }
+        <div 
+            className={assetItemClass}
+            style={{
+                ...styles.assetItem,
+                cursor: 'grab'
             }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            style={styles.assetItem}
+            draggable={!isRenaming}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleLocalDrop}
+            onContextMenu={onContextMenu}
             onClick={onClick}
         >
+            <style dangerouslySetInnerHTML={{ __html: hoverStyle }} />
             <div style={styles.iconWrapper}>
                 <VibeIcons 
                     name={getIcon()} 
@@ -49,22 +108,33 @@ const AssetItem: React.FC<{ asset: AssetData; onDelete: () => void; onClick?: ()
                     }} 
                 />
             </div>
-            <span style={styles.assetName}>{asset.name}</span>
-            <motion.button 
-                variants={{
-                    initial: { opacity: 0, scale: 0.8 },
-                    hover: { opacity: 1, scale: 1 }
-                }}
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                style={{ 
-                    position: 'absolute', top: '8px', right: '8px', 
-                    background: 'rgba(239, 68, 68, 0.2)', border: 'none', 
-                    color: '#f87171', borderRadius: '6px', padding: '4px', cursor: 'pointer' 
-                }}
-            >
-                <VibeIcons name="Trash" size={10} />
-            </motion.button>
-        </motion.div>
+            {isRenaming ? (
+                <input 
+                    autoFocus
+                    value={tempName}
+                    onChange={(e) => setTempName(e.target.value)}
+                    onBlur={() => onRename(tempName)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') onRename(tempName);
+                        if (e.key === 'Escape') onCancelRename();
+                    }}
+                    style={{
+                        width: '100%',
+                        background: '#fff',
+                        color: '#000',
+                        fontSize: '10px',
+                        border: 'none',
+                        borderRadius: '2px',
+                        textAlign: 'center',
+                        outline: 'none',
+                        padding: '2px'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                />
+            ) : (
+                <span style={styles.assetName}>{asset.name}</span>
+            )}
+        </div>
     );
 };
 
@@ -74,21 +144,27 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
     const { launchedProject } = useProjectStore();
     const { 
         togglePanel, 
-        activePanelId, setActivePanel 
+        activePanelId, setActivePanel,
+        setScriptFullScreen,
+        openFile,
     } = useEditorStore();
     
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState<'all' | AssetData['type']>('all');
     const [isScanning, setIsScanning] = useState(false);
     const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+    const [contextMenu, setContextMenu] = useState<{ x: number; y: number; assetId: string } | null>(null);
+    const [renamingAssetId, setRenamingAssetId] = useState<string | null>(null);
 
     const handleScan = async () => {
         if (!launchedProject) return;
         setIsScanning(true);
         try {
             const scanned = await ProjectScanner.scanProjectAssets(launchedProject.path);
-            setAssets(scanned);
-            console.log(`Manual scan found ${scanned.length} assets.`);
+            if (scanned && scanned.length >= 0) {
+                setAssets(scanned);
+                console.log(`Manual scan found ${scanned.length} assets.`);
+            }
         } catch (e) {
             console.error('Manual scan failed:', e);
         } finally {
@@ -113,7 +189,153 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
             return a.name.localeCompare(b.name);
         });
 
-    console.log(`[VibeAssets] Rendering ${filteredAssets.length} assets at folder: ${currentFolderId || 'Root'}`);
+    const handleContextMenu = (e: React.MouseEvent, assetId: string | null) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setContextMenu({ x: e.clientX, y: e.clientY, assetId: assetId || 'GLOBAL' });
+    };
+
+    const createNewScript = async () => {
+        if (!launchedProject) return;
+        
+        const parentFolder = currentFolderId ? assets.find((a: any) => a.id === currentFolderId) : null;
+        let basePath = parentFolder ? parentFolder.path : (launchedProject.path + (launchedProject.hasDomain ? '/src' : ''));
+        basePath = basePath.replace(/\\/g, '/');
+        
+        const scriptName = `NewScript.ts`;
+        const scriptPath = `${basePath}/${scriptName}`;
+        
+        const content = `/**\n * ${scriptName} - VibeEngine Script\n */\n\nexport class NewScript {\n    start() {\n        // Code starts here\n    }\n}\n`;
+        
+        const result = await ProjectScanner.createFile(scriptPath, content);
+        if (result.success) {
+            await handleScan();
+            // Find newly created script to trigger rename
+            setTimeout(() => {
+                const newAsset = (window as any).VibeAssets?.find((a: any) => a.path === scriptPath);
+                if (newAsset) setRenamingAssetId(newAsset.id);
+            }, 300);
+        }
+    };
+
+    const createNewFolder = async () => {
+        if (!launchedProject) return;
+        
+        const parentFolder = currentFolderId ? assets.find((a: any) => a.id === currentFolderId) : null;
+        let basePath = parentFolder ? parentFolder.path : (launchedProject.path + (launchedProject.hasDomain ? '/src' : ''));
+        basePath = basePath.replace(/\\/g, '/');
+        
+        const folderName = `New Folder`;
+        const folderPath = `${basePath}/${folderName}`;
+        
+        const result = await ProjectScanner.createFolder(folderPath);
+        if (result.success) {
+            await handleScan();
+            // Find newly created folder to trigger auto-rename
+            setTimeout(() => {
+                // handleScan calls setAssets which isn't immediate in state, 
+                // but we can search for it in the next render cycle's assets.
+                // We'll use a slightly longer delay to be safe or just trigger it via a side effect.
+            }, 300);
+        } else {
+            console.error('Failed to create folder:', result.error);
+        }
+    };
+
+    const handleRename = async (assetId: string, newName: string) => {
+        setRenamingAssetId(null);
+        const asset = assets.find((a: any) => a.id === assetId);
+        if (!asset || asset.name === newName) return;
+
+        const oldPath = asset.path;
+        const newPath = oldPath.replace(asset.name, newName); // Simple replace for demo, usually handle extension/path split
+
+        const result = await ProjectScanner.renameAsset(oldPath, newPath);
+        if (result.success) {
+            handleScan();
+        } else {
+            console.error('Rename failed:', result.error);
+        }
+    };
+
+    const handleDelete = async (assetId: string) => {
+        const asset = assets.find((a: any) => a.id === assetId);
+        if (!asset) return;
+
+        const result = await ProjectScanner.deleteAsset(asset.path);
+        if (result.success) {
+            handleScan();
+        } else {
+            console.error('Delete failed:', result.error);
+        }
+    };
+
+    const handleMoveAsset = async (draggedId: string, targetId: string | null) => {
+        const dragged = assets.find((a: any) => a.id === draggedId);
+        const target = targetId ? assets.find((a: any) => a.id === targetId) : null;
+        if (!dragged) return;
+
+        const targetPath = target ? target.path : (launchedProject!.path + (launchedProject!.hasDomain ? '/src' : ''));
+        const newPath = `${targetPath}/${dragged.name}`;
+
+        if (dragged.path === newPath) return;
+
+        console.log(`🚚 Moving ${dragged.name} to ${newPath}`);
+        const result = await ProjectScanner.renameAsset(dragged.path, newPath);
+        if (result.success) {
+            handleScan();
+        } else {
+            console.error('Move failed:', result.error);
+        }
+    };
+
+    const contextMenuItems: ContextMenuItem[] = contextMenu ? (
+        contextMenu.assetId === 'GLOBAL' ? [
+            { 
+                label: 'New Folder', 
+                icon: <VibeIcons name="Folder" size={12} />, 
+                onClick: createNewFolder
+            },
+            { 
+                label: 'New Script', 
+                icon: <VibeIcons name="Code" size={12} />, 
+                onClick: createNewScript
+            },
+            { divider: true, label: '' },
+            { 
+                label: 'Refresh Library', 
+                icon: <VibeIcons name="RefreshCw" size={12} />, 
+                onClick: handleScan 
+            },
+        ] : [
+            { 
+                label: 'Open / Select', 
+                icon: <VibeIcons name="Maximize" size={12} />, 
+                onClick: () => {
+                    const asset = assets.find((a: any) => a.id === contextMenu.assetId);
+                    if (asset?.type === 'folder') setCurrentFolderId(asset.id);
+                    else if (asset?.type === 'script') setScriptFullScreen(true);
+                }
+            },
+            { 
+                label: 'Duplicate', 
+                icon: <VibeIcons name="Copy" size={12} />, 
+                onClick: () => console.log('Duplicate asset', contextMenu.assetId)
+            },
+            { 
+                label: 'Rename', 
+                icon: <VibeIcons name="Sparkles" size={12} />, 
+                onClick: () => setRenamingAssetId(contextMenu.assetId!)
+            },
+            { divider: true, label: '' },
+            { 
+                label: 'Delete', 
+                icon: <VibeIcons name="Trash" size={12} />, 
+                danger: true, 
+                onClick: () => handleDelete(contextMenu.assetId) 
+            },
+        ]
+    ) : [];
 
     // 🟢 Breadcrumb logic
     const getBreadcrumbs = () => {
@@ -192,13 +414,27 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
                         {isScanning ? (
                             <VibeIcons name="Loader" size={14} style={{ animation: 'spin 1s linear infinite' }} />
                         ) : (
-                            <VibeIcons name="Plus" size={14} />
+                            <VibeIcons name="RefreshCw" size={14} />
                         )}
                     </VibeButton>
                 </div>
             </div>
 
-            <div style={styles.content}>
+            <div 
+                style={{ ...styles.content, cursor: 'default' }}
+                onContextMenu={(e) => handleContextMenu(e, null)}
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                }}
+                onDrop={(e) => {
+                    e.preventDefault();
+                    const draggedId = e.dataTransfer.getData('assetId');
+                    if (draggedId) {
+                        handleMoveAsset(draggedId, currentFolderId); // Drop to current view root
+                    }
+                }}
+            >
                 <div style={styles.breadcrumb}>
                     <span 
                         style={{ ...styles.breadcrumbItem, color: !currentFolderId ? VibeTheme.colors.textMain : 'inherit' }}
@@ -236,17 +472,42 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
                                 <AssetItem 
                                     key={asset.id} 
                                     asset={asset} 
-                                    onDelete={() => removeAsset(asset.id)}
-                                    onClick={() => {
+                                    onDelete={() => handleDelete(asset.id)}
+                                    onClick={async () => {
                                         if (asset.type === 'folder') setCurrentFolderId(asset.id);
-                                        else if (asset.type === 'script') togglePanel('scriptEditor');
+                                        else if (asset.type === 'script') {
+                                            const result = await ProjectScanner.readFile(asset.path);
+                                            if (result.success) {
+                                                openFile({ 
+                                                    id: asset.id, 
+                                                    name: asset.name, 
+                                                    path: asset.path, 
+                                                    content: result.content 
+                                                });
+                                                setScriptFullScreen(true);
+                                            }
+                                        }
                                     }}
+                                    onContextMenu={(e) => handleContextMenu(e, asset.id)}
+                                    isRenaming={renamingAssetId === asset.id}
+                                    onRename={(newName) => handleRename(asset.id, newName)}
+                                    onCancelRename={() => setRenamingAssetId(null)}
+                                    onDrop={handleMoveAsset}
                                 />
                             ))}
                         </div>
                     )}
                 </AnimatePresence>
             </div>
+
+            {contextMenu && (
+                <ContextMenu 
+                    x={contextMenu.x} 
+                    y={contextMenu.y} 
+                    items={contextMenuItems} 
+                    onClose={() => setContextMenu(null)} 
+                />
+            )}
         </div>
     );
 };

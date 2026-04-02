@@ -3,8 +3,8 @@
  */
 
 import * as THREE from 'three';
-import type { Entity } from '../../engine/core/Entity';
-import { TransformComponent } from '../../engine/components/TransformComponent';
+import { Entity } from '@engine';
+import { TransformComponent } from '@engine';
 import type { ICommand } from './HistoryManager';
 
 /**

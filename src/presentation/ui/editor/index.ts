@@ -7,7 +7,6 @@ export { MenuBar } from './MenuBar';
 export { EditorLayout } from './EditorLayout';
 export { SplashScreen } from './SplashScreen';
 export { StatusBar } from './StatusBar';
-export { Toolbar } from './Toolbar';
 export { ViewportToolbar } from './ViewportToolbar';
 export { TitleBar } from './TitleBar';
 

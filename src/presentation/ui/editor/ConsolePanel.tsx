@@ -51,7 +51,9 @@ const LogEntry: React.FC<LogEntryProps> = ({ log }) => {
             <VibeIcons name={getIcon()} size={12} style={{ color: getIconColor(), marginTop: '2px' }} />
             <span style={{ 
                 ...styles.message,
-                color: log.level === 'error' ? '#fca5a5' : log.level === 'warn' ? '#fde68a' : 'rgba(255, 255, 255, 0.9)'
+                color: log.level === 'error' ? VibeTheme.colors.error : 
+                       log.level === 'warn' ? VibeTheme.colors.warning : 
+                       VibeTheme.colors.textMain
             }}>
                 {log.message}
             </span>

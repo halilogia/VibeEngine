@@ -41,7 +41,7 @@ export const MenuBar: React.FC = () => {
     // Stores
     const { 
         togglePanel, 
-        showAICopilot, showHierarchy, showConsole, showAssets, showInspector,
+        showAICopilot, showHierarchy, showConsole, showAssets, showInspector, showScriptEditor,
         showAICopilotSettings, setShowAICopilotSettings
     } = useEditorStore();
     const { sceneName } = useSceneStore();
@@ -129,23 +129,7 @@ export const MenuBar: React.FC = () => {
                 <div style={styles.dividerVertical} />
             </div>
 
-            {/* CENTER: Playback Controls */}
-            <div style={styles.playbackGroup}>
-                {!isPlaying ? (
-                    <VibeButton variant="primary" size="sm" onClick={play} style={{ borderRadius: '20px', background: '#10b981', height: '28px', padding: '0 12px' }}>
-                        <VibeIcons name="Play" size={14} />
-                    </VibeButton>
-                ) : (
-                    <div style={{ display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.2)', padding: '2px', borderRadius: '20px' }}>
-                        <VibeButton variant={isPaused ? 'primary' : 'ghost'} size="sm" onClick={pause} style={{ height: '24px', borderRadius: '12px' }}>
-                            <VibeIcons name="Pause" size={14} />
-                        </VibeButton>
-                        <VibeButton variant="danger" size="sm" onClick={stop} style={{ background: '#ef4444', height: '24px', borderRadius: '12px' }}>
-                            <VibeIcons name="Square" size={14} color="#fff" />
-                        </VibeButton>
-                    </div>
-                )}
-            </div>
+            <div style={styles.playbackGroup} />
 
             {/* RIGHT: Layout & Utilities */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -189,6 +173,19 @@ export const MenuBar: React.FC = () => {
                         }}
                     >
                         <VibeIcons name="Terminal" size={14} />
+                    </VibeButton>
+
+                    {/* Bottom C: Scripts */}
+                    <VibeButton 
+                        variant="ghost" size="sm" onClick={() => togglePanel('scriptEditor')} 
+                        style={{ 
+                            width: '32px', height: '32px', padding: 0, 
+                            color: showScriptEditor ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary,
+                            filter: showScriptEditor ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none',
+                            transform: 'rotate(90deg)'
+                        }}
+                    >
+                        <VibeIcons name="Code" size={14} />
                     </VibeButton>
 
                     {/* Right A: Inspector */}

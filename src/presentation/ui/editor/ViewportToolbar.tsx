@@ -38,6 +38,8 @@ const styles = createVibeStyles({
 
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { usePlayModeStore } from '@presentation/features/editor/core';
+
 export const ViewportToolbar: React.FC = () => {
     const { 
         editorMode, setEditorMode,
@@ -47,6 +49,7 @@ export const ViewportToolbar: React.FC = () => {
         showBloom, toggleBloom,
         showEnvironment, toggleEnvironment
     } = useEditorStore();
+    const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
 
     const [showShadingMenu, setShowShadingMenu] = React.useState(false);
 
@@ -60,7 +63,73 @@ export const ViewportToolbar: React.FC = () => {
 
     return (
         <div style={styles.container}>
-            {/* 🔴 Transform Tools (Move, Rotate, Scale) */}
+            {/* 🔴 Playback Controls (Sovereign Animated Edition) */}
+            <div style={{ ...styles.group, minWidth: '75px', justifyContent: 'center' }}>
+                <AnimatePresence mode="wait">
+                    {!isPlaying ? (
+                        <motion.div
+                            key="play-btn"
+                            initial={{ y: -10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 10, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                        >
+                            <VibeButton 
+                                variant="primary" size="sm" onClick={play}
+                                style={{ 
+                                    width: '32px', height: '32px', padding: 0, borderRadius: '8px',
+                                    background: '#10b981', 
+                                    boxShadow: '0 0 15px rgba(16, 185, 129, 0.3)'
+                                }}
+                                title="Play Scene (F5)"
+                            >
+                                <motion.div
+                                    animate={{ scale: [1, 1.05, 1] }}
+                                    transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                                >
+                                    <VibeIcons name="Play" size={14} color="#fff" />
+                                </motion.div>
+                            </VibeButton>
+                        </motion.div>
+                    ) : (
+                        <motion.div 
+                            key="playing-btns"
+                            initial={{ y: 10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -10, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                            style={{ display: 'flex', gap: '4px' }}
+                        >
+                            <VibeButton 
+                                variant="ghost" size="sm" onClick={pause}
+                                style={{ 
+                                    width: '32px', height: '32px', padding: 0, borderRadius: '8px',
+                                    background: isPaused ? `${VibeTheme.colors.accent}22` : 'transparent',
+                                    color: isPaused ? VibeTheme.colors.accent : 'rgba(255,255,255,0.5)'
+                                }}
+                                title="Pause simulation"
+                            >
+                                <VibeIcons name={isPaused ? "Play" : "Pause"} size={14} />
+                            </VibeButton>
+                            <VibeButton 
+                                variant="ghost" size="sm" onClick={stop}
+                                style={{ 
+                                    width: '32px', height: '32px', padding: 0, borderRadius: '8px',
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    color: '#ef4444'
+                                }}
+                                title="Stop simulation (Esc)"
+                            >
+                                <VibeIcons name="Square" size={12} />
+                            </VibeButton>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            <div style={styles.divider} />
+
+            {/* 🟢 Transform Tools (Move, Rotate, Scale) */}
             <div style={styles.group}>
                 {[
                     { mode: 'translate', icon: 'Move', label: 'Move tools' },

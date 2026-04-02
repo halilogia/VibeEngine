@@ -16,7 +16,13 @@ export type AICommandType =
     | 'update_component'
     | 'remove_component'
     | 'set_parent'
-    | 'spawn_prefab';
+    | 'spawn_prefab'
+    | 'set_position'
+    | 'set_rotation'
+    | 'set_scale'
+    | 'set_material'
+    | 'save_file'
+    | 'attach_script';
 
 /**
  * Structure of a single AI command
@@ -25,6 +31,8 @@ export interface AICommand {
     type: AICommandType;
     params: Record<string, any>;
 }
+
+import { ProjectScanner } from '@infrastructure/services/ProjectScanner';
 
 /**
  * Result of command execution
@@ -45,16 +53,16 @@ export class CommandInterpreter {
      * Executes a batch of commands in sequence.
      * Use this for atomic scene authoring (e.g., spawning a prefab + attaching scripts).
      * @param commands - List of AICommand objects to execute.
-     * @returns An array of CommandResult objects, one for each input command.
+     * @returns Promise of an array of CommandResult objects.
      */
-    static executeBatch(commands: AICommand[]): CommandResult[] {
+    static async executeBatch(commands: AICommand[]): Promise<CommandResult[]> {
         const results: CommandResult[] = [];
         const sceneStore = useSceneStore.getState();
 
         console.group('🤖 AI Copilot: Executing Command Batch');
         
         for (const cmd of commands) {
-            const result = this.execute(cmd, sceneStore);
+            const result = await this.execute(cmd, sceneStore);
             results.push(result);
             
             if (!result.success) {
@@ -74,9 +82,49 @@ export class CommandInterpreter {
      * @param store - Reference to the Zustand store (SceneStore).
      * @returns A success/fail message with metadata.
      */
-    private static execute(cmd: AICommand, store: any): CommandResult {
+    private static async execute(cmd: AICommand, store: any): Promise<CommandResult> {
         try {
             switch (cmd.type) {
+                case 'save_file': {
+                    const { filePath, content } = cmd.params;
+                    const res = await ProjectScanner.saveFile(filePath, content);
+                    return { success: res.success, message: res.success ? `File saved: ${filePath}` : `Save failed: ${res.error}` };
+                }
+
+                case 'attach_script': {
+                    const { entityId, scriptPath } = cmd.params;
+                    store.addComponent(entityId, { 
+                        type: 'Script', 
+                        data: { scriptPath }, 
+                        enabled: true 
+                    });
+                    return { success: true, message: `Script ${scriptPath} attached to entity ${entityId}` };
+                }
+
+                case 'set_position': {
+                    const { id, x, y, z } = cmd.params;
+                    store.updateComponent(id, 'Transform', { position: [x, y, z] });
+                    return { success: true, message: `Position of entity ${id} set to [${x}, ${y}, ${z}]` };
+                }
+
+                case 'set_rotation': {
+                    const { id, x, y, z } = cmd.params;
+                    store.updateComponent(id, 'Transform', { rotation: [x, y, z] });
+                    return { success: true, message: `Rotation of entity ${id} set to [${x}, ${y}, ${z}]` };
+                }
+
+                case 'set_scale': {
+                    const { id, x, y, z } = cmd.params;
+                    store.updateComponent(id, 'Transform', { scale: [x, y, z] });
+                    return { success: true, message: `Scale of entity ${id} set to [${x}, ${y}, ${z}]` };
+                }
+
+                case 'set_material': {
+                    const { id, color, opacity } = cmd.params;
+                    store.updateComponent(id, 'Render', { color, opacity: opacity ?? 1.0 });
+                    return { success: true, message: `Material of entity ${id} updated (Color: ${color})` };
+                }
+
                 case 'add_entity': {
                     const id = store.addEntity(cmd.params.name, cmd.params.parentId);
                     

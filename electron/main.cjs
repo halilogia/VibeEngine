@@ -47,6 +47,93 @@ function readProjectInfo(projectPath) {
         hasDomain
     };
 }
+// 📁 FileSystem Operations
+ipcMain.handle('create-folder', async (event, folderPath) => {
+    try {
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
+            return { success: true };
+        }
+        return { success: false, error: 'Folder already exists' };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('create-file', async (event, filePath, content = '') => {
+    try {
+        if (!fs.existsSync(filePath)) {
+            fs.writeFileSync(filePath, content);
+            return { success: true };
+        }
+        return { success: false, error: 'File already exists' };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('rename-asset', async (event, oldPath, newPath) => {
+    try {
+        if (fs.existsSync(oldPath)) {
+            fs.renameSync(oldPath, newPath);
+            return { success: true };
+        }
+        return { success: false, error: 'Source not found' };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('read-file', async (event, filePath) => {
+    console.log(`[IPC] read-file: ${filePath}`);
+    try {
+        if (fs.existsSync(filePath)) {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            console.log(`[IPC] read-file success: ${content.length} chars`);
+            return { success: true, content };
+        }
+        console.error(`[IPC] read-file failed: Not found at ${filePath}`);
+        return { success: false, error: 'File not found' };
+    } catch (e) {
+        console.error(`[IPC] read-file error: ${e.message}`);
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('save-file', async (event, filePath, content) => {
+    console.log(`[IPC] save-file: ${filePath}`);
+    try {
+        fs.writeFileSync(filePath, content, 'utf-8');
+        return { success: true };
+    } catch (e) {
+        console.error(`[IPC] save-file failed: ${e.message}`);
+        return { success: false, error: e.message };
+    }
+});
+
+console.log('💎 VIBEENGINE ANALYTICS: IPC HANDLERS READY');
+
+ipcMain.handle('delete-asset', async (event, assetPath) => {
+    try {
+        if (fs.existsSync(assetPath)) {
+            await shell.trashItem(assetPath);
+            return { success: true };
+        }
+        return { success: false, error: 'File not found' };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+// Window control IPCs
+ipcMain.on('window-minimize', () => { if(mainWindow) mainWindow.minimize() });
+ipcMain.on('window-maximize', () => {
+    if (!mainWindow) return;
+    if (mainWindow.isMaximized()) mainWindow.unmaximize();
+    else mainWindow.maximize();
+});
+ipcMain.on('window-close', () => { if(mainWindow) mainWindow.close() });
+
 
 ipcMain.handle('pick-project-folder', async () => {
     const { canceled, filePaths } = await require('electron').dialog.showOpenDialog({
@@ -123,14 +210,6 @@ ipcMain.handle('scan-project-assets', async (event, projectPath) => {
     }
 });
 
-// Window control IPCs
-ipcMain.on('window-minimize', () => mainWindow.minimize());
-ipcMain.on('window-maximize', () => {
-    if (mainWindow.isMaximized()) mainWindow.unmaximize();
-    else mainWindow.maximize();
-});
-ipcMain.on('window-close', () => mainWindow.close());
-
 // Determine if in development
 const isDev = !app.isPackaged;
 
@@ -187,7 +266,7 @@ function createMainWindow() {
     // Load the app
     if (isDev) {
         mainWindow.loadURL('http://localhost:5173/editor.html');
-        // mainWindow.webContents.openDevTools(); // Optional
+        mainWindow.webContents.openDevTools({ mode: 'detach' }); // 🛠️ FORCE OPEN FOR DEEP ANALYSIS
     } else {
         mainWindow.loadFile(path.join(__dirname, '../dist/editor.html'));
     }

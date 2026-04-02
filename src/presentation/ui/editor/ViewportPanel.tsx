@@ -12,15 +12,26 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { useEditorStore, useSceneStore } from '@infrastructure/store';
-import { usePlayModeStore } from '@presentation/features/editor/core/PlayModeManager';
-import { VibeTheme } from '@themes/VibeStyles';
-import { VibeIcons } from '@ui/common/VibeIcons';
 import { ViewportToolbar } from '@ui/editor/ViewportToolbar';
 import { StatusBar } from './StatusBar';
+import { usePlayModeStore } from '@presentation/features/editor/core';
+import { motion, AnimatePresence } from 'framer-motion';
 import { viewportStyles as styles, viewportAnimations } from './ViewportPanel.styles';
 
 // Map editor entity IDs to Three.js objects
 const entityMeshMap = new Map<number, THREE.Object3D>();
+
+function disposeObject(obj: THREE.Object3D) {
+    obj.traverse((node) => {
+        if (node instanceof THREE.Mesh) {
+            if (node.geometry) node.geometry.dispose();
+            if (node.material) {
+                const materials = Array.isArray(node.material) ? node.material : [node.material];
+                materials.forEach(m => m.dispose());
+            }
+        }
+    });
+}
 
 function createMeshForEntity(meshType: string, color: string): THREE.Mesh {
     let geometry: THREE.BufferGeometry;
@@ -136,10 +147,12 @@ export const ViewportPanel: React.FC = () => {
         const composer = new EffectComposer(renderer);
         composer.addPass(new RenderPass(scene, camera));
         
-        // Dynamic Bloom Resolution
+        // 🏛️ Recalibrated Sovereign Bloom: Prevents over-exposure and gizmo glow
         const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(containerRef.current.clientWidth, containerRef.current.clientHeight), 
-            0.5, 0.4, 0.85
+            0.15, // Strength: Minimal radiance
+            0.1,  // Radius: Tight dispersion
+            0.95   // Threshold: Only high-luminance peaks glow
         );
         composer.addPass(bloomPass);
         composer.addPass(new OutputPass());
@@ -238,8 +251,28 @@ export const ViewportPanel: React.FC = () => {
         return () => {
             cancelAnimationFrame(animationId);
             resizeObserver.disconnect();
-            renderer.dispose();
+            
+            // 🧹 Elite Cleanup: Deep Dispose
+            if (rendererRef.current) {
+                rendererRef.current.dispose();
+                rendererRef.current.forceContextLoss();
+            }
+            if (sceneRef.current) disposeObject(sceneRef.current);
+            if (orbitRef.current) orbitRef.current.dispose();
+            if (transformRef.current) transformRef.current.dispose();
+            if (composerRef.current) {
+                composerRef.current.passes.forEach(pass => {
+                    if ((pass as any).dispose) (pass as any).dispose();
+                });
+            }
+            
             entityMeshMap.clear();
+            rendererRef.current = null;
+            sceneRef.current = null;
+            cameraRef.current = null;
+            orbitRef.current = null;
+            transformRef.current = null;
+            composerRef.current = null;
         };
     }, []);
 
@@ -318,6 +351,21 @@ export const ViewportPanel: React.FC = () => {
             <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
             
             <div style={styles.overlay}>
+                <AnimatePresence>
+                    {isPlaying && (
+                        <motion.div 
+                            key="live-indicator"
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: -20, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            style={styles.liveBadge}
+                        >
+                            <div style={{ ...styles.liveDot, animation: 'live-pulse 2s infinite' }} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                
                 <ViewportToolbar />
                 <StatusBar />
                 

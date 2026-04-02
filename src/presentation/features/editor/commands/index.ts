@@ -1,1 +1,3 @@
-export * from './EntityCommands';\nexport * from './HistoryManager';\nexport * from './TransformCommands';
+export * from './EntityCommands';
+export * from './HistoryManager';
+export * from './TransformCommands';

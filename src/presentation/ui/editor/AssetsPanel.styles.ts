@@ -58,9 +58,9 @@ export const assetsStyles = createVibeStyles({
     },
     assetItemHover: {
         background: VibeTheme.colors.bgSecondary,
-        borderColor: `${VibeTheme.colors.accent}44`,
+        borderColor: `${VibeTheme.colors.accent}bb`, // More visible purple
         transform: 'translateY(-4px)',
-        shadow: `0 15px 30px -10px ${VibeTheme.colors.accent}44`,
+        boxShadow: `0 15px 30px -10px ${VibeTheme.colors.accent}44`,
     },
     breadcrumb: {
         gridColumn: '1 / -1',
@@ -69,9 +69,9 @@ export const assetsStyles = createVibeStyles({
         gap: '8px',
         padding: '0 0 12px 0',
         fontSize: '11px',
-        color: VibeTheme.colors.textSecondary,
-        fontWeight: 600,
-        opacity: 0.8,
+        color: VibeTheme.colors.textMain,
+        fontWeight: 800,
+        opacity: 1,
     },
     breadcrumbItem: {
         cursor: 'pointer',
@@ -91,15 +91,16 @@ export const assetsStyles = createVibeStyles({
         transition: 'all 0.2s ease',
     },
     assetName: {
-        fontSize: '10px',
-        fontWeight: 700,
-        color: VibeTheme.colors.textSecondary,
+        fontSize: '11px',
+        fontWeight: 600,
+        color: VibeTheme.colors.textMain,
         textAlign: 'center',
         width: '100%',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
         letterSpacing: '0.02em',
+        // removed textShadow to improve clarity on light backgrounds
     },
     emptyState: {
         flex: 1,

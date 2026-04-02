@@ -26,7 +26,7 @@ export const TitleBar: React.FC = () => {
             justifyContent: 'space-between',
             padding: '0 12px',
             userSelect: 'none',
-            WebkitAppRegion: 'drag' as any, // Make window draggable
+            ['WebkitAppRegion' as any]: 'drag', // Make window draggable
             borderBottom: `1px solid ${VibeTheme.colors.glassBorder}`
         }}>
             {/* Left: App Logo & Name */}
@@ -41,7 +41,7 @@ export const TitleBar: React.FC = () => {
             </div>
 
             {/* Right: Window Controls */}
-            <div style={{ display: 'flex', WebkitAppRegion: 'no-drag' as any }}>
+            <div style={{ display: 'flex', ['WebkitAppRegion' as any]: 'no-drag' }}>
                 <WindowControlButton icon="Minus" onClick={() => handleAction('minimize')} />
                 <WindowControlButton icon="Maximize" onClick={() => handleAction('maximize')} />
                 <WindowControlButton icon="X" onClick={() => handleAction('close')} hoverColor="#ef4444" />

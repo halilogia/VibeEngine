@@ -2,8 +2,8 @@
  * Entity Commands - Undo/Redo operations for entity management
  */
 
-import type { Entity } from '../../engine/core/Entity';
-import type { Scene } from '../../engine/core/Scene';
+import { Entity } from '@engine';
+import { Scene } from '@engine';
 import type { ICommand } from './HistoryManager';
 
 /**

@@ -7,7 +7,6 @@
 
 export * from './editorStore';
 export * from './sceneStore';
-export * from './projectStore';
 export * from './toastStore';
 export * from './undoRedoStore';
 export * from './consoleStore';

@@ -1,0 +1,142 @@
+src/engine/components/AnimationComponent.ts(7,27): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/AnimationComponent.ts(190,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'AnimationComponent' does not extend another class.
+src/engine/components/AnimationComponent.ts(196,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'AnimationComponent' does not extend another class.
+src/engine/components/AudioComponent.ts(6,27): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/AudioComponent.ts(145,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'AudioComponent' does not extend another class.
+src/engine/components/AudioComponent.ts(150,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'AudioComponent' does not extend another class.
+src/engine/components/CameraComponent.ts(7,27): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/CameraComponent.ts(80,40): error TS2339: Property 'entity' does not exist on type 'CameraComponent'.
+src/engine/components/CameraComponent.ts(82,32): error TS2339: Property 'entity' does not exist on type 'CameraComponent'.
+src/engine/components/CameraComponent.ts(93,41): error TS2339: Property 'entity' does not exist on type 'CameraComponent'.
+src/engine/components/CameraComponent.ts(109,32): error TS2339: Property 'entity' does not exist on type 'CameraComponent'.
+src/engine/components/CameraComponent.ts(117,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'CameraComponent' does not extend another class.
+src/engine/components/CollisionComponent.ts(7,27): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/CollisionComponent.ts(105,19): error TS2339: Property 'entity' does not exist on type 'CollisionComponent'.
+src/engine/components/CollisionComponent.ts(107,32): error TS2339: Property 'entity' does not exist on type 'CollisionComponent'.
+src/engine/components/CollisionComponent.ts(121,18): error TS2339: Property 'entity' does not exist on type 'CollisionComponent'.
+src/engine/components/CollisionComponent.ts(122,36): error TS2339: Property 'entity' does not exist on type 'CollisionComponent'.
+src/engine/components/CollisionComponent.ts(142,18): error TS2339: Property 'entity' does not exist on type 'CollisionComponent'.
+src/engine/components/CollisionComponent.ts(143,36): error TS2339: Property 'entity' does not exist on type 'CollisionComponent'.
+src/engine/components/CollisionComponent.ts(193,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'CollisionComponent' does not extend another class.
+src/engine/components/ParticleComponent.ts(7,27): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/ParticleComponent.ts(260,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'ParticleComponent' does not extend another class.
+src/engine/components/RenderComponent.ts(7,27): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/RenderComponent.ts(76,37): error TS2339: Property 'entity' does not exist on type 'RenderComponent'.
+src/engine/components/RenderComponent.ts(78,32): error TS2339: Property 'entity' does not exist on type 'RenderComponent'.
+src/engine/components/RenderComponent.ts(141,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'RenderComponent' does not extend another class.
+src/engine/components/RenderComponent.ts(146,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'RenderComponent' does not extend another class.
+src/engine/components/RigidbodyComponent.ts(7,27): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/RigidbodyComponent.ts(133,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'RigidbodyComponent' does not extend another class.
+src/engine/components/ScriptComponent.ts(19,27): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/ScriptComponent.ts(20,29): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/ScriptComponent.ts(21,34): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/ScriptComponent.ts(22,37): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/ScriptComponent.ts(33,38): error TS2339: Property 'entity' does not exist on type 'ScriptComponent'.
+src/engine/components/ScriptComponent.ts(109,18): error TS2339: Property 'entity' does not exist on type 'ScriptComponent'.
+src/engine/components/ScriptComponent.ts(114,34): error TS2339: Property 'entity' does not exist on type 'ScriptComponent'.
+src/engine/components/ScriptComponent.ts(180,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'ScriptComponent' does not extend another class.
+src/engine/components/ScriptComponent.ts(184,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'ScriptComponent' does not extend another class.
+src/engine/components/ScriptComponent.ts(190,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'ScriptComponent' does not extend another class.
+src/engine/components/ScriptComponent.ts(198,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'ScriptComponent' does not extend another class.
+src/engine/components/TransformComponent.ts(7,27): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/TransformComponent.ts(146,38): error TS2339: Property 'entity' does not exist on type 'TransformComponent'.
+src/engine/components/TransformComponent.ts(169,14): error TS4112: This member cannot have an 'override' modifier because its containing class 'TransformComponent' does not extend another class.
+src/engine/components/__tests__/CameraComponent.test.ts(4,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/__tests__/CollisionComponent.test.ts(4,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/__tests__/ScriptComponent.test.ts(3,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/__tests__/TransformComponent.test.ts(4,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/components/__tests__/TransformComponent.test.ts(64,23): error TS2339: Property 'entity' does not exist on type 'TransformComponent'.
+src/engine/demo/EngineDemo.ts(72,19): error TS2345: Argument of type 'InputSystem' is not assignable to parameter of type 'System'.
+  Type 'InputSystem' is missing the following properties from type 'System': app, enabled, requiredComponents, filterEntities
+src/engine/demo/EngineDemo.ts(73,19): error TS2345: Argument of type 'ScriptSystem' is not assignable to parameter of type 'System'.
+  Type 'ScriptSystem' is missing the following properties from type 'System': app, enabled, filterEntities
+src/engine/demo/EngineDemo.ts(74,19): error TS2345: Argument of type 'PhysicsSystem' is not assignable to parameter of type 'System'.
+  Type 'PhysicsSystem' is missing the following properties from type 'System': app, enabled, filterEntities
+src/engine/demo/EngineDemo.ts(75,19): error TS2345: Argument of type 'RenderSystem' is not assignable to parameter of type 'System'.
+  Type 'RenderSystem' is missing the following properties from type 'System': app, enabled, filterEntities
+src/engine/demo/EngineDemo.ts(79,24): error TS2345: Argument of type 'TransformComponent' is not assignable to parameter of type 'Component'.
+  Type 'TransformComponent' is missing the following properties from type 'Component': entity, enabled, type
+src/engine/demo/EngineDemo.ts(84,24): error TS2345: Argument of type 'RenderComponent' is not assignable to parameter of type 'Component'.
+  Type 'RenderComponent' is missing the following properties from type 'Component': entity, enabled, type
+src/engine/demo/EngineDemo.ts(119,25): error TS2345: Argument of type 'TransformComponent' is not assignable to parameter of type 'Component'.
+  Type 'TransformComponent' is missing the following properties from type 'Component': entity, enabled, type
+src/engine/demo/EngineDemo.ts(123,25): error TS2345: Argument of type 'RenderComponent' is not assignable to parameter of type 'Component'.
+  Type 'RenderComponent' is missing the following properties from type 'Component': entity, enabled, type
+src/engine/demo/EngineDemo.ts(126,25): error TS2345: Argument of type 'ScriptComponent' is not assignable to parameter of type 'Component'.
+  Type 'ScriptComponent' is missing the following properties from type 'Component': entity, enabled, type
+src/engine/demo/EngineDemo.ts(127,25): error TS2345: Argument of type 'CollisionComponent' is not assignable to parameter of type 'Component'.
+  Type 'CollisionComponent' is missing the following properties from type 'Component': entity, enabled, type
+src/engine/systems/AnimationSystem.ts(5,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/AnimationSystem.ts(6,29): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/AnimationSystem.ts(7,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/AudioSystem.ts(1,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/AudioSystem.ts(2,29): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/AudioSystem.ts(3,32): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/AudioSystem.ts(99,31): error TS7006: Parameter 'err' implicitly has an 'any' type.
+src/engine/systems/InputSystem.ts(6,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/InputSystem.ts(7,29): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/ParticleSystem.ts(5,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/ParticleSystem.ts(6,29): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/ParticleSystem.ts(7,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/ParticleSystem.ts(8,35): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/PhysicsSystem.ts(6,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/PhysicsSystem.ts(7,29): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/PhysicsSystem.ts(8,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/PhysicsSystem.ts(9,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/PhysicsSystem.ts(10,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/RenderSystem.ts(6,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/RenderSystem.ts(7,29): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/RenderSystem.ts(8,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/RenderSystem.ts(9,33): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/RenderSystem.ts(10,33): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/RenderSystem.ts(43,19): error TS2339: Property 'app' does not exist on type 'RenderSystem'.
+src/engine/systems/RenderSystem.ts(57,40): error TS2339: Property 'app' does not exist on type 'RenderSystem'.
+src/engine/systems/RenderSystem.ts(77,19): error TS2339: Property 'app' does not exist on type 'RenderSystem'.
+src/engine/systems/RenderSystem.ts(79,31): error TS2339: Property 'app' does not exist on type 'RenderSystem'.
+src/engine/systems/RenderSystem.ts(86,39): error TS2339: Property 'app' does not exist on type 'RenderSystem'.
+src/engine/systems/RenderSystem.ts(87,39): error TS2339: Property 'app' does not exist on type 'RenderSystem'.
+src/engine/systems/ScriptSystem.ts(6,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/ScriptSystem.ts(7,29): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/ScriptSystem.ts(8,33): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/ScriptSystem.ts(39,40): error TS2339: Property 'app' does not exist on type 'ScriptSystem'.
+src/engine/systems/ScriptSystem.ts(58,19): error TS2339: Property 'app' does not exist on type 'ScriptSystem'.
+src/engine/systems/ScriptSystem.ts(60,31): error TS2339: Property 'app' does not exist on type 'ScriptSystem'.
+src/engine/systems/__tests__/AnimationSystem.test.ts(3,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/AnimationSystem.test.ts(4,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/AudioSystem.test.ts(3,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/AudioSystem.test.ts(4,32): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/ParticleSystem.test.ts(4,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/ParticleSystem.test.ts(5,35): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/ParticleSystem.test.ts(6,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/PhysicsSystem.test.ts(3,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/PhysicsSystem.test.ts(4,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/PhysicsSystem.test.ts(5,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/PhysicsSystem.test.ts(6,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/RenderSystem.test.ts(4,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/RenderSystem.test.ts(5,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/RenderSystem.test.ts(6,33): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/RenderSystem.test.ts(7,33): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/RenderSystem.test.ts(25,22): error TS2339: Property 'app' does not exist on type 'RenderSystem'.
+src/engine/systems/__tests__/ScriptSystem.test.ts(3,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/ScriptSystem.test.ts(4,33): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/systems/__tests__/ScriptSystem.test.ts(17,22): error TS2339: Property 'app' does not exist on type 'ScriptSystem'.
+src/engine/utils/EntityPool.ts(6,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/utils/EntityPool.ts(7,23): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/utils/EntityPool.ts(8,36): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/utils/Prefab.ts(15,24): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/utils/Prefab.ts(16,28): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/engine/utils/Prefab.ts(17,48): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/infrastructure/store/editorStore.ts(99,18): error TS2741: Property 'showAboutModal' is missing in type '{ selectedEntityId: null; selectedEntityIds: never[]; editorMode: "translate"; viewMode: "perspective"; showGrid: true; showAxes: true; isPlaying: false; isPaused: false; showHierarchy: true; ... 40 more ...; setLayoutPreset: (preset: "architect" | ... 1 more ... | "animator") => void; }' but required in type 'EditorState'.
+src/infrastructure/store/index.ts(14,1): error TS2308: Module './projectStore' has already exported a member named 'ProjectInfo'. Consider explicitly re-exporting to resolve the ambiguity.
+src/infrastructure/store/index.ts(14,1): error TS2308: Module './projectStore' has already exported a member named 'useProjectStore'. Consider explicitly re-exporting to resolve the ambiguity.
+src/presentation/features/editor/bridge/EntityBridge.ts(7,94): error TS2307: Cannot find module '@engine' or its corresponding type declarations.
+src/presentation/features/editor/commands/EntityCommands.ts(5,29): error TS2307: Cannot find module '../../engine/core/Entity' or its corresponding type declarations.
+src/presentation/features/editor/commands/EntityCommands.ts(6,28): error TS2307: Cannot find module '../../engine/core/Scene' or its corresponding type declarations.
+src/presentation/features/editor/commands/TransformCommands.ts(6,29): error TS2307: Cannot find module '../../engine/core/Entity' or its corresponding type declarations.
+src/presentation/features/editor/commands/TransformCommands.ts(7,36): error TS2307: Cannot find module '../../engine/components/TransformComponent' or its corresponding type declarations.
+src/presentation/features/editor/index.ts(22,15): error TS2307: Cannot find module '@editor/storage' or its corresponding type declarations.
+src/presentation/ui/common/VibeIcons.tsx(27,7): error TS2739: Type '{ Move: Element; Minus: Element; Rotate: Element; Scale: Element; Play: Element; Pause: Element; Square: Element; Stop: Element; ... 51 more ...; Maximize: Element; }' is missing the following properties from type 'Record<VibeIconName, ReactNode>': Upload, Settings
+src/presentation/ui/editor/StatusBar.tsx(54,32): error TS2339: Property 'section' does not exist on type '{ container: { position: "absolute"; bottom: string; left: string; transform: "translateX(-50%)"; height: string; minWidth: string; background: "var(--vibe-glass-bg)"; backdropFilter: "blur(30px) saturate(180%)"; ... 12 more ...; transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"; }; ... 6 more ...; version: { ...;...'.
+src/presentation/ui/editor/StatusBar.tsx(55,41): error TS2339: Property 'badge' does not exist on type '{ container: { position: "absolute"; bottom: string; left: string; transform: "translateX(-50%)"; height: string; minWidth: string; background: "var(--vibe-glass-bg)"; backdropFilter: "blur(30px) saturate(180%)"; ... 12 more ...; transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"; }; ... 6 more ...; version: { ...;...'.
+src/presentation/ui/editor/TitleBar.tsx(29,13): error TS2353: Object literal may only specify known properties, and 'WebkitAppRegion' does not exist in type 'Properties<string | number, string & {}>'.
+src/presentation/ui/editor/TitleBar.tsx(44,44): error TS2353: Object literal may only specify known properties, and 'WebkitAppRegion' does not exist in type 'Properties<string | number, string & {}>'.

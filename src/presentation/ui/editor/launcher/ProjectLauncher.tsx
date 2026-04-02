@@ -71,7 +71,7 @@ export const ProjectLauncher: React.FC = () => {
           </motion.div>
       </header>
 
-      <section style={{ flex: 1, overflowY: 'auto', zIndex: 1, position: 'relative', paddingBottom: '100px' }}>
+      <section style={{ flex: 1, overflowY: 'auto', zIndex: 1, position: 'relative', paddingBottom: '180px' }}>
           <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -144,26 +144,31 @@ export const ProjectLauncher: React.FC = () => {
                             boxShadow: isSelected ? `0 0 40px rgba(99, 102, 241, 0.15)` : 'none'
                         }}
                     >
-                        {/* 🟢 Remove Button (Top-Right) */}
+                        {/* 🔴 Remove Button (Top-Right) */}
                         <motion.button
-                            whileHover={{ scale: 1.2, color: '#ef4444' }}
+                            whileHover={{ scale: 1.1, backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' }}
                             whileTap={{ scale: 0.9 }}
+                            title="Remove from library"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleProjectRemove(project.path);
                             }}
                             style={{
                                 position: 'absolute',
-                                top: '16px',
-                                right: '16px',
-                                background: 'rgba(255,255,255,0.03)',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '6px',
-                                color: 'rgba(255,255,255,0.3)',
+                                top: '12px',
+                                right: '12px',
+                                background: 'rgba(0,0,0,0.2)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '50%',
+                                width: '28px',
+                                height: '28px',
+                                color: 'rgba(255,255,255,0.8)',
                                 cursor: 'pointer',
                                 zIndex: 5,
-                                display: 'flex'
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s'
                             }}
                         >
                             <VibeIcons name="X" size={14} />
@@ -222,19 +227,19 @@ export const ProjectLauncher: React.FC = () => {
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                 style={{
                     position: 'absolute',
-                    bottom: 0,
-                    left: 40,
-                    right: 40,
-                    padding: '2.5rem',
+                    bottom: '2rem',
+                    left: '4rem',
+                    right: '4rem',
+                    padding: '2rem 3rem',
                     backgroundColor: 'var(--vibe-bg-secondary)',
-                    borderRadius: '24px 24px 0 0',
+                    borderRadius: '24px',
                     border: '1px solid var(--vibe-border)',
-                    borderBottom: 'none',
-                    boxShadow: '0 -20px 40px rgba(0,0,0,0.4)',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    zIndex: 10
+                    zIndex: 10,
+                    backdropFilter: 'blur(20px)'
                 }}
             >
                 <div>

@@ -8,6 +8,14 @@ import { persist } from 'zustand/middleware';
 export type EditorMode = 'translate' | 'rotate' | 'scale';
 export type ViewMode = 'perspective' | 'top' | 'front' | 'side';
 
+export interface OpenFile {
+    id: string;
+    name: string;
+    path: string;
+    content: string;
+    isDirty: boolean;
+}
+
 interface EditorState {
     // Selection
     selectedEntityId: number | null;
@@ -38,7 +46,8 @@ interface EditorState {
     rightWidth: number;        // Now only for AI Copilot
     inspectorWidth: number;
     bottomHeight: number;
-    assetsWidth: number;       // Percentage or fixed? Let's use percentage or share.
+    assetsWidth: number;
+    consoleWidth: number;
     
     activePanelId: string | null;
     shadingMode: 'lit' | 'wireframe' | 'solid';
@@ -47,6 +56,18 @@ interface EditorState {
     showEnvironment: boolean;
     showAICopilotSettings: boolean;
     activeSettingsTab: string;
+    isScriptFullScreen: boolean;
+    showAboutModal: boolean;
+    previousTrayState: { 
+        hierarchy: boolean; 
+        inspector: boolean; 
+        assets: boolean; 
+        console: boolean; 
+    } | null;
+
+    // 📁 File Management
+    openFiles: OpenFile[];
+    activeFileId: string | null;
 
     // Actions
     selectEntity: (id: number | null) => void;
@@ -60,16 +81,22 @@ interface EditorState {
     pause: () => void;
     stop: () => void;
     togglePanel: (panel: 'hierarchy' | 'inspector' | 'assets' | 'console' | 'aiCopilot' | 'scriptEditor') => void;
-    setPanelSize: (panel: 'left' | 'right' | 'bottom' | 'inspector' | 'assets', size: number) => void;
+    setPanelSize: (panel: 'left' | 'right' | 'bottom' | 'inspector' | 'assets' | 'console', size: number) => void;
     setActivePanel: (id: string | null) => void;
     setShadingMode: (mode: 'lit' | 'wireframe' | 'solid') => void;
     toggleCommandPalette: (show?: boolean) => void;
     toggleBloom: () => void;
     toggleEnvironment: () => void;
     setShowAICopilotSettings: (show: boolean, tab?: string) => void;
-    showAboutModal: boolean;
     setShowAboutModal: (show: boolean) => void;
+    setScriptFullScreen: (val: boolean, restore?: boolean) => void;
     setLayoutPreset: (preset: 'architect' | 'programmer' | 'animator') => void;
+
+    // 📁 File Actions
+    openFile: (file: { id: string; name: string; path: string; content?: string }) => void;
+    closeFile: (id: string) => void;
+    setActiveFile: (id: string | null) => void;
+    updateFileContent: (id: string, content: string) => void;
 
     // Comprehensive Engine Config
     engineConfig: {
@@ -119,6 +146,7 @@ export const useEditorStore = create<EditorState>()(
             inspectorWidth: 320,
             bottomHeight: 300,
             assetsWidth: 500,
+            consoleWidth: 380,
 
             activePanelId: 'viewport',
             shadingMode: 'lit',
@@ -127,6 +155,13 @@ export const useEditorStore = create<EditorState>()(
             showEnvironment: true,
             showAICopilotSettings: false,
             activeSettingsTab: 'project',
+            isScriptFullScreen: false,
+            showAboutModal: false,
+            previousTrayState: null,
+
+            // Files
+            openFiles: [],
+            activeFileId: null,
 
             engineConfig: {
                 editorTheme: 'Sovereign Dark',
@@ -191,6 +226,7 @@ export const useEditorStore = create<EditorState>()(
                 if (panel === 'inspector') return { inspectorWidth: size };
                 if (panel === 'bottom') return { bottomHeight: size };
                 if (panel === 'assets') return { assetsWidth: size };
+                if (panel === 'console') return { consoleWidth: size };
                 return state;
             }),
 
@@ -206,6 +242,79 @@ export const useEditorStore = create<EditorState>()(
                 activeSettingsTab: tab || state.activeSettingsTab 
             })),
             setShowAboutModal: (show) => set({ showAboutModal: show }),
+            setScriptFullScreen: (val, restore) => set((state) => {
+                // Case 1: Entering Full Screen
+                if (val && !state.isScriptFullScreen) {
+                    console.log('🏛️ Entering Sovereign Full Screen');
+                    return { 
+                        isScriptFullScreen: true, 
+                        showScriptEditor: true,
+                        previousTrayState: { 
+                            assets: state.showAssets, 
+                            console: state.showConsole,
+                            hierarchy: state.showHierarchy,
+                            inspector: state.showInspector 
+                        },
+                        showAssets: false,
+                        showConsole: false,
+                        showHierarchy: false,
+                        showInspector: false
+                    };
+                }
+                
+                // Case 2: Exiting Full Screen via Restore (Minimize Button)
+                if (!val && restore && state.previousTrayState) {
+                    console.log('🏛️ Exiting Full Screen: Restoring Layout');
+                    return { 
+                        isScriptFullScreen: false,
+                        showAssets: state.previousTrayState.assets,
+                        showConsole: state.previousTrayState.console,
+                        showHierarchy: state.previousTrayState.hierarchy,
+                        showInspector: state.previousTrayState.inspector,
+                        previousTrayState: null
+                    };
+                }
+                
+                // Case 3: Simple Exit (Drag or other)
+                console.log('🏛️ Simple Exit Full Screen (No Restore)');
+                return { isScriptFullScreen: val, previousTrayState: null };
+            }),
+
+            openFile: (file) => set((state) => {
+                const existing = state.openFiles.find(f => f.path === file.path);
+                if (existing) return { activeFileId: existing.id, showScriptEditor: true };
+                
+                const newFile: OpenFile = {
+                    id: file.id,
+                    name: file.name,
+                    path: file.path,
+                    content: file.content || '',
+                    isDirty: false
+                };
+                return { 
+                    openFiles: [...state.openFiles, newFile],
+                    activeFileId: newFile.id,
+                    showScriptEditor: true
+                };
+            }),
+
+            closeFile: (id) => set((state) => {
+                const newFiles = state.openFiles.filter(f => f.id !== id);
+                let nextActive = state.activeFileId;
+                if (state.activeFileId === id) {
+                    nextActive = newFiles.length > 0 ? newFiles[newFiles.length - 1].id : null;
+                }
+                return { 
+                    openFiles: newFiles, 
+                    activeFileId: nextActive,
+                    showScriptEditor: newFiles.length > 0
+                };
+            }),
+
+            setActiveFile: (id) => set({ activeFileId: id }),
+            updateFileContent: (id, content) => set((state) => ({
+                openFiles: state.openFiles.map(f => f.id === id ? { ...f, content, isDirty: true } : f)
+            })),
 
             setLayoutPreset: (preset) => set((state) => {
                 if (preset === 'architect') {
@@ -234,6 +343,7 @@ export const useEditorStore = create<EditorState>()(
                 inspectorWidth: state.inspectorWidth,
                 bottomHeight: state.bottomHeight,
                 assetsWidth: state.assetsWidth,
+                consoleWidth: state.consoleWidth,
                 activePanelId: state.activePanelId,
                 editorMode: state.editorMode,
                 viewMode: state.viewMode,

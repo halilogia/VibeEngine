@@ -26,7 +26,7 @@ const styles = createVibeStyles({
     menu: {
         position: 'fixed',
         minWidth: '180px',
-        background: 'rgba(15, 15, 25, 0.9)',
+        background: VibeTheme.colors.bgSecondary,
         backdropFilter: 'blur(30px)',
         WebkitBackdropFilter: 'blur(30px)',
         border: `1px solid ${VibeTheme.colors.glassBorder}`,
@@ -50,7 +50,7 @@ const styles = createVibeStyles({
     },
     itemHover: {
         background: 'rgba(255, 255, 255, 0.08)',
-        color: '#fff',
+        color: VibeTheme.colors.textMain,
     },
     itemDanger: {
         color: '#f43f5e',
@@ -61,7 +61,7 @@ const styles = createVibeStyles({
     },
     divider: {
         height: '1px',
-        background: 'rgba(255, 255, 255, 0.05)',
+        background: VibeTheme.colors.glassBorder,
         margin: '6px 8px',
     }
 });

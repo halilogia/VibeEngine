@@ -107,7 +107,7 @@ export const EditorApp: React.FC = () => {
             
             {showLauncher && !showSplash && (
                 <div style={modalOverlayStyle}>
-                    <div style={{ width: '90%', height: '85%', position: 'relative' }}>
+                    <div style={{ width: '95%', height: '92%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                         <ProjectLauncher />
                         <button onClick={() => setShowLauncher(false)} style={launcherCloseButtonStyle}>×</button>
                     </div>

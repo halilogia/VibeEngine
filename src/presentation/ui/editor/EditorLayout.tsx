@@ -11,6 +11,7 @@ import {
     AssetsPanel, 
     ConsolePanel, 
     AICopilotPanel, 
+    ScriptEditorPanel,
     MenuBar, 
     TitleBar, 
     StatusBar 
@@ -24,10 +25,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const EditorLayout: React.FC = () => {
     const { 
         showHierarchy, showInspector, showConsole, showAssets, showAICopilot, showScriptEditor, setActivePanel,
-        leftWidth, rightWidth, bottomHeight, inspectorWidth, assetsWidth, setPanelSize
+        leftWidth, rightWidth, bottomHeight, inspectorWidth, assetsWidth, consoleWidth, setPanelSize,
+        isScriptFullScreen, setScriptFullScreen
     } = useEditorStore();
 
-    const handleResize = useCallback((dir: 'L' | 'R' | 'B' | 'I' | 'A') => (e: React.MouseEvent) => {
+    const handleResize = useCallback((dir: 'L' | 'R' | 'B' | 'I' | 'A' | 'C') => (e: React.MouseEvent) => {
         const startX = e.clientX;
         const startY = e.clientY;
         
@@ -36,23 +38,32 @@ export const EditorLayout: React.FC = () => {
         const sR = rightWidth;
         const sI = inspectorWidth;
         const sA = assetsWidth;
-        const sH = bottomHeight;
+        const sC = consoleWidth;
+        const sH = isScriptFullScreen ? (window.innerHeight - 80) : bottomHeight;
 
         const onMove = (moveEvent: MouseEvent) => {
             const deltaX = moveEvent.clientX - startX;
             const deltaY = moveEvent.clientY - startY;
 
-            if (dir === 'L') setPanelSize('left', Math.max(160, sL + deltaX));
-            if (dir === 'R') setPanelSize('right', Math.max(260, sR - deltaX));
-            if (dir === 'B') setPanelSize('bottom', Math.max(100, sH - deltaY));
-            if (dir === 'A') setPanelSize('assets', Math.max(200, sA + deltaX));
+            if (dir === 'L') setPanelSize('left', Math.max(180, Math.min(500, sL + deltaX)));
+            if (dir === 'R') setPanelSize('right', Math.max(280, Math.min(800, sR - deltaX)));
+            if (dir === 'B') {
+                if (isScriptFullScreen) {
+                    setScriptFullScreen(false);
+                }
+                setPanelSize('bottom', Math.max(120, Math.min(window.innerHeight - 80, sH - deltaY)));
+            }
+            if (dir === 'A') setPanelSize('assets', Math.max(200, Math.min(1200, sA + deltaX)));
+            if (dir === 'C') setPanelSize('console', Math.max(200, Math.min(1200, sC + deltaX)));
             
             if (dir === 'I') {
-                // 🌉 Sum-Zero Dual Resize: Share space between Inspector and AI
-                const newI = Math.max(200, sI + deltaX);
-                const nextDelta = newI - sI; // Actual change after clamping
-                setPanelSize('inspector', newI);
-                setPanelSize('right', Math.max(200, sR - nextDelta));
+                const potentialI = sI + deltaX;
+                const potentialR = sR - deltaX;
+                
+                if (potentialI >= 220 && potentialR >= 220) {
+                    setPanelSize('inspector', potentialI);
+                    setPanelSize('right', potentialR);
+                }
             }
         };
         const onUp = () => {
@@ -61,7 +72,7 @@ export const EditorLayout: React.FC = () => {
         };
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
-    }, [leftWidth, rightWidth, bottomHeight, inspectorWidth, assetsWidth]);
+    }, [leftWidth, rightWidth, bottomHeight, inspectorWidth, assetsWidth, consoleWidth]);
 
     return (
         <div style={styles.appContainer}>
@@ -76,7 +87,7 @@ export const EditorLayout: React.FC = () => {
                             initial={{ width: 0, opacity: 0 }}
                             animate={{ width: leftWidth, opacity: 1 }}
                             exit={{ width: 0, opacity: 0 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                            transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
                             style={{ display: 'flex', flexShrink: 0, overflow: 'hidden' }}
                         >
                             <div style={{ ...styles.sidebarLeft, width: leftWidth }} onClick={() => setActivePanel('hierarchy')}>
@@ -93,19 +104,25 @@ export const EditorLayout: React.FC = () => {
                         <VibeErrorBoundary name="Viewport"><ViewportPanel /></VibeErrorBoundary>
                     </div>
 
-                    {/* 🟢 Bottom Tray (Assets & Console) - Sovereign Guarantee */}
+                    {/* 🟢 Bottom Tray (Assets, Console, Scripts) - Sovereign Studio Expansion */}
                     <AnimatePresence>
-                        {(showAssets || showConsole) && (
+                        {(showAssets || showConsole || showScriptEditor) && (
                             <motion.div 
                                 initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: bottomHeight, opacity: 1 }}
+                                animate={{ 
+                                    height: isScriptFullScreen ? 'calc(100vh - 80px)' : bottomHeight, 
+                                    opacity: 1 
+                                }}
                                 exit={{ height: 0, opacity: 0 }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
                                 style={{ 
-                                    position: 'relative',
+                                    position: isScriptFullScreen ? 'fixed' : 'relative',
+                                    top: isScriptFullScreen ? 80 : 0,
+                                    left: isScriptFullScreen ? 0 : 0,
+                                    right: isScriptFullScreen ? (showAICopilot ? rightWidth : 0) : 0,
                                     display: 'flex', 
                                     flexDirection: 'column', 
-                                    zIndex: 1000, 
+                                    zIndex: isScriptFullScreen ? 9999 : 1000, 
                                     borderTop: `1px solid ${VibeTheme.colors.glassBorder}`,
                                     background: VibeTheme.colors.bgPrimary,
                                     flexShrink: 0,
@@ -118,36 +135,58 @@ export const EditorLayout: React.FC = () => {
                                 />
                                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
                                     <AnimatePresence>
-                                        {showAssets && (
+                                        {showAssets && !isScriptFullScreen && (
                                             <motion.div 
                                                 initial={{ width: 0, opacity: 0 }}
-                                                animate={{ width: showConsole ? assetsWidth : '100%', opacity: 1 }}
+                                                animate={{ width: (showConsole || showScriptEditor) ? assetsWidth : '100%', opacity: 1 }}
                                                 exit={{ width: 0, opacity: 0 }}
-                                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                                transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
                                                 style={{ flexShrink: 0, overflow: 'hidden' }}
                                             >
-                                                <div style={{ width: showConsole ? assetsWidth : '100%', minWidth: '200px', height: '100%' }}>
+                                                <div style={{ width: (showConsole || showScriptEditor) ? assetsWidth : '100%', minWidth: '200px', height: '100%' }}>
                                                     <VibeErrorBoundary name="Assets"><AssetsPanel /></VibeErrorBoundary>
                                                 </div>
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
-
-                                    {showAssets && showConsole && (
+                                    
+                                    {showAssets && (showConsole || showScriptEditor) && !isScriptFullScreen && (
                                         <div onMouseDown={handleResize('A')} className="v-resizer v-resizer-vertical" style={{ background: 'rgba(255,255,255,0.05)' }} />
                                     )}
 
                                     <AnimatePresence>
-                                        {showConsole && (
+                                        {showConsole && !isScriptFullScreen && (
                                             <motion.div 
                                                 initial={{ width: 0, opacity: 0 }}
-                                                animate={{ width: showAssets ? 'auto' : '100%', opacity: 1 }}
+                                                animate={{ width: showScriptEditor ? consoleWidth : '100%', opacity: 1 }}
                                                 exit={{ width: 0, opacity: 0 }}
-                                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                                transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
+                                                style={{ flexShrink: 0, overflow: 'hidden' }}
+                                            >
+                                                <div style={{ width: showScriptEditor ? consoleWidth : '100%', minWidth: '200px', height: '100%' }}>
+                                                    <VibeErrorBoundary name="Console"><ConsolePanel /></VibeErrorBoundary>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {showConsole && showScriptEditor && !isScriptFullScreen && (
+                                        <div onMouseDown={handleResize('C')} className="v-resizer v-resizer-vertical" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                                    )}
+
+                                    <AnimatePresence>
+                                        {showScriptEditor && (
+                                            <motion.div 
+                                                initial={{ width: 0, opacity: 0 }}
+                                                animate={{ width: (showAssets || showConsole) && !isScriptFullScreen ? 'auto' : '100%', opacity: 1 }}
+                                                exit={{ width: 0, opacity: 0 }}
+                                                transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
                                                 style={{ flex: 1, overflow: 'hidden' }}
                                             >
-                                                <div style={{ width: '100%', minWidth: '200px', height: '100%' }}>
-                                                    <VibeErrorBoundary name="Console"><ConsolePanel /></VibeErrorBoundary>
+                                                <div style={{ width: '100%', height: '100%' }}>
+                                                    <VibeErrorBoundary name="Script Editor">
+                                                        <ScriptEditorPanel dragHandleProps={{ onMouseDown: handleResize('B') }} />
+                                                    </VibeErrorBoundary>
                                                 </div>
                                             </motion.div>
                                         )}
@@ -172,7 +211,7 @@ export const EditorLayout: React.FC = () => {
                                 initial={{ width: 0, opacity: 0 }}
                                 animate={{ width: inspectorWidth, opacity: 1 }}
                                 exit={{ width: 0, opacity: 0 }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
                                 style={{ display: 'flex', flexShrink: 0, overflow: 'hidden' }}
                             >
                                 <div style={{ ...styles.sidebarRight, width: inspectorWidth, borderLeft: 'none' }} onClick={() => setActivePanel('inspector')}>
@@ -190,7 +229,7 @@ export const EditorLayout: React.FC = () => {
                                 initial={{ width: 0, opacity: 0 }}
                                 animate={{ width: rightWidth, opacity: 1 }}
                                 exit={{ width: 0, opacity: 0 }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                transition={{ type: 'spring', stiffness: 320, damping: 42, mass: 0.8 }}
                                 style={{ display: 'flex', flexShrink: 0, overflow: 'hidden' }}
                             >
                                 <div style={{ ...styles.sidebarRight, width: rightWidth, borderLeft: (showInspector ? `1px solid ${VibeTheme.colors.glassBorder}` : 'none') }} onClick={() => setActivePanel('ai')}>
@@ -207,12 +246,12 @@ export const EditorLayout: React.FC = () => {
                     z-index: 3000; 
                     transition: all 0.2s; 
                     position: relative;
+                    background: transparent !important;
                 }
                 .v-resizer-vertical {
                     width: 8px;
                     cursor: col-resize;
                     margin: 0 -4px;
-                    background: transparent;
                 }
                 .v-resizer-vertical::after {
                     content: '';
@@ -221,7 +260,8 @@ export const EditorLayout: React.FC = () => {
                     top: 0;
                     bottom: 0;
                     width: 1px;
-                    background: ${VibeTheme.colors.glassBorder};
+                    background: transparent;
+                    transition: all 0.2s;
                     transform: translateX(-50%);
                 }
                 .v-resizer-vertical:hover::after {
@@ -234,7 +274,7 @@ export const EditorLayout: React.FC = () => {
                     cursor: row-resize; 
                     z-index: 3000; 
                     transition: all 0.2s; 
-                    background: transparent;
+                    background: transparent !important;
                     position: relative;
                 }
                 .h-resizer::after {
@@ -244,7 +284,8 @@ export const EditorLayout: React.FC = () => {
                     left: 0;
                     right: 0;
                     height: 1px;
-                    background: ${VibeTheme.colors.glassBorder};
+                    background: transparent;
+                    transition: all 0.2s;
                     transform: translateY(-50%);
                 }
                 .h-resizer:hover::after { 

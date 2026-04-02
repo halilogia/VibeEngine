@@ -23,11 +23,16 @@
         "outDir": "dist",
         "baseUrl": ".",
         "paths": {
+            "@engine": ["src/engine/index.ts"],
             "@engine/*": ["src/engine/*"],
+            "@domain": ["src/domain/index.ts"],
             "@domain/*": ["src/domain/*"],
+            "@infrastructure": ["src/infrastructure/index.ts"],
             "@infrastructure/*": ["src/infrastructure/*"],
+            "@editor": ["src/presentation/features/editor/index.ts"],
             "@editor/*": ["src/presentation/features/editor/*"],
             "@presentation/*": ["src/presentation/*"],
+            "@lib": ["src/lib/index.ts"],
             "@lib/*": ["src/lib/*"],
             "@ui/*": ["src/presentation/ui/*"],
             "@themes/*": ["src/presentation/ui/themes/*"]

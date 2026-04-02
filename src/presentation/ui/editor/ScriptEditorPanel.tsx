@@ -6,9 +6,17 @@
 import React, { useState } from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
 import { useEditorStore, useSceneStore } from '@infrastructure/store';
+import { ProjectScanner } from '@infrastructure/services/ProjectScanner';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { scriptStyles as styles } from './ScriptEditorPanel.styles';
+
+import Editor, { loader } from '@monaco-editor/react';
+
+// 🚀 Quantum Monaco Loader: Fix for Electron environment (using unpkg fallback)
+loader.config({ 
+    paths: { vs: 'https://unpkg.com/monaco-editor@0.43.0/min/vs' } 
+});
 
 // #region Components
 interface TabProps {
@@ -44,7 +52,7 @@ const ScriptTab: React.FC<TabProps> = ({ name, isActive, isDirty, onClick, onClo
                     }}
                     onClick={(e) => { e.stopPropagation(); onClose(); }}
                 >
-                    <VibeIcons name="Plus" size={12} style={{ transform: 'rotate(45deg)' }} />
+                    <VibeIcons name="X" size={10} strokeWidth={2.5} />
                 </button>
             )}
         </div>
@@ -57,31 +65,81 @@ interface ScriptEditorPanelProps {
 }
 
 export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandleProps }) => {
-    const { activePanelId, setActivePanel } = useEditorStore();
+    const { 
+        activePanelId, setActivePanel, engineConfig,
+        isScriptFullScreen, setScriptFullScreen,
+        openFiles, activeFileId, closeFile, setActiveFile, updateFileContent,
+        togglePanel, showConsole, showScriptEditor
+    } = useEditorStore();
     const { selectedEntityId, entities } = useSceneStore();
-    const [openScripts, setOpenScripts] = useState<{ id: string; name: string; isDirty: boolean }[]>([
-        { id: '1', name: 'PlayerController.ts', isDirty: true },
-        { id: '2', name: 'GameManager.ts', isDirty: false }
-    ]);
-    const [activeScriptId, setActiveScriptId] = useState('1');
-
+    
+    const activeScript = openFiles.find(s => s.id === activeFileId);
     const selectedEntity = selectedEntityId ? entities.get(selectedEntityId) : null;
 
-    if (openScripts.length === 0) {
+    if (openFiles.length === 0) {
         return (
             <div 
                 className={`editor-panel script-editor-panel ${activePanelId === 'scripts' ? 'active-panel' : ''}`}
                 onClick={() => setActivePanel('scripts')}
                 style={styles.panel}
             >
+                <div style={{ ...styles.header, justifyContent: 'flex-end', borderBottom: 'none' }}>
+                     {isScriptFullScreen && (
+                        <VibeButton variant="ghost" size="sm" onClick={() => setScriptFullScreen(false)} style={{ border: 'none', background: 'transparent' }}>
+                            <VibeIcons name="ChevronDown" size={16} /> EXIT FULLSCREEN
+                        </VibeButton>
+                    )}
+                </div>
                 <div style={styles.emptyState}>
                     <VibeIcons name="Code" size={48} style={{ opacity: 0.1, color: VibeTheme.colors.accent }} />
-                    <h3 style={{ margin: 0, color: '#fff' }}>NO SCRIPTS OPEN</h3>
-                    <p style={{ margin: 0, fontSize: '12px' }}>Open a script from the Assets panel to start coding.</p>
+                    <h3 style={{ margin: 0, color: VibeTheme.colors.textMain }}>NO SCRIPTS OPEN</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: VibeTheme.colors.textSecondary }}>Open a script from the Assets panel to start coding.</p>
                 </div>
             </div>
         );
     }
+
+    const handleEditorWillMount = (monaco: any) => {
+        console.log('💎 MONACO HANDSHAKE: THEME DEFINITION');
+        monaco.editor.defineTheme('vibe-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+                { token: 'comment', foreground: '6272a4', fontStyle: 'italic' },
+                { token: 'keyword', foreground: '818cf8', fontStyle: 'bold' },
+                { token: 'string', foreground: '34d399' },
+                { token: 'number', foreground: 'fbbf24' },
+                { token: 'type', foreground: '60a5fa' },
+            ],
+            colors: {
+                'editor.background': '#05050a',
+                'editor.foreground': '#ffffff',
+                'editor.lineHighlightBackground': '#11111a',
+                'editorCursor.foreground': '#6366f1',
+                'editor.selectionBackground': '#26264d',
+                'editorBracketMatch.background': '#2d2d59',
+                'editorGutter.background': '#05050a',
+                'editorIndentGuide.background': '#1a1a2e',
+                'editorLineNumber.foreground': '#4b5563',
+                'editorLineNumber.activeForeground': '#6366f1',
+            }
+        });
+    };
+
+    const handleSave = async () => {
+        if (!activeFileId || !activeScript) return;
+        
+        try {
+            const result = await ProjectScanner.saveFile(activeScript.path, activeScript.content || '');
+            if (result.success) {
+                console.log('💾 File saved successfully:', activeScript.path);
+            } else {
+                console.error('❌ Save failed:', result.error);
+            }
+        } catch (e) {
+            console.error('❌ Save error:', e);
+        }
+    };
 
     return (
         <div 
@@ -89,46 +147,116 @@ export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandle
             onClick={() => setActivePanel('scripts')}
             style={styles.panel}
         >
-            <div style={styles.header}>
+            <div 
+                style={{ ...styles.header, cursor: isScriptFullScreen ? 'row-resize' : 'default' }}
+                {...dragHandleProps}
+            >
                 <div style={styles.tabs}>
-                    {openScripts.map(script => (
+                    {openFiles.map(script => (
                         <ScriptTab
                             key={script.id}
                             name={script.name}
-                            isActive={activeScriptId === script.id}
+                            isActive={activeFileId === script.id}
                             isDirty={script.isDirty}
-                            onClick={() => setActiveScriptId(script.id)}
-                            onClose={() => setOpenScripts(prev => prev.filter(s => s.id !== script.id))}
+                            onClick={() => setActiveFile(script.id)}
+                            onClose={() => closeFile(script.id)}
                         />
                     ))}
-                    <button style={{ ...styles.tab, background: 'transparent', border: 'none', width: '36px', padding: 0 }}>
-                        <VibeIcons name="Plus" size={14} />
-                    </button>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingRight: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingRight: '12px' }}>
                     {selectedEntity && (
-                        <div style={styles.badge}>TARGET: {selectedEntity.name.toUpperCase()}</div>
+                        <div style={styles.badge}>RECEPTOR: {selectedEntity.name.toUpperCase()}</div>
                     )}
-                    <VibeButton variant="primary" size="sm">
+                    
+                    {isScriptFullScreen ? (
+                        <VibeButton variant="ghost" size="sm" onClick={() => setScriptFullScreen(false, true)} style={{ color: VibeTheme.colors.accent }}>
+                            <VibeIcons name="ChevronDown" size={16} /> MINIMIZE
+                        </VibeButton>
+                    ) : (
+                        <VibeButton variant="ghost" size="sm" onClick={() => setScriptFullScreen(true)}>
+                            <VibeIcons name="ChevronUp" size={16} /> MAXIMIZE
+                        </VibeButton>
+                    )}
+
+                    <VibeButton 
+                        variant="primary" 
+                        size="sm" 
+                        style={{ height: '24px', opacity: 0.9 }}
+                        onClick={handleSave}
+                    >
                         <VibeIcons name="Save" size={14} /> SAVE
                     </VibeButton>
                 </div>
             </div>
 
-            <div style={styles.editorContainer}>
-                {/* Monaco Editor Placeholder */}
-                <div style={{ padding: '20px', color: 'rgba(255, 255, 255, 0.4)', fontFamily: 'monospace' }}>
-                    <div>{"1 | class PlayerController extends Entity {"}</div>
-                    <div>{"2 |   onUpdate(dt: number) {"}</div>
-                    <div>{"3 |     const input = this.engine.input;"}</div>
-                    <div>{"4 |     if (input.isKeyDown('Space')) {"}</div>
-                    <div>{"5 |       this.jump();"}</div>
-                    <div>{"6 |     }"}</div>
-                    <div>{"7 |   }"}</div>
-                    <div>{"8 | }"}</div>
-                </div>
+            <div style={{ ...styles.editorContainer, flex: 1, position: 'relative', background: VibeTheme.colors.bgPrimary }}>
+                <Editor
+                    key={activeFileId || 'empty'}
+                    height="100%"
+                    defaultLanguage="typescript"
+                    defaultValue={activeScript?.content || ""}
+                    value={activeScript?.content}
+                    onChange={(val) => activeFileId && updateFileContent(activeFileId, val || '')}
+                    beforeMount={handleEditorWillMount}
+                    loading={
+                        <div style={styles.emptyState}>
+                            <VibeIcons 
+                                name="Loader" 
+                                size={42} 
+                                style={{ 
+                                    animation: 'vSpin 1.5s linear infinite', 
+                                    color: VibeTheme.colors.accent,
+                                    filter: 'drop-shadow(0 0 10px var(--vibe-accent))'
+                                }} 
+                            />
+                            <span style={{ 
+                                fontSize: '10px', 
+                                fontWeight: 700,
+                                letterSpacing: '0.4em', 
+                                marginTop: '20px',
+                                opacity: 0.8,
+                                color: VibeTheme.colors.accent 
+                            }}>
+                                INITIALIZING QUANTUM EDITOR...
+                            </span>
+                        </div>
+                    }
+                    theme="vibe-dark"
+                    options={{
+                        fontSize: 14 * ((engineConfig.uiScale || 100) / 100),
+                        minimap: { enabled: true },
+                        padding: { top: 20, bottom: 20 },
+                        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                        smoothScrolling: true,
+                        cursorBlinking: 'smooth',
+                        cursorSmoothCaretAnimation: 'on',
+                        contextmenu: true,
+                        lineNumbers: 'on',
+                        renderLineHighlight: 'all',
+                        folding: true,
+                        bracketPairColorization: { enabled: true },
+                        quickSuggestions: true,
+                        scrollbar: {
+                            verticalScrollbarSize: 4,
+                            horizontalScrollbarSize: 4,
+                            verticalSliderSize: 4,
+                            useShadows: false
+                        }
+                    }}
+                />
             </div>
+
+            <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes vSpin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                .v-spin {
+                    animation: vSpin 1.5s linear infinite;
+                    color: ${VibeTheme.colors.accent};
+                }
+            ` }} />
         </div>
     );
 };

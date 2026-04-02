@@ -51,8 +51,8 @@ export const StatusBar: React.FC = () => {
 
             <div style={styles.divider} />
             
-            <div style={styles.section}>
-                <div style={{ ...styles.badge, background: 'rgba(99, 102, 241, 0.1)', color: VibeTheme.colors.accent, fontWeight: 900 }}>
+            <div style={styles.group}>
+                <div style={styles.modeBadge}>
                     {editorMode === 'translate' ? 'MOVE MODE' : editorMode.toUpperCase() + ' MODE'}
                 </div>
             </div>
