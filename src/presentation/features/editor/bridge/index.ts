@@ -1,7 +1,4 @@
-/**
- * Sovereign Editor Bridge Index
- * 🏛️⚛️💎🚀
- */
+
 
 export * from './EntityBridge';
 export * from './ComponentRegistry';

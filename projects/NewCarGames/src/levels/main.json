@@ -1,0 +1,130 @@
+{
+  "version": "1.0.0",
+  "name": "Main Level",
+  "entities": [
+    {
+      "id": 1,
+      "name": "Main Camera",
+      "parentId": null,
+      "enabled": true,
+      "tags": [
+        "camera"
+      ],
+      "components": [
+        {
+          "type": "Transform",
+          "data": {
+            "position": [
+              0,
+              5,
+              10
+            ],
+            "rotation": [
+              -20,
+              0,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "enabled": true
+        },
+        {
+          "type": "Camera",
+          "data": {
+            "fov": 75,
+            "near": 0.1,
+            "far": 5000,
+            "isActive": true
+          },
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Directional Light",
+      "parentId": null,
+      "enabled": true,
+      "tags": [
+        "light"
+      ],
+      "components": [
+        {
+          "type": "Transform",
+          "data": {
+            "position": [
+              5,
+              10,
+              5
+            ],
+            "rotation": [
+              -45,
+              30,
+              0
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          "enabled": true
+        },
+        {
+          "type": "Light",
+          "data": {
+            "lightType": "directional",
+            "color": "#ffffff",
+            "intensity": 1.5,
+            "castShadow": true
+          },
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Infinite Grid",
+      "parentId": null,
+      "enabled": true,
+      "tags": [
+        "environment"
+      ],
+      "components": [
+        {
+          "type": "Transform",
+          "data": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              -90,
+              0,
+              0
+            ],
+            "scale": [
+              100,
+              100,
+              1
+            ]
+          },
+          "enabled": true
+        },
+        {
+          "type": "Render",
+          "data": {
+            "meshType": "plane",
+            "color": "#111827"
+          },
+          "enabled": true
+        }
+      ]
+    }
+  ]
+}

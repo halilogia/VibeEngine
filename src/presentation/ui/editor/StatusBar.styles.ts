@@ -1,7 +1,4 @@
-/**
- * StatusBar Styles - Sovereign TypeScript Styling
- * 🏛️⚛️💎🚀
- */
+
 
 import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 

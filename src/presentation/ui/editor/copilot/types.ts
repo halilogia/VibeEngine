@@ -1,21 +1,23 @@
-import { AIProvider } from "../../../features/editor/bridge/NeuralService";
+export interface Command {
+  type: string;
+}
 
 export interface Message {
-    id: string;
-    role: 'user' | 'assistant';
-    content: string;
-    thought?: string;
-    thoughtCollapsed?: boolean;
-    timestamp: Date;
-    commands?: any[];
-    streaming?: boolean;
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  thought?: string;
+  thoughtCollapsed?: boolean;
+  timestamp: Date;
+  commands?: Command[];
+  streaming?: boolean;
 }
 
 export interface AICopilotPanelProps {
-    dragHandleProps?: any;
+  dragHandleProps?: unknown;
 }
 
 export interface ModelOption {
-    provider: string;
-    model: string;
+  provider: string;
+  model: string;
 }

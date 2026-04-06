@@ -25,12 +25,12 @@ describe('ObjectPool', () => {
         const obj1 = pool.acquire();
         pool.release(obj1);
         
-        expect(obj1.active).toBe(false); // Reset called
+        expect(obj1.active).toBe(false); 
         expect(pool.available).toBe(1);
         expect(pool.active).toBe(0);
         
         const obj2 = pool.acquire();
-        expect(obj2).toBe(obj1); // Reused
+        expect(obj2).toBe(obj1); 
         expect(pool.active).toBe(1);
     });
 
@@ -48,7 +48,7 @@ describe('ObjectPool', () => {
         
         pool.release(o1);
         pool.release(o2);
-        pool.release(o3); // Should be discarded
+        pool.release(o3); 
         
         expect(pool.available).toBe(2);
     });

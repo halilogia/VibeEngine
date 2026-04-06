@@ -1,7 +1,4 @@
-/**
- * HierarchyPanel - Entity tree view (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React, { useState } from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
@@ -13,19 +10,13 @@ import { VibeInput } from '@ui/atomic/atoms/VibeInput';
 import { VibeTheme } from '@themes/VibeStyles';
 import { hierarchyStyles as styles } from './HierarchyPanel.styles';
 
-/**
- * Props for the SearchHighlight component
- */
 interface SearchHighlightProps {
-    /** The full text to search within */
+    
     text: string;
-    /** The search query string for highlighting */
+    
     search: string;
 }
 
-/**
- * SearchHighlight - UI component for visual search matching.
- */
 const SearchHighlight: React.FC<SearchHighlightProps> = ({ text, search }) => {
     if (!search || !text.toLowerCase().includes(search.toLowerCase())) {
         return <span>{text}</span>;
@@ -45,24 +36,17 @@ const SearchHighlight: React.FC<SearchHighlightProps> = ({ text, search }) => {
     );
 };
 
-/**
- * Props for the TreeNode component
- */
 interface TreeNodeProps {
-    /** Entity data to display in this tree node */
+    
     entity: EntityData;
-    /** Current indentation level in the tree hiearchy */
+    
     depth: number;
-    /** Current global search query for highlighting names */
+    
     searchQuery: string;
-    /** Callback for triggering the context menu on this node */
+    
     onContextMenu: (e: React.MouseEvent, entityId: number) => void;
 }
 
-/**
- * TreeNode - Individual recursive element in the entity hierarchy.
- * Handles selection, expansion, and context menu triggers.
- */
 const TreeNode: React.FC<TreeNodeProps> = ({ entity, depth, searchQuery, onContextMenu }) => {
     const [expanded, setExpanded] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
@@ -133,21 +117,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({ entity, depth, searchQuery, onConte
     );
 };
 
-/**
- * Props for the HierarchyPanel component
- */
 interface HierarchyPanelProps {
-    /** Drag handle props from the docking system */
-    dragHandleProps?: any;
+    
+    dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-/**
- * HierarchyPanel - Entity tree view and scene structure manager.
- * 🏛️⚛️💎🚀
- * 
- * Provides a high-fidelity visual representation of the scene graph, supporting
- * recursive entity traversal, selection, and context-driven operations.
- */
 export const HierarchyPanel: React.FC<HierarchyPanelProps> = ({ dragHandleProps }) => {
     const { entities, rootEntityIds, addEntity, removeEntity } = useSceneStore();
     const { 

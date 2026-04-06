@@ -1,7 +1,4 @@
-/**
- * ConsolePanel Styles - Sovereign TypeScript Styling
- * 🏛️⚛️💎🚀
- */
+
 
 import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 
@@ -35,18 +32,18 @@ export const consoleStyles = createVibeStyles({
         overflowY: 'auto',
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: '12px',
-        paddingRight: '4px',          // Clean UI padding
+        paddingRight: '4px',          
     },
     entry: {
         display: 'flex',
         alignItems: 'flex-start',
         gap: '14px',
         padding: '10px 16px',
-        paddingRight: '40px',         // Modest safe zone for the copy button
+        paddingRight: '40px',         
         borderLeft: '4px solid transparent',
         borderBottom: `1px solid ${VibeTheme.colors.border}`,
         transition: 'all 0.1s ease',
-        position: 'relative',         // ⚓ Anchor for the copy button
+        position: 'relative',         
         overflow: 'hidden',
     },
     entryHover: {
@@ -62,7 +59,7 @@ export const consoleStyles = createVibeStyles({
     },
     message: {
         flex: 1,
-        minWidth: 0,                  // 🚨 CRITICAL: Allows flex item to shrink and wrap
+        minWidth: 0,                  
         color: VibeTheme.colors.textMain,
         lineHeight: 1.5,
         wordBreak: 'break-all',

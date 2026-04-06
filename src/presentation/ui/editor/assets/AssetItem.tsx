@@ -13,7 +13,7 @@ export const AssetItem: React.FC<{
     onRename: (newName: string) => void;
     onCancelRename: () => void;
     onDrop: (draggedAssetId: string, targetFolderId: string | null) => void;
-}> = ({ asset, onDelete, onClick, onContextMenu, isRenaming, onRename, onCancelRename, onDrop }) => {
+}> = ({ asset, onClick, onContextMenu, isRenaming, onRename, onCancelRename, onDrop }) => {
     const [isDragOver, setIsDragOver] = useState(false);
     const [tempName, setTempName] = useState(asset.name);
 

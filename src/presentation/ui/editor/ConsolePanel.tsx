@@ -1,7 +1,4 @@
-/**
- * ConsolePanel - Terminal view (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
@@ -11,7 +8,6 @@ import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { consoleStyles as styles } from './ConsolePanel.styles';
 
-// #region Components
 interface LogEntryProps {
     log: { id: string; message: string; level: LogLevel; timestamp: number };
 }
@@ -39,7 +35,7 @@ const LogEntry: React.FC<LogEntryProps> = ({ log }) => {
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        // We could add a tiny success toast here if needed
+        
     };
 
     return (
@@ -48,7 +44,7 @@ const LogEntry: React.FC<LogEntryProps> = ({ log }) => {
                 ...styles.entry, 
                 ...styles[log.level],
                 ...(isHovered ? styles.entryHover : {}),
-                userSelect: 'text', // 🖱️ Allow manual selection
+                userSelect: 'text', 
                 cursor: 'text',
                 position: 'relative'
             }}
@@ -70,7 +66,7 @@ const LogEntry: React.FC<LogEntryProps> = ({ log }) => {
                 }}
                 style={{
                     position: 'absolute',
-                    right: '10px',           // 🚨 Slightly inwards from the edge
+                    right: '10px',           
                     top: '10px',
                     padding: '8px',
                     cursor: 'pointer',
@@ -89,16 +85,16 @@ const LogEntry: React.FC<LogEntryProps> = ({ log }) => {
         </div>
     );
 };
-// #endregion
 
 interface ConsolePanelProps {
-    dragHandleProps?: any;
+    dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export const ConsolePanel: React.FC<ConsolePanelProps> = ({ dragHandleProps }) => {
     const { logs, clearLogs } = useConsoleStore();
     const { activePanelId, setActivePanel } = useEditorStore();
-    const [filter, setFilter] = useState<LogLevel | 'all'>('all');
+    type ConsoleFilter = LogLevel | 'all';
+    const [filter, setFilter] = useState<ConsoleFilter>('all');
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const filteredLogs = logs.filter(log => filter === 'all' || log.level === filter);
@@ -140,12 +136,12 @@ export const ConsolePanel: React.FC<ConsolePanelProps> = ({ dragHandleProps }) =
 
             <div style={styles.toolbar}>
                 <div style={styles.filters}>
-                    {['all', 'info', 'warn', 'error', 'success'].map((l) => (
+                    {(['all', 'info', 'warn', 'error', 'success'] as ConsoleFilter[]).map((l) => (
                         <VibeButton
                             key={l}
                             variant={filter === l ? 'primary' : 'ghost'}
                             size="sm"
-                            onClick={() => setFilter(l as any)}
+                            onClick={() => setFilter(l)}
                             style={{ borderRadius: '20px', fontSize: '10px', height: '24px' }}
                         >
                             {l.toUpperCase()}

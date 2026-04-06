@@ -23,15 +23,13 @@ describe('ScriptSystem', () => {
         
         const startSpy = vi.spyOn(scriptComp, 'startAll');
         const updateSpy = vi.spyOn(scriptComp, 'updateAll');
-        
-        // 1. First update
+
         scriptSystem.update(0.016, [entity]);
         expect(startSpy).toHaveBeenCalledTimes(1);
         expect(updateSpy).toHaveBeenCalledTimes(1);
-        
-        // 2. Second update
+
         scriptSystem.update(0.016, [entity]);
-        expect(startSpy).toHaveBeenCalledTimes(1); // Still once
+        expect(startSpy).toHaveBeenCalledTimes(1); 
         expect(updateSpy).toHaveBeenCalledTimes(2);
     });
 
@@ -59,6 +57,6 @@ describe('ScriptSystem', () => {
         scriptSystem.reset();
         
         scriptSystem.update(0.016, [entity]);
-        expect(startSpy).toHaveBeenCalledTimes(2); // Called again after reset
+        expect(startSpy).toHaveBeenCalledTimes(2); 
     });
 });

@@ -1,7 +1,4 @@
-/**
- * SceneManager - Manage game states and scene transitions
- * Handles Menu → Gameplay → GameOver flow.
- */
+
 
 export type GameState = 'loading' | 'menu' | 'playing' | 'paused' | 'gameover';
 
@@ -13,9 +10,6 @@ export interface StateConfig {
 
 type StateListener = (newState: GameState, oldState: GameState) => void;
 
-/**
- * Scene/State Manager
- */
 export class SceneManager {
     private static instance: SceneManager | null = null;
     
@@ -24,9 +18,6 @@ export class SceneManager {
     private listeners: StateListener[] = [];
     private isPaused: boolean = false;
 
-    /**
-     * Get singleton instance
-     */
     static getInstance(): SceneManager {
         if (!SceneManager.instance) {
             SceneManager.instance = new SceneManager();
@@ -34,17 +25,11 @@ export class SceneManager {
         return SceneManager.instance;
     }
 
-    /**
-     * Register a state with callbacks
-     */
     registerState(state: GameState, config: StateConfig): this {
         this.states.set(state, config);
         return this;
     }
 
-    /**
-     * Change to a new state
-     */
     setState(newState: GameState): void {
         if (newState === this.currentState) return;
 
@@ -52,41 +37,29 @@ export class SceneManager {
         const oldConfig = this.states.get(oldState);
         const newConfig = this.states.get(newState);
 
-        // Exit old state
         if (oldConfig?.onExit) {
             oldConfig.onExit();
         }
 
         this.currentState = newState;
 
-        // Enter new state
         if (newConfig?.onEnter) {
             newConfig.onEnter();
         }
 
-        // Notify listeners
         this.listeners.forEach(listener => listener(newState, oldState));
 
         console.log(`🎬 State: ${oldState} → ${newState}`);
     }
 
-    /**
-     * Get current state
-     */
     getState(): GameState {
         return this.currentState;
     }
 
-    /**
-     * Check if in specific state
-     */
     isState(state: GameState): boolean {
         return this.currentState === state;
     }
 
-    /**
-     * Pause the game
-     */
     pause(): void {
         if (this.currentState === 'playing') {
             this.isPaused = true;
@@ -94,9 +67,6 @@ export class SceneManager {
         }
     }
 
-    /**
-     * Resume the game
-     */
     resume(): void {
         if (this.currentState === 'paused') {
             this.isPaused = false;
@@ -104,9 +74,6 @@ export class SceneManager {
         }
     }
 
-    /**
-     * Toggle pause
-     */
     togglePause(): void {
         if (this.isPaused) {
             this.resume();
@@ -115,9 +82,6 @@ export class SceneManager {
         }
     }
 
-    /**
-     * Quick state changers
-     */
     goToMenu(): void {
         this.setState('menu');
     }
@@ -130,9 +94,6 @@ export class SceneManager {
         this.setState('gameover');
     }
 
-    /**
-     * Update current state (call each frame)
-     */
     update(deltaTime: number): void {
         if (this.isPaused) return;
         
@@ -142,9 +103,6 @@ export class SceneManager {
         }
     }
 
-    /**
-     * Add state change listener
-     */
     onStateChange(listener: StateListener): () => void {
         this.listeners.push(listener);
         return () => {
@@ -153,14 +111,10 @@ export class SceneManager {
         };
     }
 
-    /**
-     * Reset manager
-     */
     reset(): void {
         this.currentState = 'loading';
         this.isPaused = false;
     }
 }
 
-// Convenience export
 export const sceneManager = SceneManager.getInstance();

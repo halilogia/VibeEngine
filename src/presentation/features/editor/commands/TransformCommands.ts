@@ -1,15 +1,10 @@
-/**
- * Transform Commands - Undo/Redo operations for transform changes
- */
+
 
 import * as THREE from 'three';
 import { Entity } from '@engine';
 import { TransformComponent } from '@engine';
 import type { ICommand } from './HistoryManager';
 
-/**
- * Command for changing entity position
- */
 export class MoveCommand implements ICommand {
     description: string;
     private entity: Entity;
@@ -38,9 +33,6 @@ export class MoveCommand implements ICommand {
     }
 }
 
-/**
- * Command for changing entity rotation
- */
 export class RotateCommand implements ICommand {
     description: string;
     private entity: Entity;
@@ -71,9 +63,6 @@ export class RotateCommand implements ICommand {
     }
 }
 
-/**
- * Command for changing entity scale
- */
 export class ScaleCommand implements ICommand {
     description: string;
     private entity: Entity;

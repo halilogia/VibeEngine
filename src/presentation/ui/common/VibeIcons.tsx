@@ -1,8 +1,4 @@
-/**
- * VibeIcons - Sovereign SVG Icon System for VibeEngine
- * Custom, lightweight replacement for Lucide-React.
- * Use: <VibeIcons name="Move" size={16} color="currentColor" />
- */
+
 
 import React from 'react';
 

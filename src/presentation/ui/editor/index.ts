@@ -1,7 +1,4 @@
-/**
- * Sovereign Editor Components Index
- * 🏛️⚛️💎🚀
- */
+
 
 export { MenuBar } from './MenuBar';
 export { EditorLayout } from './EditorLayout';
@@ -10,7 +7,6 @@ export { StatusBar } from './StatusBar';
 export { ViewportToolbar } from './ViewportToolbar';
 export { TitleBar } from './TitleBar';
 
-// Panels
 export { HierarchyPanel } from './HierarchyPanel';
 export { InspectorPanel } from './InspectorPanel';
 export { AssetsPanel } from './AssetsPanel';
@@ -19,7 +15,6 @@ export { AICopilotPanel } from './AICopilotPanel';
 export { ScriptEditorPanel } from './ScriptEditorPanel';
 export { ViewportPanel } from './ViewportPanel';
 
-// Overlays
 export { ContextMenu } from './ContextMenu';
 export { CommandPalette } from './CommandPalette';
 export { ToastContainer } from './ToastContainer';

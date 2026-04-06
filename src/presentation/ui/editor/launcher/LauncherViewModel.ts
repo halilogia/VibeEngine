@@ -1,21 +1,24 @@
-import { useProjectStore, ProjectInfo } from '@infrastructure/store/useProjectStore';
-import { ProjectScanner } from '@infrastructure/services/ProjectScanner';
-import { useSceneStore } from '@infrastructure/store/sceneStore';
-import { deserializeScene, createDefaultScene } from '@editor/serialization/SceneSerializer';
+import {
+  useProjectStore,
+  ProjectInfo,
+} from "@infrastructure/store/useProjectStore";
+import { ProjectScanner } from "@infrastructure/services/ProjectScanner";
+import { useSceneStore, type AssetData } from "@infrastructure/store/sceneStore";
+import { deserializeScene } from "@editor/serialization/SceneSerializer";
 
 export const useLauncherViewModel = () => {
   const { setAssets } = useSceneStore();
-  const { 
-    projects, 
-    selectedProject, 
-    isLoading, 
+  const {
+    projects,
+    selectedProject,
+    isLoading,
     error,
     selectProject,
     launchProject,
     setLoading,
     setError,
     addProject,
-    removeProject
+    removeProject,
   } = useProjectStore();
 
   const pickProjectFolder = async () => {
@@ -27,12 +30,16 @@ export const useLauncherViewModel = () => {
         addProject(result);
         selectProject(result);
       }
-    } catch (e: any) {
-      const msg = e?.message || '';
-      if (msg.includes('bridge not available')) {
-        setError('Keşif sistemi sadece Electron üzerinde aktiftir. Lütfen "npm run electron:dev" komutunu kullanın.');
+    } catch (e) {
+      const msg = (e as Error)?.message || "";
+      if (msg.includes("bridge not available")) {
+        setError(
+          'Keşif sistemi sadece Electron üzerinde aktiftir. Lütfen "npm run electron:dev" komutunu kullanın.',
+        );
       } else {
-        setError('Proje klasörü okunamadı. Lütfen geçerli bir dizin seçin veya izinleri kontrol edin.');
+        setError(
+          "Proje klasörü okunamadı. Lütfen geçerli bir dizin seçin veya izinleri kontrol edin.",
+        );
       }
     } finally {
       setLoading(false);
@@ -53,66 +60,76 @@ export const useLauncherViewModel = () => {
     if (selectedProject) {
       setLoading(true);
       try {
-        // 🟢 Elite Asset Sync: Scan project src folder
-        const assets = await ProjectScanner.scanProjectAssets(selectedProject.path);
+        
+        const assets = await ProjectScanner.scanProjectAssets(
+          selectedProject.path,
+        ) as AssetData[];
         setAssets(assets);
-        
-        // 🚀 Ultimate Studio Sync: Tell Electron which project is active
+
         await ProjectScanner.setActiveProject(selectedProject.path);
-        
-        // 🟢 Elite Scene Loading: Try to auto-load the project's main scene
-        const sceneName = selectedProject.mainScene || 'main'; // Should fallback to 'main'
+
+        const sceneName = selectedProject.mainScene || "main"; 
         const baseFolder = selectedProject.path;
         const sceneFile = `${baseFolder}/src/levels/${sceneName}.json`;
-        
+
         try {
           const result = await ProjectScanner.readFile(sceneFile);
           if (result.success && result.content) {
-            // Found a level file! Load it immediately.
+            
             deserializeScene(result.content);
             console.log(`✅ Scene auto-loaded from: ${sceneFile}`);
           } else {
-            // Fallback: Check if there's a 'scene.json' in the root or /src/
+            
             const rootScene = `${baseFolder}/scene.json`;
             const rootRes = await ProjectScanner.readFile(rootScene);
             if (rootRes.success && rootRes.content) {
               deserializeScene(rootRes.content);
               console.log(`✅ Scene auto-loaded from: ${rootScene}`);
             } else {
-              // 🏛️ Sovereign Automation: If project is empty, try to hijack from local dev server!
-              console.log('🔍 No scene found. Attempting automatic "Ultimate Snapshot" from local dev server...');
               
-              // We assume standard ports (MobRunner uses 5174, Vite default is 5173)
-              const backupUrls = ['http://localhost:5174', 'http://localhost:5173', 'http://localhost:5175'];
-              
+              console.log(
+                '🔍 No scene found. Attempting automatic "Ultimate Snapshot" from local dev server...',
+              );
+
+              const backupUrls = [
+                "http://localhost:5174",
+                "http://localhost:5173",
+                "http://localhost:5175",
+              ];
+
               for (const url of backupUrls) {
                 try {
                   const result = await ProjectScanner.captureScene(url);
                   if (result.success && result.data) {
-                    deserializeScene(result.data);
-                    console.log(`✅ Ultimate Snapshot SUCCESS from ${url}! Scene loaded automatically.`);
-                    
-                    // Trigger a toast (optional via sync)
-                    break; 
+                    deserializeScene(JSON.stringify(result.data));
+                    console.log(
+                      `✅ Ultimate Snapshot SUCCESS from ${url}! Scene loaded automatically.`,
+                    );
+
+                    break;
                   }
-                } catch (err) {
-                  // Keep trying
+                } catch {
+                  void 0;
                 }
               }
 
               if (useSceneStore.getState().entities.size === 0) {
-                console.warn('⚠️ No VibeEngine scene found and automatic hijack failed. Please save a scene manually.');
+                console.warn(
+                  "⚠️ No VibeEngine scene found and automatic hijack failed. Please save a scene manually.",
+                );
               }
             }
           }
-        } catch (e) {
-          console.warn('⚠️ No scene loaded. Skipping auto-load.');
+        } catch {
+          console.warn("⚠️ No scene loaded. Skipping auto-load.");
         }
 
         launchProject(selectedProject);
-        console.log(`Motor ve Assets senkronize edildi: ${selectedProject.name} (${assets.length} varlık)`);
+        console.log(
+          `Motor ve Assets senkronize edildi: ${selectedProject.name} (${assets.length} varlık)`,
+        );
       } catch (e) {
-        console.error('Asset tarama hatası:', e);
+        console.error("Asset tarama hatası:", e);
         launchProject(selectedProject);
       } finally {
         setLoading(false);
@@ -128,6 +145,6 @@ export const useLauncherViewModel = () => {
     pickProjectFolder,
     handleProjectSelect,
     handleProjectRemove,
-    launchActiveProject
+    launchActiveProject,
   };
 };

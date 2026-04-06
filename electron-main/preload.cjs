@@ -1,7 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('ProjectScanner', {
-    pickProjectFolder: () => ipcRenderer.invoke('pick-project-folder'),
+    getAppPath: () => ipcRenderer.invoke('get-app-path'),
+    pickProjectFolder: (options) => ipcRenderer.invoke('pick-project-folder', options),
     scanProjectAssets: (path) => ipcRenderer.invoke('scan-project-assets', path),
     createFolder: (path) => ipcRenderer.invoke('create-folder', path),
     createFile: (path, content) => ipcRenderer.invoke('create-file', path, content),

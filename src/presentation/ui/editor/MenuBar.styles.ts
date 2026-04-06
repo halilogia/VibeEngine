@@ -1,7 +1,4 @@
-/**
- * Unified MenuBar Styles (Sovereign Minimalist Edition)
- * 🏛️⚛&💎🚀
- */
+
 
 import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 

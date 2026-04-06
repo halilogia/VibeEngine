@@ -16,12 +16,12 @@ export const NeuralSettingsTab: React.FC = () => {
         >
             <SettingsGroup title="Neural Agent Authentication">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    {['openrouter', 'github'].map(p => (
+                    {(['openrouter', 'github'] as const).map((p: string) => (
                         <SettingsField key={p} label={`${p.toUpperCase()} ACCESS TOKEN`}>
                             <SettingsInput 
                                 type="password" 
-                                defaultValue={VibeVault.getSecret(p as any) || ''}
-                                onBlur={(e) => VibeVault.saveSecret(p as any, e.target.value)}
+                                defaultValue={VibeVault.getSecret(p) || ''}
+                                onBlur={(e) => VibeVault.saveSecret(p, e.target.value)}
                                 placeholder="sk-••••••••••••••••••••••••"
                             />
                         </SettingsField>

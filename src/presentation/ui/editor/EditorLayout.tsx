@@ -1,9 +1,6 @@
-/**
- * EditorLayout (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
 
-import React, { useState, useCallback } from 'react';
+
+import React, { useCallback } from 'react';
 import { 
     HierarchyPanel, 
     ViewportPanel, 
@@ -13,9 +10,7 @@ import {
     AICopilotPanel, 
     ScriptEditorPanel,
     MenuBar, 
-    TitleBar, 
-    StatusBar 
-} from './index';
+    TitleBar} from './index';
 import { useEditorStore } from '@infrastructure/store';
 import { VibeTheme } from '@themes/VibeStyles';
 import { layoutStyles as styles } from './EditorLayout.styles';
@@ -32,8 +27,7 @@ export const EditorLayout: React.FC = () => {
     const handleResize = useCallback((dir: 'L' | 'R' | 'B' | 'I' | 'A' | 'C') => (e: React.MouseEvent) => {
         const startX = e.clientX;
         const startY = e.clientY;
-        
-        // Snapshot current widths
+
         const sL = leftWidth;
         const sR = rightWidth;
         const sI = inspectorWidth;
@@ -72,7 +66,7 @@ export const EditorLayout: React.FC = () => {
         };
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
-    }, [leftWidth, rightWidth, bottomHeight, inspectorWidth, assetsWidth, consoleWidth]);
+    }, [leftWidth, rightWidth, inspectorWidth, assetsWidth, consoleWidth, isScriptFullScreen, bottomHeight, setPanelSize, setScriptFullScreen]);
 
     return (
         <div style={styles.appContainer}>
@@ -85,7 +79,7 @@ export const EditorLayout: React.FC = () => {
                 flexDirection: 'row',
                 position: 'relative'
             }}>
-                {/* 1. Left Sidebar (Hierarchy) */}
+                {}
                 <AnimatePresence>
                     {showHierarchy && (
                         <motion.div 
@@ -103,7 +97,7 @@ export const EditorLayout: React.FC = () => {
                     )}
                 </AnimatePresence>
 
-                {/* 2. Center Viewport Area - Sovereign Stable Flex */}
+                {}
                 <div style={{ 
                     flex: 1, 
                     display: 'flex', 
@@ -117,7 +111,7 @@ export const EditorLayout: React.FC = () => {
                         <VibeErrorBoundary name="Viewport"><ViewportPanel /></VibeErrorBoundary>
                     </div>
 
-                    {/* 🟢 Bottom Tray (Assets, Console, Scripts) - Sovereign Studio Expansion */}
+                    {}
                     <AnimatePresence>
                         {(showAssets || showConsole || showScriptEditor) && (
                             <motion.div 
@@ -213,7 +207,7 @@ export const EditorLayout: React.FC = () => {
                     </AnimatePresence>
                 </div>
 
-                {/* 3. Right Sidebar Area (Inspector & AI Copilot) */}
+                {}
                 <div style={{ 
                     display: 'flex', 
                     position: 'relative',
@@ -223,7 +217,7 @@ export const EditorLayout: React.FC = () => {
                     borderLeft: `1px solid ${VibeTheme.colors.glassBorder}`,
                     overflow: 'hidden'
                 }}>
-                    {/* The main right resizer */}
+                    {}
                     {(showInspector || showAICopilot) && (
                         <div onMouseDown={handleResize('R')} className="v-resizer v-resizer-vertical" style={{ position: 'absolute', left: 0, zIndex: 100 }} />
                     )}
@@ -259,7 +253,7 @@ export const EditorLayout: React.FC = () => {
                                 <div style={{ 
                                     ...styles.sidebarRight, 
                                     width: rightWidth, 
-                                    minWidth: rightWidth, // 🚨 FORCE width recognition
+                                    minWidth: rightWidth, 
                                     borderLeft: (showInspector ? `1px solid ${VibeTheme.colors.glassBorder}` : 'none'),
                                     zIndex: 1 
                                 }} onClick={() => setActivePanel('ai')}>
@@ -324,7 +318,6 @@ export const EditorLayout: React.FC = () => {
                     box-shadow: 0 0 10px ${VibeTheme.colors.accent}66;
                 }
                 
-                /* 🏛️ Sovereign Elite Global Scrollbar */
                 *::-webkit-scrollbar {
                     width: 4px;
                     height: 4px;

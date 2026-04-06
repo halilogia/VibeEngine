@@ -23,13 +23,11 @@ describe('CollisionComponent', () => {
     it('should calculate world bounding box correctly', () => {
         const transform = e1.getComponent(TransformComponent)!;
         transform.position.set(10, 0, 0);
-        transform.setScale(2); // Double size
+        transform.setScale(2); 
         
         c1.setBox(1, 1, 1);
         const bbox = c1.getWorldBoundingBox();
-        
-        // Center is 10,0,0. Size is 1x1x1 scaled by 2 = 2x2x2.
-        // Min should be 10-1=9, Max should be 10+1=11
+
         expect(bbox.min.x).toBe(9);
         expect(bbox.max.x).toBe(11);
     });
@@ -73,18 +71,18 @@ describe('CollisionComponent', () => {
     });
 
     it('should respect collision layers and masks', () => {
-        c1.layer = 1; // Layer 1
-        c1.mask = 1 << 2; // Only collide with Layer 2
+        c1.layer = 1; 
+        c1.mask = 1 << 2; 
         
-        c2.layer = 2; // Layer 2
-        c2.mask = 0xFFFFFFFF; // Collide with everything
+        c2.layer = 2; 
+        c2.mask = 0xFFFFFFFF; 
         
         e1.getComponent(TransformComponent)!.position.set(0, 0, 0);
         e2.getComponent(TransformComponent)!.position.set(0, 0, 0);
         
         expect(c1.intersects(c2)).toBe(true);
         
-        c1.mask = 1 << 3; // Change mask to Layer 3
+        c1.mask = 1 << 3; 
         expect(c1.intersects(c2)).toBe(false);
     });
 });

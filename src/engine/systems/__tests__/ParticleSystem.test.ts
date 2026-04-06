@@ -43,8 +43,7 @@ describe('ParticleSystem', () => {
     it('should dispose particles when entity is removed', () => {
         const entity = new Entity('RemovedEntity');
         const particleComp = entity.addComponent(new ParticleComponent());
-        
-        // Initialize it first
+
         particleSystem.update(0.016, [entity]);
         
         const disposeSpy = vi.spyOn(particleComp, 'dispose');

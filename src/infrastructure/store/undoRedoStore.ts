@@ -1,6 +1,4 @@
-/**
- * UndoRedoStore - History management for undo/redo
- */
+
 
 import { create } from 'zustand';
 import { useSceneStore, type EntityData } from './sceneStore';
@@ -17,7 +15,6 @@ interface UndoRedoState {
     future: HistoryState[];
     maxHistory: number;
 
-    // Actions
     pushState: () => void;
     undo: () => void;
     redo: () => void;
@@ -65,7 +62,7 @@ export const useUndoRedoStore = create<UndoRedoState>((set, get) => ({
         const currentState = cloneState();
         set((state) => ({
             past: [...state.past.slice(-state.maxHistory + 1), currentState],
-            future: [] // Clear future on new action
+            future: [] 
         }));
     },
 

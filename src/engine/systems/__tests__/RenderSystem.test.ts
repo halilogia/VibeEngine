@@ -29,8 +29,7 @@ describe('RenderSystem', () => {
         const entity = new Entity('MeshEntity');
         const transform = entity.addComponent(new TransformComponent());
         const render = entity.addComponent(new RenderComponent(new THREE.Mesh()));
-        
-        // Initial state: not in scene
+
         expect(mockThreeScene.children.length).toBe(0);
 
         renderSystem.update(0.016, [entity]);
@@ -73,19 +72,16 @@ describe('RenderSystem', () => {
         const entity = new Entity('VisibleEntity');
         entity.addComponent(new TransformComponent());
         const render = entity.addComponent(new RenderComponent(new THREE.Mesh()));
-        
-        // Disabled entity
+
         entity.enabled = false;
         renderSystem.update(0.016, [entity]);
         expect(render.object3D?.visible).toBe(false);
-        
-        // Enabled entity, disabled component
+
         entity.enabled = true;
         render.enabled = false;
         renderSystem.update(0.016, [entity]);
         expect(render.object3D?.visible).toBe(false);
-        
-        // Both enabled
+
         render.enabled = true;
         renderSystem.update(0.016, [entity]);
         expect(render.object3D?.visible).toBe(true);

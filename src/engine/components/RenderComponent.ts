@@ -1,7 +1,4 @@
-/**
- * RenderComponent - 3D mesh/model rendering
- * Connects an entity to a Three.js Object3D for rendering.
- */
+
 
 import * as THREE from 'three';
 import { Component } from '@engine';
@@ -10,19 +7,14 @@ import { TransformComponent } from './TransformComponent';
 export class RenderComponent extends Component {
     static readonly TYPE = 'Render';
 
-    /** Three.js object to render (Mesh, Group, SkinnedMesh, etc.) */
     object3D: THREE.Object3D | null = null;
 
-    /** Whether to cast shadows */
     castShadow: boolean = true;
 
-    /** Whether to receive shadows */
     receiveShadow: boolean = true;
 
-    /** Render layer (for selective rendering) */
     layer: number = 0;
 
-    /** Has been added to Three.js scene */
     private addedToScene: boolean = false;
 
     constructor(object3D?: THREE.Object3D) {
@@ -32,11 +24,8 @@ export class RenderComponent extends Component {
         }
     }
 
-    /**
-     * Set the 3D object to render
-     */
     setObject3D(object3D: THREE.Object3D): this {
-        // Remove old object if exists
+        
         if (this.object3D && this.addedToScene) {
             this.object3D.parent?.remove(this.object3D);
             this.addedToScene = false;
@@ -47,17 +36,11 @@ export class RenderComponent extends Component {
         return this;
     }
 
-    /**
-     * Set a mesh with geometry and material
-     */
     setMesh(geometry: THREE.BufferGeometry, material: THREE.Material): this {
         const mesh = new THREE.Mesh(geometry, material);
         return this.setObject3D(mesh);
     }
 
-    /**
-     * Apply shadow settings to object and children
-     */
     applyShadowSettings(): void {
         if (!this.object3D) return;
 
@@ -69,9 +52,6 @@ export class RenderComponent extends Component {
         });
     }
 
-    /**
-     * Sync transform from TransformComponent to Object3D
-     */
     syncTransform(): void {
         if (!this.object3D || !this.entity) return;
 
@@ -83,9 +63,6 @@ export class RenderComponent extends Component {
         this.object3D.scale.copy(transform.scale);
     }
 
-    /**
-     * Add to Three.js scene
-     */
     addToScene(scene: THREE.Scene): void {
         if (this.object3D && !this.addedToScene) {
             scene.add(this.object3D);
@@ -93,9 +70,6 @@ export class RenderComponent extends Component {
         }
     }
 
-    /**
-     * Remove from Three.js scene
-     */
     removeFromScene(): void {
         if (this.object3D && this.addedToScene) {
             this.object3D.parent?.remove(this.object3D);
@@ -103,9 +77,6 @@ export class RenderComponent extends Component {
         }
     }
 
-    /**
-     * Set visibility
-     */
     setVisible(visible: boolean): this {
         if (this.object3D) {
             this.object3D.visible = visible;
@@ -113,16 +84,10 @@ export class RenderComponent extends Component {
         return this;
     }
 
-    /**
-     * Get visibility
-     */
     get visible(): boolean {
         return this.object3D?.visible ?? false;
     }
 
-    /**
-     * Dispose of geometry and materials
-     */
     dispose(): void {
         if (!this.object3D) return;
 

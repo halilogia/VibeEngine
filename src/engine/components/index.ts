@@ -1,6 +1,4 @@
-/**
- * Components Module Exports
- */
+
 
 export { TransformComponent } from './TransformComponent';
 export { RenderComponent } from './RenderComponent';

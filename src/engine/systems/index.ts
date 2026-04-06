@@ -1,6 +1,4 @@
-/**
- * Systems Module Exports
- */
+
 
 export { InputSystem, type InputState } from './InputSystem';
 export { ScriptSystem } from './ScriptSystem';

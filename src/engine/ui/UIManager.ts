@@ -1,7 +1,4 @@
-/**
- * UIManager - HTML-based UI overlay system
- * Creates and manages UI elements on top of the game canvas.
- */
+
 
 export type UIElementType = 'text' | 'bar' | 'button' | 'panel' | 'image';
 
@@ -41,9 +38,6 @@ interface UIElement {
     element: HTMLElement;
 }
 
-/**
- * UI Manager - Singleton
- */
 export class UIManager {
     private static instance: UIManager | null = null;
 
@@ -51,9 +45,6 @@ export class UIManager {
     private elements: Map<string, UIElement> = new Map();
     private initialized = false;
 
-    /**
-     * Get singleton instance
-     */
     static getInstance(): UIManager {
         if (!UIManager.instance) {
             UIManager.instance = new UIManager();
@@ -61,9 +52,6 @@ export class UIManager {
         return UIManager.instance;
     }
 
-    /**
-     * Initialize the UI container
-     */
     initialize(parent: HTMLElement = document.body): void {
         if (this.initialized) return;
 
@@ -85,9 +73,6 @@ export class UIManager {
         console.log('✅ UIManager initialized');
     }
 
-    /**
-     * Create a text element
-     */
     createText(id: string, text: string, x: number, y: number, style?: UIElementStyle): void {
         this.createElement({
             id,
@@ -99,9 +84,6 @@ export class UIManager {
         });
     }
 
-    /**
-     * Create a health/progress bar
-     */
     createBar(
         id: string,
         x: number,
@@ -127,9 +109,6 @@ export class UIManager {
         });
     }
 
-    /**
-     * Create a button
-     */
     createButton(
         id: string,
         text: string,
@@ -149,9 +128,6 @@ export class UIManager {
         });
     }
 
-    /**
-     * Create a panel (container)
-     */
     createPanel(
         id: string,
         x: number,
@@ -171,30 +147,23 @@ export class UIManager {
         });
     }
 
-    /**
-     * Create any UI element
-     */
     createElement(config: UIElementConfig): void {
         if (!this.container) {
             console.warn('UIManager not initialized');
             return;
         }
 
-        // Remove existing if same ID
         this.remove(config.id);
 
         const element = document.createElement('div');
         element.id = `vibe-ui-${config.id}`;
 
-        // Base style
         element.style.position = 'absolute';
         element.style.left = `${config.x}px`;
         element.style.top = `${config.y}px`;
 
-        // Apply anchor
         this.applyAnchor(element, config);
 
-        // Type-specific styling
         switch (config.type) {
             case 'text':
                 this.setupText(element, config);
@@ -210,12 +179,10 @@ export class UIManager {
                 break;
         }
 
-        // Apply custom style
         if (config.style) {
             this.applyStyle(element, config.style);
         }
 
-        // Visibility
         if (config.visible === false) {
             element.style.display = 'none';
         }
@@ -224,9 +191,6 @@ export class UIManager {
         this.elements.set(config.id, { config, element });
     }
 
-    /**
-     * Update text content
-     */
     setText(id: string, text: string): void {
         const ui = this.elements.get(id);
         if (ui?.config.type === 'text') {
@@ -235,9 +199,6 @@ export class UIManager {
         }
     }
 
-    /**
-     * Update bar value
-     */
     setBarValue(id: string, value: number, maxValue?: number): void {
         const ui = this.elements.get(id);
         if (ui?.config.type === 'bar') {
@@ -252,9 +213,6 @@ export class UIManager {
         }
     }
 
-    /**
-     * Show an element
-     */
     show(id: string): void {
         const ui = this.elements.get(id);
         if (ui) {
@@ -263,9 +221,6 @@ export class UIManager {
         }
     }
 
-    /**
-     * Hide an element
-     */
     hide(id: string): void {
         const ui = this.elements.get(id);
         if (ui) {
@@ -274,9 +229,6 @@ export class UIManager {
         }
     }
 
-    /**
-     * Remove an element
-     */
     remove(id: string): void {
         const ui = this.elements.get(id);
         if (ui) {
@@ -285,18 +237,12 @@ export class UIManager {
         }
     }
 
-    /**
-     * Clear all UI elements
-     */
     clear(): void {
         for (const [id] of this.elements) {
             this.remove(id);
         }
     }
 
-    /**
-     * Destroy the UI manager
-     */
     destroy(): void {
         this.clear();
         this.container?.remove();
@@ -304,8 +250,6 @@ export class UIManager {
         this.initialized = false;
         UIManager.instance = null;
     }
-
-    // ============ PRIVATE SETUP METHODS ============
 
     private setupText(element: HTMLElement, config: UIElementConfig): void {
         element.textContent = config.text ?? '';
@@ -406,5 +350,4 @@ export class UIManager {
     }
 }
 
-// Convenience export
 export const ui = UIManager.getInstance();

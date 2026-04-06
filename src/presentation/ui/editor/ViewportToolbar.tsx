@@ -1,11 +1,8 @@
-/**
- * ViewportToolbar (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React from 'react';
-import { VibeIcons } from '@ui/common/VibeIcons';
-import { useEditorStore } from '@infrastructure/store';
+import { VibeIcons, VibeIconName } from '@ui/common/VibeIcons';
+import { useEditorStore, EditorMode } from '@infrastructure/store';
 import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 
@@ -53,17 +50,17 @@ export const ViewportToolbar: React.FC = () => {
 
     const [showShadingMenu, setShowShadingMenu] = React.useState(false);
 
-    const shadingOptions: { id: typeof shadingMode; icon: any; label: string }[] = [
-        { id: 'lit', icon: 'Box', label: 'Lit' },
-        { id: 'wireframe', icon: 'Grid', label: 'Wireframe' },
-        { id: 'solid', icon: 'Layers', label: 'Solid' }
+    const shadingOptions: { id: typeof shadingMode; icon: VibeIconName; label: string }[] = [
+        { id: 'lit', icon: 'Box' as VibeIconName, label: 'Lit' },
+        { id: 'wireframe', icon: 'Grid' as VibeIconName, label: 'Wireframe' },
+        { id: 'solid', icon: 'Layers' as VibeIconName, label: 'Solid' }
     ];
 
     const currentShading = shadingOptions.find(o => o.id === shadingMode) || shadingOptions[0];
 
     return (
         <div style={styles.container}>
-            {/* 🔴 Playback Controls (Sovereign Animated Edition) */}
+            {}
             <div style={{ ...styles.group, minWidth: '75px', justifyContent: 'center' }}>
                 <AnimatePresence mode="wait">
                     {!isPlaying ? (
@@ -129,18 +126,18 @@ export const ViewportToolbar: React.FC = () => {
 
             <div style={styles.divider} />
 
-            {/* 🟢 Transform Tools (Move, Rotate, Scale) */}
+            {}
             <div style={styles.group}>
                 {[
-                    { mode: 'translate', icon: 'Move', label: 'Move tools' },
-                    { mode: 'rotate', icon: 'Rotate', label: 'Rotate tools' },
-                    { mode: 'scale', icon: 'Scale', label: 'Scale tools' }
+                    { mode: 'translate' as EditorMode, icon: 'Move' as VibeIconName, label: 'Move tools' },
+                    { mode: 'rotate' as EditorMode, icon: 'Rotate' as VibeIconName, label: 'Rotate tools' },
+                    { mode: 'scale' as EditorMode, icon: 'Scale' as VibeIconName, label: 'Scale tools' }
                 ].map((m) => (
                     <VibeButton
                         key={m.mode}
                         variant={editorMode === m.mode ? 'primary' : 'ghost'}
                         size="sm"
-                        onClick={() => setEditorMode(m.mode as any)}
+                        onClick={() => setEditorMode(m.mode)}
                         style={{ 
                             width: '32px', height: '32px', padding: 0,
                             borderRadius: '8px',
@@ -149,13 +146,13 @@ export const ViewportToolbar: React.FC = () => {
                         }}
                         title={m.label}
                     >
-                        <VibeIcons name={m.icon as any} size={14} color={editorMode === m.mode ? VibeTheme.colors.accent : 'rgba(255,255,255,0.5)'} />
+                        <VibeIcons name={m.icon} size={14} color={editorMode === m.mode ? VibeTheme.colors.accent : 'rgba(255,255,255,0.5)'} />
                     </VibeButton>
                 ))}
             </div>
 
             <div style={styles.divider} />
-            {/* 🟢 Shading Mode Dropdown */}
+            {}
             <div style={{ position: 'relative' }}>
                 <VibeButton 
                     variant="ghost" 

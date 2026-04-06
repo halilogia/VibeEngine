@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { serializeScene, deserializeScene } from '../SceneSerializer';
 
-// Mock the sceneStore
 const mockStore = {
     sceneName: 'Test Scene',
     entities: new Map(),
@@ -37,7 +36,7 @@ describe('SceneSerializer', () => {
     });
 
     it('should serialize a scene with hierarchy', () => {
-        // Setup mock data
+        
         const entity1 = {
             id: 1,
             name: 'Parent',

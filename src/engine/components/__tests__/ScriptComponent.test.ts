@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ScriptComponent, Script } from '../ScriptComponent';
 import { Entity } from '@engine';
 
-// Mock concrete script implementation
 class TestScript extends Script {
     initCalled = false;
     startCalled = 0;
@@ -16,7 +15,7 @@ class TestScript extends Script {
         this.updateCount++; 
         this.lastDelta = dt;
     }
-    // Added lateUpdate to allow spying in tests
+    
     override lateUpdate(dt: number) { }
     override destroy() { this.destroyed = true; }
 }
@@ -49,8 +48,8 @@ describe('ScriptComponent', () => {
         scriptComp.startAll();
         expect(script.startCalled).toBe(1);
         
-        scriptComp.startAll(); // Second call
-        expect(script.startCalled).toBe(1); // Should still be 1
+        scriptComp.startAll(); 
+        expect(script.startCalled).toBe(1); 
     });
 
     it('should call updateAll and lateUpdateAll', () => {
@@ -76,13 +75,13 @@ describe('ScriptComponent', () => {
 
     it('should clone scripts and preserve properties', () => {
         const script = scriptComp.addScript(new TestScript());
-        script.lastDelta = 99; // Set a property
+        script.lastDelta = 99; 
         
         const clonedComp = scriptComp.clone();
         expect(clonedComp.scripts.length).toBe(1);
         
         const clonedScript = clonedComp.scripts[0] as TestScript;
         expect(clonedScript.lastDelta).toBe(99);
-        expect(clonedScript).not.toBe(script); // Should be a new instance
+        expect(clonedScript).not.toBe(script); 
     });
 });

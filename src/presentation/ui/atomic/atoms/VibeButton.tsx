@@ -1,8 +1,4 @@
-/**
- * VibeButton Atom - Sovereign Elite Button
- * Implements logic-driven hover/active states with TypeScript protection.
- * 🏛️⚛️💎🚀
- */
+
 
 import React, { useState } from 'react';
 import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
@@ -69,7 +65,7 @@ export const VibeButton: React.FC<VibeButtonProps> = ({
     const [isActive, setIsActive] = useState(false);
 
     const getVariantStyle = () => {
-        let s = { ...styles[variant] };
+        const s = { ...styles[variant] };
         
         if (disabled) {
             return {
@@ -91,13 +87,12 @@ export const VibeButton: React.FC<VibeButtonProps> = ({
         }
 
         if (isHovered) {
-             const variantStyle = styles[variant] as any;
              return {
                 ...s,
                 transform: 'translateY(-1px)',
                 background: variant === 'primary' ? VibeTheme.colors.accent : VibeTheme.colors.bgSubtle,
                 filter: variant === 'primary' ? 'brightness(1.15)' : 'none',
-                borderColor: variant === 'ghost' ? VibeTheme.colors.glassBorder : variantStyle.borderColor,
+                borderColor: variant === 'ghost' ? VibeTheme.colors.glassBorder : variant === 'danger' ? 'rgba(244, 63, 94, 0.4)' : VibeTheme.colors.glassBorder,
                 boxShadow: variant === 'primary' ? `0 8px 25px ${VibeTheme.colors.accent}60` : `0 4px 12px rgba(0,0,0,0.1)`,
                 color: variant === 'primary' ? '#fff' : VibeTheme.colors.textMain,
             };

@@ -19,8 +19,7 @@ describe('PhysicsSystem', () => {
         
         rb.velocity.set(10, 0, 0);
         rb.useGravity = false;
-        
-        // Update for 1 second
+
         physicsSystem.update(1.0, [entity]);
         
         expect(transform.position.x).toBe(10);
@@ -32,16 +31,12 @@ describe('PhysicsSystem', () => {
         const rb = entity.addComponent(new RigidbodyComponent());
         
         rb.useGravity = true;
-        // gravityScale does not exist; gravity vector is used directly
-        
-        // Update for 1 second
+
         physicsSystem.update(1.0, [entity]);
-        
-        // Gravity is typically [0, -9.81, 0]
+
         expect(rb.velocity.y).toBeLessThan(0);
         expect(transform.position.y).toBeLessThan(0);
     });
-
 
     it('should detect collisions between overlapping colliders', () => {
         const e1 = new Entity('E1');
@@ -53,10 +48,9 @@ describe('PhysicsSystem', () => {
         const t2 = e2.addComponent(new TransformComponent());
         const c2 = e2.addComponent(new CollisionComponent());
         c2.onCollisionEnter = vi.fn();
-        
-        // Overlap them
+
         t1.position.set(0, 0, 0);
-        t2.position.set(0.5, 0, 0); // They are 1x1x1 by default
+        t2.position.set(0.5, 0, 0); 
         
         physicsSystem.update(0.016, [e1, e2]);
         
@@ -93,13 +87,11 @@ describe('PhysicsSystem', () => {
         const e2 = new Entity('E2');
         const t2 = e2.addComponent(new TransformComponent());
         const c2 = e2.addComponent(new CollisionComponent());
-        
-        // 1. Initial Collision
+
         t1.position.set(0, 0, 0);
         t2.position.set(0, 0, 0);
         physicsSystem.update(0.016, [e1, e2]);
-        
-        // 2. Move apart
+
         t2.position.set(10, 10, 10);
         physicsSystem.update(0.016, [e1, e2]);
         

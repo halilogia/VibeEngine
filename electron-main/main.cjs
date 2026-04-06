@@ -8,6 +8,14 @@ const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
 
+// 🌊 VibeEngine Hot Reload: Auto-restart Main Process on change
+if (process.env.NODE_ENV !== 'production') {
+    require('electron-reload')(__dirname, {
+        electron: path.join(__dirname, '..', 'node_modules', '.bin', 'electron'),
+        hardResetMethod: 'exit'
+    });
+}
+
 let activeProjectPath = '';
 
 function readProjectInfo(projectPath) {
@@ -180,11 +188,18 @@ ipcMain.handle('set-active-project', async (event, projectPath) => {
     return { success: true };
 });
 
-ipcMain.handle('pick-project-folder', async () => {
-    const { canceled, filePaths } = await require('electron').dialog.showOpenDialog({
-        title: 'Select a project folder',
-        properties: ['openDirectory']
-    });
+ipcMain.handle('get-app-path', () => {
+    return app.getAppPath();
+});
+
+ipcMain.handle('pick-project-folder', async (event, options = {}) => {
+    const dialogOptions = {
+        title: options.title || 'Select a project folder',
+        properties: ['openDirectory', 'createDirectory'],
+        defaultPath: options.defaultPath || undefined
+    };
+
+    const { canceled, filePaths } = await require('electron').dialog.showOpenDialog(dialogOptions);
 
     if (canceled || filePaths.length === 0) {
         return null;

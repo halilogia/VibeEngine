@@ -1,6 +1,4 @@
-/**
- * Editor Store - Global state management for the editor
- */
+
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -16,24 +14,20 @@ export interface OpenFile {
     isDirty: boolean;
 }
 
-interface EditorState {
-    // Selection
+export interface EditorState {
+    
     selectedEntityId: number | null;
     selectedEntityIds: number[];
 
-    // Transform mode
     editorMode: EditorMode;
 
-    // View
     viewMode: ViewMode;
     showGrid: boolean;
     showAxes: boolean;
 
-    // Play state
     isPlaying: boolean;
     isPaused: boolean;
 
-    // Panels Persistence
     showHierarchy: boolean;
     showInspector: boolean;
     showAssets: boolean;
@@ -41,9 +35,8 @@ interface EditorState {
     showAICopilot: boolean;
     showScriptEditor: boolean;
 
-    // Panel Sizes
     leftWidth: number;
-    rightWidth: number;        // Now only for AI Copilot
+    rightWidth: number;        
     inspectorWidth: number;
     bottomHeight: number;
     assetsWidth: number;
@@ -65,11 +58,9 @@ interface EditorState {
         console: boolean; 
     } | null;
 
-    // 📁 File Management
     openFiles: OpenFile[];
     activeFileId: string | null;
 
-    // Actions
     selectEntity: (id: number | null) => void;
     addToSelection: (id: number) => void;
     clearSelection: () => void;
@@ -92,13 +83,11 @@ interface EditorState {
     setScriptFullScreen: (val: boolean, restore?: boolean) => void;
     setLayoutPreset: (preset: 'architect' | 'programmer' | 'animator') => void;
 
-    // 📁 File Actions
     openFile: (file: { id: string; name: string; path: string; content?: string }) => void;
     closeFile: (id: string) => void;
     setActiveFile: (id: string | null) => void;
     updateFileContent: (id: string, content: string) => void;
 
-    // Comprehensive Engine Config
     engineConfig: {
         editorTheme: string;
         uiScale: number;
@@ -122,7 +111,7 @@ interface EditorState {
 export const useEditorStore = create<EditorState>()(
     persist(
         (set) => ({
-            // Initial state
+            
             selectedEntityId: null,
             selectedEntityIds: [],
             editorMode: 'translate',
@@ -131,8 +120,7 @@ export const useEditorStore = create<EditorState>()(
             showAxes: true,
             isPlaying: false,
             isPaused: false,
-            
-            // Visibility
+
             showHierarchy: true,
             showInspector: true,
             showAssets: false,
@@ -140,7 +128,6 @@ export const useEditorStore = create<EditorState>()(
             showAICopilot: true,
             showScriptEditor: false,
 
-            // Default Sizes
             leftWidth: 260,
             rightWidth: 380,
             inspectorWidth: 320,
@@ -159,7 +146,6 @@ export const useEditorStore = create<EditorState>()(
             showAboutModal: false,
             previousTrayState: null,
 
-            // Files
             openFiles: [],
             activeFileId: null,
 
@@ -181,7 +167,6 @@ export const useEditorStore = create<EditorState>()(
                 neuralTemperature: 0.72
             },
 
-            // Actions
             selectEntity: (id) => set({
                 selectedEntityId: id,
                 selectedEntityIds: id ? [id] : []
@@ -243,7 +228,7 @@ export const useEditorStore = create<EditorState>()(
             })),
             setShowAboutModal: (show) => set({ showAboutModal: show }),
             setScriptFullScreen: (val, restore) => set((state) => {
-                // Case 1: Entering Full Screen
+                
                 if (val && !state.isScriptFullScreen) {
                     console.log('🏛️ Entering Sovereign Full Screen');
                     return { 
@@ -261,8 +246,7 @@ export const useEditorStore = create<EditorState>()(
                         showInspector: false
                     };
                 }
-                
-                // Case 2: Exiting Full Screen via Restore (Minimize Button)
+
                 if (!val && restore && state.previousTrayState) {
                     console.log('🏛️ Exiting Full Screen: Restoring Layout');
                     return { 
@@ -274,8 +258,7 @@ export const useEditorStore = create<EditorState>()(
                         previousTrayState: null
                     };
                 }
-                
-                // Case 3: Simple Exit (Drag or other)
+
                 console.log('🏛️ Simple Exit Full Screen (No Restore)');
                 return { isScriptFullScreen: val, previousTrayState: null };
             }),

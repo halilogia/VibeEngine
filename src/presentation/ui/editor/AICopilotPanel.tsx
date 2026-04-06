@@ -1,30 +1,16 @@
-/**
- * AICopilotPanel (Sovereign Elite Edition)
- * 🏛️⚛️💎🚀
- * Refactored for Modular Excellence
- * 
- * - [x] Create `src/infrastructure/services/NeuralContextService.ts` for scene serialization.
- * - [x] Modify `useAICopilot` (UI/Logic) to fetch and inject context on every message.
- * - [x] Add "Scene Synced" UI indicator in `AICopilotPanel.tsx`.
- * - [x] Phase 1 Complete: AI now has "Eyes" and can see the scene state.
- * 
- * ## Next Steps:
- * - Prepare Phase 2: Agentic Tool-Calling (The "Hands").
- */
+
 
 import React, { useRef, useEffect } from 'react';
-import { useEditorStore } from '@infrastructure/store';
 import { VibeTheme } from '@themes/VibeStyles';
 import { aiAnimations } from './AICopilotPanel.styles';
 
-// Internal Modular Components
 import { useAICopilot } from './copilot/useAICopilot';
 import { ModelSelector } from './copilot/ModelSelector';
 import { MessageList } from './copilot/MessageList';
 import { ChatInput } from './copilot/ChatInput';
 import { AICopilotPanelProps } from './copilot/types';
 
-export const AICopilotPanel: React.FC<AICopilotPanelProps> = ({ dragHandleProps }) => {
+export const AICopilotPanel: React.FC<AICopilotPanelProps> = () => {
     const { 
         input, setInput,
         messages,

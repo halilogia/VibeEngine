@@ -1,7 +1,4 @@
-/**
- * EditorLayout Styles - Sovereign TypeScript Styling
- * 🏛️⚛️💎🚀
- */
+
 
 import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 
@@ -21,7 +18,7 @@ export const layoutStyles = createVibeStyles({
         cursor: 'default',
     },
     topBar: {
-        height: '48px', // Match the unified header height
+        height: '48px', 
         flexShrink: 0,
         zIndex: 1000,
         background: VibeTheme.colors.glassBg,

@@ -7,7 +7,7 @@ describe('AudioSystem', () => {
     let audioSystem: AudioSystem;
 
     beforeEach(() => {
-        // Mock AudioContext using a class-based mock to support 'new' constructor
+        
         class MockAudioCtx {
             decodeAudioData = vi.fn();
             createBufferSource = vi.fn().mockReturnValue({ connect: vi.fn(), start: vi.fn(), stop: vi.fn() });
@@ -22,8 +22,7 @@ describe('AudioSystem', () => {
     it('should initialize audio context on user interaction', () => {
         const getCtxSpy = vi.spyOn(AudioComponent, 'getAudioContext');
         audioSystem.initialize();
-        
-        // Trigger click on document
+
         document.dispatchEvent(new MouseEvent('click'));
         
         expect(getCtxSpy).toHaveBeenCalled();

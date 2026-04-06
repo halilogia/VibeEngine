@@ -1,6 +1,4 @@
-/**
- * EditorApp - Main editor application component (Elite Studio Edition)
- */
+
 
 import React, { useState, useEffect } from 'react';
 import { EditorLayout, SplashScreen } from '@ui/editor';
@@ -19,10 +17,9 @@ import { usePlayModeStore } from './core';
 import { SettingsModal } from '../../ui/editor/settings/SettingsModal';
 
 export const EditorApp: React.FC = () => {
-    const { isPlaying } = usePlayModeStore();
+    usePlayModeStore();
     const addLog = useConsoleStore(state => state.addLog);
 
-    // 🕵️ Console Agent: Intercept all system logs and mirror to UI Console
     useEffect(() => {
         const originalLog = console.log;
         const originalWarn = console.warn;
@@ -54,25 +51,23 @@ export const EditorApp: React.FC = () => {
         showAICopilotSettings, setShowAICopilotSettings, engineConfig 
     } = useEditorStore();
 
-    // Dynamically apply Theme and UI Scaling to the HTML document
     useEffect(() => {
         document.body.setAttribute('data-theme', engineConfig.editorTheme || 'Sovereign Dark');
         document.documentElement.style.fontSize = `${(engineConfig.uiScale || 100) / 100 * 16}px`;
     }, [engineConfig.editorTheme, engineConfig.uiScale]);
 
-    // Enable keyboard shortcuts
     useKeyboardShortcuts();
     const { initializeKenneyLibrary } = useAssetManager();
 
     useEffect(() => {
-        // 🏛️ Sovereign Unity Hub Logic: Show launcher if no project is active
+        
         if (!launchedProject) {
             setShowLauncher(true);
         }
     }, [launchedProject, setShowLauncher]);
 
     useEffect(() => {
-        // Initialize the loading bridge immediately
+        
         const bridge = {
             progress: 0, status: 'initializing' as 'initializing' | 'ready',
             modules: {} as Record<string, 'success' | 'error'>, details: 'Starting Editor...'
@@ -102,7 +97,6 @@ export const EditorApp: React.FC = () => {
             }, elapsed);
         });
 
-        // Initialize Kenney Pirate Kit Library
         initializeKenneyLibrary([
             'barrel.glb', 'boat-row-large.glb', 'boat-row-small.glb', 'bottle-large.glb', 
             'bottle.glb', 'cannon-ball.glb', 'cannon-mobile.glb', 'cannon.glb', 
@@ -118,8 +112,7 @@ export const EditorApp: React.FC = () => {
             'ship-wreck.glb', 'tower-complete-large.glb', 'tower-complete-small.glb', 
             'tower-watch.glb'
         ]);
-    }, []);
-
+    }, [initializeKenneyLibrary]);
 
     return (
         <div style={{ width: '100vw', height: '100vh', background: VibeTheme.colors.bgPrimary, overflow: 'hidden', position: 'relative' }}>
@@ -138,7 +131,7 @@ export const EditorApp: React.FC = () => {
                 <CommandPalette />
             </div>
 
-            {/* MODULAR ELITE MODALS */}
+            {}
             <AnimatePresence>
                 {showAICopilotSettings && <SettingsModal onClose={() => setShowAICopilotSettings(false)} projectName={launchedProject?.name} />}
             </AnimatePresence>
@@ -153,7 +146,6 @@ export const EditorApp: React.FC = () => {
             )}
 
             <style>{`
-                /** Global overrides for the core modular architecture */
                 @keyframes vibe-fade-in { from { opacity: 0; } to { opacity: 1; } }
                 ::-webkit-scrollbar { width: 6px; }
                 ::-webkit-scrollbar-thumb { background: ${VibeTheme.colors.glassBorder}; border-radius: 10px; }

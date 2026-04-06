@@ -1,8 +1,4 @@
-/**
- * VibePhysics - High-Performance Physics Engine
- * Powered by Rapier.js (@dimforge/rapier3d-compat)
- * Million-Dollar Industry Standard Integration 🏛️💎
- */
+
 
 import RAPIER from '@dimforge/rapier3d-compat';
 
@@ -22,16 +18,11 @@ export class VibePhysics {
         return VibePhysics.instance;
     }
 
-    /**
-     * Initialize the Rapier WASM engine.
-     * Must be called before any other VibePhysics method.
-     */
     public async initialize(): Promise<void> {
         if (this.initialized) return;
 
         await RAPIER.init();
 
-        // Gravity: Standard earth gravity (0, -9.81, 0)
         const gravity = { x: 0.0, y: -9.81, z: 0.0 };
         this.world = new RAPIER.World(gravity);
 
@@ -39,9 +30,6 @@ export class VibePhysics {
         console.log('🏗️ [VibePhysics] Rapier Engine Ready (WASM)');
     }
 
-    /**
-     * Step the physics world forward
-     */
     public step(deltaTime: number): void {
         if (this.world) {
             this.world.timestep = deltaTime;
@@ -49,9 +37,6 @@ export class VibePhysics {
         }
     }
 
-    /**
-     * Create a dynamic rigid body with a box collider
-     */
     public createBox(
         x: number, y: number, z: number,
         size: number = 1

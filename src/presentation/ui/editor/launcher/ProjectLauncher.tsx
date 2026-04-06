@@ -30,7 +30,7 @@ export const ProjectLauncher: React.FC = () => {
       overflow: 'hidden',
       position: 'relative'
     }}>
-      {/* Cinematic Ambient Glow */}
+      {}
       <div style={{
           position: 'absolute',
           top: '-10%',
@@ -144,7 +144,7 @@ export const ProjectLauncher: React.FC = () => {
                             boxShadow: isSelected ? `0 0 40px rgba(99, 102, 241, 0.15)` : 'none'
                         }}
                     >
-                        {/* 🔴 Remove Button (Top-Right) */}
+                        {}
                         <motion.button
                             whileHover={{ scale: 1.1, backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' }}
                             whileTap={{ scale: 0.9 }}
@@ -272,7 +272,7 @@ export const ProjectLauncher: React.FC = () => {
                     <VibeIcons name="Play" size={20} style={{ fill: '#fff' }} />
                     <span style={{ position: 'relative', zIndex: 1 }}>{t('launcher.start_engine')}</span>
                     
-                    {/* Elite Inner Glow */}
+                    {}
                     <motion.div 
                         animate={{ opacity: [0.3, 0.6, 0.3] }}
                         transition={{ repeat: Infinity, duration: 2 }}

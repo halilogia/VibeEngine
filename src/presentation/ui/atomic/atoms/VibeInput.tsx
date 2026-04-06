@@ -1,8 +1,4 @@
-/**
- * VibeInput Atom - Sovereign Elite Input
- * Type-safe styling and logic-driven focus states.
- * 🏛️⚛️💎🚀
- */
+
 
 import React, { useState } from 'react';
 import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';

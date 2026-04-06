@@ -1,7 +1,4 @@
-/**
- * AssetsPanel Styles - Sovereign TypeScript Styling
- * 🏛️⚛️💎🚀
- */
+
 
 import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 
@@ -58,7 +55,7 @@ export const assetsStyles = createVibeStyles({
     },
     assetItemHover: {
         background: VibeTheme.colors.bgSecondary,
-        borderColor: `${VibeTheme.colors.accent}bb`, // More visible purple
+        borderColor: `${VibeTheme.colors.accent}bb`, 
         transform: 'translateY(-4px)',
         boxShadow: `0 15px 30px -10px ${VibeTheme.colors.accent}44`,
     },
@@ -100,7 +97,7 @@ export const assetsStyles = createVibeStyles({
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
         letterSpacing: '0.02em',
-        // removed textShadow to improve clarity on light backgrounds
+        
     },
     emptyState: {
         flex: 1,

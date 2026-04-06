@@ -23,7 +23,7 @@ export const useAssetsPanelLogic = () => {
         if (!launchedProject) return;
         setIsScanning(true);
         try {
-            const scanned = await ProjectScanner.scanProjectAssets(launchedProject.path);
+            const scanned = await ProjectScanner.scanProjectAssets(launchedProject.path) as AssetData[];
             if (scanned && scanned.length >= 0) {
                 setAssets(scanned);
                 console.log(`Manual scan found ${scanned.length} assets.`);
@@ -36,14 +36,14 @@ export const useAssetsPanelLogic = () => {
     }, [launchedProject, setAssets]);
 
     const filteredAssets = assets
-        .filter((asset: any) => {
+        .filter((asset: AssetData) => {
             const assetParentId = (asset.parentId || null) as string | null;
             const inFolder = assetParentId === currentFolderId;
             const matchesSearch = asset.name.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesFilter = activeFilter === 'all' || asset.type === activeFilter;
             return inFolder && matchesSearch && matchesFilter;
         })
-        .sort((a: any, b: any) => {
+        .sort((a: AssetData, b: AssetData) => {
             if (a.type === 'folder' && b.type !== 'folder') return -1;
             if (a.type !== 'folder' && b.type === 'folder') return 1;
             return a.name.localeCompare(b.name);
@@ -51,7 +51,7 @@ export const useAssetsPanelLogic = () => {
 
     const createNewScript = async () => {
         if (!launchedProject) return;
-        const parentFolder = currentFolderId ? assets.find((a: any) => a.id === currentFolderId) : null;
+        const parentFolder = currentFolderId ? assets.find((a: AssetData) => a.id === currentFolderId) : null;
         let basePath = parentFolder ? parentFolder.path : (launchedProject.path + (launchedProject.hasDomain ? '/src' : ''));
         basePath = basePath.replace(/\\/g, '/');
         const scriptName = `NewScript.ts`;
@@ -61,7 +61,7 @@ export const useAssetsPanelLogic = () => {
         if (result.success) {
             await handleScan();
             setTimeout(() => {
-                const newAsset = (window as any).VibeAssets?.find((a: any) => a.path === scriptPath);
+                const newAsset = (window as unknown as { VibeAssets?: AssetData[] }).VibeAssets?.find((a: AssetData) => a.path === scriptPath);
                 if (newAsset) setRenamingAssetId(newAsset.id);
             }, 300);
         }
@@ -69,7 +69,7 @@ export const useAssetsPanelLogic = () => {
 
     const createNewFolder = async () => {
         if (!launchedProject) return;
-        const parentFolder = currentFolderId ? assets.find((a: any) => a.id === currentFolderId) : null;
+        const parentFolder = currentFolderId ? assets.find((a: AssetData) => a.id === currentFolderId) : null;
         let basePath = parentFolder ? parentFolder.path : (launchedProject.path + (launchedProject.hasDomain ? '/src' : ''));
         basePath = basePath.replace(/\\/g, '/');
         const folderName = `New Folder`;
@@ -84,7 +84,7 @@ export const useAssetsPanelLogic = () => {
 
     const handleRename = async (assetId: string, newName: string) => {
         setRenamingAssetId(null);
-        const asset = assets.find((a: any) => a.id === assetId);
+        const asset = assets.find((a: AssetData) => a.id === assetId);
         if (!asset || asset.name === newName) return;
         const oldPath = asset.path;
         const newPath = oldPath.replace(asset.name, newName);
@@ -97,7 +97,7 @@ export const useAssetsPanelLogic = () => {
     };
 
     const handleDelete = async (assetId: string) => {
-        const asset = assets.find((a: any) => a.id === assetId);
+        const asset = assets.find((a: AssetData) => a.id === assetId);
         if (!asset) return;
         const result = await ProjectScanner.deleteAsset(asset.path);
         if (result.success) {
@@ -108,8 +108,8 @@ export const useAssetsPanelLogic = () => {
     };
 
     const handleMoveAsset = async (draggedId: string, targetId: string | null) => {
-        const dragged = assets.find((a: any) => a.id === draggedId);
-        const target = targetId ? assets.find((a: any) => a.id === targetId) : null;
+        const dragged = assets.find((a: AssetData) => a.id === draggedId);
+        const target = targetId ? assets.find((a: AssetData) => a.id === targetId) : null;
         if (!dragged) return;
         const targetPath = target ? target.path : (launchedProject!.path + (launchedProject!.hasDomain ? '/src' : ''));
         const newPath = `${targetPath}/${dragged.name}`;
@@ -122,7 +122,7 @@ export const useAssetsPanelLogic = () => {
         }
     };
 
-    const handleAssetClick = async (asset: any) => {
+    const handleAssetClick = async (asset: AssetData) => {
         if (asset.type === 'folder') setCurrentFolderId(asset.id);
         else if (asset.type === 'script') {
             const result = await ProjectScanner.readFile(asset.path);
@@ -138,11 +138,11 @@ export const useAssetsPanelLogic = () => {
         }
     };
 
-    const getBreadcrumbs = () => {
-        const path = [];
+    const getBreadcrumbs = (): AssetData[] => {
+        const path: AssetData[] = [];
         let currId = currentFolderId;
         while (currId) {
-            const folder = assets.find((a: any) => a.id === currId);
+            const folder = assets.find((a: AssetData) => a.id === currId);
             if (folder) {
                 path.unshift(folder);
                 currId = folder.parentId || null;

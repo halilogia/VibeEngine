@@ -1,7 +1,4 @@
-/**
- * SplashScreen (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React, { useState, useEffect } from 'react';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
@@ -10,6 +7,14 @@ import { splashStyles as styles, splashAnimations } from './SplashScreen.styles'
 interface SplashScreenProps {
     onComplete: () => void;
 }
+
+interface VibeLoadingState {
+    progress: number;
+    details?: string;
+    status: string;
+}
+
+type VibeWindow = Window & { VibeLoading?: VibeLoadingState };
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
     const [fadeOut, setFadeOut] = useState(false);
@@ -24,7 +29,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
             audio.play().catch(err => {
                 if (err.name !== 'AbortError') console.warn('Audio play failed:', err);
             });
-        } catch (e) {}
+        } catch {
+            console.warn('Splash audio initialization failed');
+        }
     }, []);
 
     const handleStart = () => {
@@ -35,7 +42,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         if (!userReady) return;
 
         const pollInterval = setInterval(() => {
-            const loading = (window as any).VibeLoading;
+            const loading = (window as VibeWindow).VibeLoading;
             if (loading) {
                 setProgress(loading.progress);
                 setStatus(loading.details || 'Loading Modules...');

@@ -5,15 +5,15 @@ import { VibeIcons } from '@ui/common/VibeIcons';
 import { SovereignHeader } from '@ui/atomic/molecules/SovereignHeader';
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
 import { assetsStyles as styles } from './AssetsPanel.styles';
+import type { AssetData } from '@infrastructure/store';
 
-// Sub-components
 import { AssetItem } from './assets/AssetItem';
 import { AssetsToolbar } from './assets/AssetsToolbar';
 import { AssetsBreadcrumbs } from './assets/AssetsBreadcrumbs';
 import { AssetsEmptyState } from './assets/AssetsEmptyState';
 import { useAssetsPanelLogic } from './assets/useAssetsPanelLogic';
 
-export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandleProps }) => {
+export const AssetsPanel: React.FC<{ dragHandleProps?: React.HTMLAttributes<HTMLDivElement> }> = ({ dragHandleProps }) => {
     const { t } = useTranslation();
     const {
         assets,
@@ -69,11 +69,10 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
                 label: 'Open / Select', 
                 icon: <VibeIcons name="Maximize" size={12} />, 
                 onClick: () => {
-                    const asset = assets.find((a: any) => a.id === contextMenu.assetId);
+                    const asset = assets.find((a: AssetData) => a.id === contextMenu.assetId);
                     if (asset?.type === 'folder') setCurrentFolderId(asset.id);
                     else if (asset?.type === 'script') {
-                        // handleAssetClick is used for clicking, 
-                        // but here we can just reuse the same logic
+
                         handleAssetClick(asset);
                     }
                 }
@@ -141,7 +140,7 @@ export const AssetsPanel: React.FC<{ dragHandleProps?: any }> = ({ dragHandlePro
                         <AssetsEmptyState isScanning={isScanning} />
                     ) : (
                         <div style={styles.grid}>
-                            {filteredAssets.map((asset: any) => (
+                            {filteredAssets.map((asset: AssetData) => (
                                 <AssetItem 
                                     key={asset.id} 
                                     asset={asset} 

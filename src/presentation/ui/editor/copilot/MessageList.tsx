@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { VibeIcons } from '@ui/common/VibeIcons';
 import { VibeTheme } from '@themes/VibeStyles';
-import { Message } from './types';
+import { Message, Command } from './types';
 
 interface MessageListProps {
     messages: Message[];
@@ -61,7 +61,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, isThinking, 
                 </div>
             )}
             
-            {messages.map((msg, idx) => {
+            {messages.map((msg) => {
                 const showDots = msg.role === 'assistant' && !msg.content.trim() && !msg.thought && (isThinking || msg.streaming);
                 return (
                     <motion.div 
@@ -78,7 +78,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, isThinking, 
                             boxShadow: msg.role === 'user' ? `0 10px 20px -10px ${VibeTheme.colors.accent}44` : 'none',
                             cursor: 'text'
                         }}>
-                            {/* AI Reasoning / Thought Block */}
+                            {}
                             {msg.thought && <ThinkingBlock thought={msg.thought} />}
 
                             {showDots ? (
@@ -94,7 +94,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, isThinking, 
                                     borderTop: `1px dotted ${VibeTheme.colors.glassBorder}`, 
                                     display: 'flex', flexWrap: 'wrap', gap: '6px' 
                                 }}>
-                                    {msg.commands.map((cmd: any, cIdx: number) => (
+                                    {msg.commands.map((cmd: Command, cIdx: number) => (
                                         <div key={cIdx} style={{ 
                                             background: `${VibeTheme.colors.accent}11`,
                                             padding: '4px 10px', borderRadius: '6px',

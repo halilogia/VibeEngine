@@ -1,10 +1,7 @@
-/**
- * InspectorPanel - Property editor (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React, { useState } from 'react';
-import { VibeIcons } from '@ui/common/VibeIcons';
+import { VibeIcons, type VibeIconName } from '@ui/common/VibeIcons';
 import { useSceneStore, useEditorStore, type ComponentData } from '@infrastructure/store';
 import { SovereignHeader } from '@ui/atomic/molecules/SovereignHeader';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
@@ -12,27 +9,18 @@ import { VibeInput } from '@ui/atomic/atoms/VibeInput';
 import { VibeTheme } from '@themes/VibeStyles';
 import { inspectorStyles as styles } from './InspectorPanel.styles';
 
-// #region Components
-
-/**
- * Props for the Vector3Field component
- */
 interface Vector3FieldProps {
-    /** Label to display for the vector field */
+    
     label: string;
-    /** Vector value as either an array [x,y,z] or object {x,y,z} */
+    
     value: number[] | Record<string, number>;
-    /** Callback triggered when any axis changes */
+    
     onChange: (value: number[] | Record<string, number>) => void;
 }
 
-/**
- * Vector3Field - Atomic UI component for editing 3D vector data.
- */
 const Vector3Field: React.FC<Vector3FieldProps> = ({ label, value, onChange }) => {
     const axes = ['x', 'y', 'z'];
-    
-    // Safely resolve axis value whether it's an array [0,0,0] or object {x,y,z}
+
     const getAxisValue = (axis: string, idx: number) => {
         if (Array.isArray(value)) return value[idx];
         if (typeof value === 'object' && value !== null) return value[axis];
@@ -69,31 +57,24 @@ const Vector3Field: React.FC<Vector3FieldProps> = ({ label, value, onChange }) =
     );
 };
 
-/**
- * Props for the ComponentSection component
- */
 interface ComponentSectionProps {
-    /** Override title to display in the header */
+    
     title?: string;
-    /** Override icon name to display in the header */
+    
     icon?: string;
-    /** Optional component data context */
+    
     component?: ComponentData;
-    /** Callback for removing this component from the entity */
+    
     onRemove?: () => void;
-    /** The fields or children to render inside the section */
+    
     children: React.ReactNode;
 }
 
-/**
- * ComponentSection - Collapsible container for grouping component properties.
- */
 const ComponentSection: React.FC<ComponentSectionProps> = ({ 
     component, onRemove, title, icon, children 
 }) => {
     const [isHovered, setIsHovered] = useState(false);
-    
-    // Resolve display properties
+
     const displayTitle = title || component?.type?.toUpperCase() || 'COMPONENT';
     const displayIcon = icon || (component?.type === 'Light' ? 'Sun' : component?.type === 'Physics' ? 'Shield' : 'Box');
 
@@ -104,7 +85,7 @@ const ComponentSection: React.FC<ComponentSectionProps> = ({
             onMouseLeave={() => setIsHovered(false)}
         >
             <div style={styles.sectionHeader}>
-                <VibeIcons name={displayIcon as any} size={14} style={{ opacity: 0.7 }} />
+                <VibeIcons name={displayIcon as VibeIconName} size={14} style={{ opacity: 0.7 }} />
                 <span style={{ flex: 1 }}>{displayTitle}</span>
                 {isHovered && component?.type !== 'Transform' && onRemove && (
                     <VibeButton variant="ghost" size="sm" onClick={onRemove} style={{ padding: 0, width: '20px', height: '20px' }}>
@@ -118,23 +99,12 @@ const ComponentSection: React.FC<ComponentSectionProps> = ({
         </div>
     );
 };
-// #endregion
 
-/**
- * Props for the InspectorPanel component
- */
 interface InspectorPanelProps {
-    /** Drag handle props from the docking system */
-    dragHandleProps?: any;
+    
+    dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-/**
- * InspectorPanel - Property editor and entity configuration system.
- * 🏛️⚛️💎🚀
- * 
- * Provides a high-fidelity interface for modifying entity properties, components,
- * and materials. Supports recursive property binding and transactional updates.
- */
 export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps }) => {
     const { entities, updateEntity } = useSceneStore();
     const { selectedEntityId, activePanelId, setActivePanel } = useEditorStore();
@@ -170,7 +140,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps 
             <SovereignHeader title="INSPECTOR" icon="Activity" dragHandleProps={dragHandleProps} />
             
             <div style={styles.content}>
-                {/* Entity Header */}
+                {}
                 <div style={styles.sectionBody}>
                     <span style={styles.fieldLabel}>NAME</span>
                     <VibeInput 
@@ -179,15 +149,15 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps 
                     />
                 </div>
 
-                {/* Components Wrapper */}
-                {selectedEntity.components.map((comp: any, idx: number) => {
+                {}
+                {selectedEntity.components.map((comp: ComponentData, idx: number) => {
                     const data = comp.data || {};
                     if (comp.type === 'Transform') {
                         return (
                             <ComponentSection key={`comp-${idx}`} title="TRANSFORM" icon="Move">
                                 <Vector3Field 
                                     label="POSITION" 
-                                    value={data.position} 
+                                    value={data.position as number[] | Record<string, number>} 
                                     onChange={(val) => {
                                         const newComps = [...selectedEntity.components];
                                         newComps[idx] = { ...comp, data: { ...data, position: val } };
@@ -196,7 +166,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps 
                                 />
                                 <Vector3Field 
                                     label="ROTATION" 
-                                    value={data.rotation} 
+                                    value={data.rotation as number[] | Record<string, number>} 
                                     onChange={(val) => {
                                         const newComps = [...selectedEntity.components];
                                         newComps[idx] = { ...comp, data: { ...data, rotation: val } };
@@ -205,7 +175,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({ dragHandleProps 
                                 />
                                 <Vector3Field 
                                     label="SCALE" 
-                                    value={data.scale} 
+                                    value={data.scale as number[] | Record<string, number>} 
                                     onChange={(val) => {
                                         const newComps = [...selectedEntity.components];
                                         newComps[idx] = { ...comp, data: { ...data, scale: val } };

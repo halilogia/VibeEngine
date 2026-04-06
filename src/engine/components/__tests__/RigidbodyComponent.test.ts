@@ -10,9 +10,9 @@ describe('RigidbodyComponent', () => {
     });
 
     it('should apply force correctly (F = ma)', () => {
-        rb.mass = 2; // m=2
-        const force = new THREE.Vector3(10, 0, 0); // F=10
-        rb.addForce(force); // a = F/m = 5
+        rb.mass = 2; 
+        const force = new THREE.Vector3(10, 0, 0); 
+        rb.addForce(force); 
         
         expect(rb.velocity.x).toBe(5);
     });
@@ -28,12 +28,10 @@ describe('RigidbodyComponent', () => {
     it('should apply drag over time', () => {
         rb.velocity.set(10, 0, 0);
         rb.drag = 0.5;
-        
-        // 1 second update: velocity * (1 - 0.5 * 1.0) = 5
+
         rb.applyDrag(1.0);
         expect(rb.velocity.x).toBe(5);
-        
-        // 0.5 second update: 5 * (1 - 0.5 * 0.5) = 5 * 0.75 = 3.75
+
         rb.applyDrag(0.5);
         expect(rb.velocity.x).toBe(3.75);
     });
@@ -43,7 +41,7 @@ describe('RigidbodyComponent', () => {
         rb.gravity.set(0, -10, 0);
         rb.useGravity = true;
         
-        rb.applyGravity(1.0); // 0 + (-10 * 1) = -10
+        rb.applyGravity(1.0); 
         expect(rb.velocity.y).toBe(-10);
     });
 

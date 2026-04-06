@@ -3,7 +3,7 @@ import { initLoadingBridge, updateLoadingStatus } from '../AppLoadingBridge';
 
 describe('AppLoadingBridge', () => {
     beforeEach(() => {
-        // Clear global window object before each test
+        
         delete (window as any).VibeLoading;
     });
 

@@ -1,9 +1,6 @@
-/**
- * ViewportPanel (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
 
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+
+import React, { useRef, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
@@ -19,7 +16,6 @@ import { usePlayModeStore } from '@presentation/features/editor/core';
 import { motion, AnimatePresence } from 'framer-motion';
 import { viewportStyles as styles, viewportAnimations } from './ViewportPanel.styles';
 
-// Map editor entity IDs to Three.js objects
 const entityMeshMap = new Map<number, THREE.Object3D>();
 
 function disposeObject(obj: THREE.Object3D) {
@@ -37,11 +33,11 @@ function disposeObject(obj: THREE.Object3D) {
 const modelLoader = new GLTFLoader();
 const modelCache = new Map<string, THREE.Group>();
 
-function createMeshForEntity(meshType: string, color: string, modelPath?: string, entityId?: number, onModelLoaded?: (group: THREE.Group) => void, hasWorkspace?: boolean): THREE.Object3D {
+function createMeshForEntity(meshType: string, color: string, modelPath?: string, _entityId?: number, onModelLoaded?: (group: THREE.Group) => void, hasWorkspace?: boolean): THREE.Object3D {
     if (meshType === 'model' && modelPath) {
         const group = new THREE.Group();
         group.name = 'placeholder';
-        // Add a placeholder box while loading
+        
         const placeholder = new THREE.Mesh(
             new THREE.BoxGeometry(1, 1, 1),
             new THREE.MeshStandardMaterial({ color, wireframe: true, transparent: true, opacity: 0 })
@@ -49,7 +45,6 @@ function createMeshForEntity(meshType: string, color: string, modelPath?: string
         placeholder.visible = false;
         group.add(placeholder);
 
-        // Load model
         let fullPath = modelPath;
         if (hasWorkspace && !fullPath.startsWith('vibe-asset://') && !fullPath.startsWith('http')) {
             const cleanPath = modelPath.startsWith('/') ? modelPath.slice(1) : modelPath;
@@ -110,7 +105,6 @@ export const ViewportPanel: React.FC = () => {
     const composerRef = useRef<EffectComposer | null>(null);
     const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
     const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
-    const [fps, setFps] = useState(60);
 
     const { 
         editorMode, showGrid, showAxes, selectedEntityId, selectEntity,
@@ -138,7 +132,6 @@ export const ViewportPanel: React.FC = () => {
         return texture;
     };
 
-    // 🟢 REACTIVE VIEWPORT CONTROLS
     useEffect(() => {
         const scene = sceneRef.current;
         if (!scene) return;
@@ -152,7 +145,6 @@ export const ViewportPanel: React.FC = () => {
         if (dir) dir.visible = showEnvironment;
     }, [showGrid, showAxes, showEnvironment]);
 
-    // 🟢 REACTIVE SHADING MODE
     useEffect(() => {
         sceneRef.current?.traverse((obj) => {
             if (obj instanceof THREE.Mesh && obj.material) {
@@ -162,15 +154,13 @@ export const ViewportPanel: React.FC = () => {
         });
     }, [shadingMode, entities]); 
 
-    // 🟢 REACTIVE BLOOM
     useEffect(() => {
         const composer = composerRef.current;
         if (!composer) return;
-        const bloomPass = composer.passes[1] as any;
+        const bloomPass = composer.passes[1] as UnrealBloomPass | undefined;
         if (bloomPass) bloomPass.enabled = showBloom;
     }, [showBloom]);
 
-    // 🔵 MAIN SETUP EFFECT
     useEffect(() => {
         if (!canvasRef.current || !containerRef.current) return;
 
@@ -179,7 +169,7 @@ export const ViewportPanel: React.FC = () => {
         scene.background = bgTexture || new THREE.Color(0x1a1a2e);
         sceneRef.current = scene;
 
-        const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 5000); // 🏛️ Elite Far Plane
+        const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 5000); 
         camera.position.set(150, 150, 150);
         camera.lookAt(0, 0, -200);
         cameraRef.current = camera;
@@ -197,13 +187,12 @@ export const ViewportPanel: React.FC = () => {
 
         const composer = new EffectComposer(renderer);
         composer.addPass(new RenderPass(scene, camera));
-        
-        // 🏛️ Recalibrated Sovereign Bloom: Prevents over-exposure and gizmo glow
+
         const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(containerRef.current.clientWidth, containerRef.current.clientHeight), 
-            0.15, // Strength: Minimal radiance
-            0.1,  // Radius: Tight dispersion
-            0.95   // Threshold: Only high-luminance peaks glow
+            0.15, 
+            0.1,  
+            0.95   
         );
         composer.addPass(bloomPass);
         composer.addPass(new OutputPass());
@@ -211,12 +200,12 @@ export const ViewportPanel: React.FC = () => {
 
         const orbit = new OrbitControls(camera, canvasRef.current);
         orbit.enableDamping = true;
-        orbit.target.set(0, 0, -100); // 🎯 Center of MobRunner track
+        orbit.target.set(0, 0, -100); 
         orbit.update();
         orbitRef.current = orbit;
 
         const transform = new TransformControls(camera, canvasRef.current);
-        transform.addEventListener('dragging-changed', (e) => orbit.enabled = !e.value);
+        transform.addEventListener('dragging-changed', function(event) { orbit.enabled = !event.value; });
         transform.addEventListener('objectChange', () => {
             if (selectedEntityId !== null) {
                 const mesh = entityMeshMap.get(selectedEntityId);
@@ -229,7 +218,7 @@ export const ViewportPanel: React.FC = () => {
                 }
             }
         });
-        scene.add(transform as any);
+        scene.add(transform);
         transformRef.current = transform;
 
         const ambient = new THREE.AmbientLight(0xffffff, 0.5);
@@ -254,7 +243,7 @@ export const ViewportPanel: React.FC = () => {
         const handleResize = () => { needsResize = true; };
         const resizeObserver = new ResizeObserver(handleResize);
         resizeObserver.observe(containerRef.current);
-        needsResize = true; // Initial trigger
+        needsResize = true; 
 
         let animationId: number;
         let lastTime = performance.now();
@@ -263,7 +252,6 @@ export const ViewportPanel: React.FC = () => {
         const animate = () => {
             animationId = requestAnimationFrame(animate);
 
-            // 🛠️ Optimized Resize: Sync with Animation Loop to prevent layout-thrashing
             if (needsResize && containerRef.current) {
                 const { clientWidth, clientHeight } = containerRef.current;
                 if (clientWidth > 0 && clientHeight > 0) {
@@ -271,9 +259,8 @@ export const ViewportPanel: React.FC = () => {
                     composer.setSize(clientWidth, clientHeight);
                     camera.aspect = clientWidth / clientHeight;
                     camera.updateProjectionMatrix();
-                    
-                    // Stabilize Bloom Pass
-                    const bloom = composer.passes[1] as any;
+
+                    const bloom = composer.passes[1] as UnrealBloomPass | undefined;
                     if (bloom && bloom.resolution) {
                         bloom.resolution.set(clientWidth, clientHeight);
                     }
@@ -281,17 +268,15 @@ export const ViewportPanel: React.FC = () => {
                 needsResize = false;
             }
 
-            // 🛡️ Guard: Prevent rendering on empty framebuffers
             if (!containerRef.current || containerRef.current.clientWidth === 0 || containerRef.current.clientHeight === 0) {
                 return;
             }
 
-            // 🔴 Real-time FPS Calculation
             frames++;
             const currentTime = performance.now();
             if (currentTime >= lastTime + 1000) {
                 const currentFps = Math.round((frames * 1000) / (currentTime - lastTime));
-                (window as any).VibeFPS = currentFps;
+                (window as typeof window & { VibeFPS?: number }).VibeFPS = currentFps;
                 frames = 0;
                 lastTime = currentTime;
             }
@@ -304,8 +289,7 @@ export const ViewportPanel: React.FC = () => {
         return () => {
             cancelAnimationFrame(animationId);
             resizeObserver.disconnect();
-            
-            // 🧹 Elite Cleanup: Deep Dispose
+
             if (rendererRef.current) {
                 rendererRef.current.dispose();
                 rendererRef.current.forceContextLoss();
@@ -315,7 +299,9 @@ export const ViewportPanel: React.FC = () => {
             if (transformRef.current) transformRef.current.dispose();
             if (composerRef.current) {
                 composerRef.current.passes.forEach(pass => {
-                    if ((pass as any).dispose) (pass as any).dispose();
+                    if ('dispose' in pass && typeof pass.dispose === 'function') {
+                        pass.dispose();
+                    }
                 });
             }
             
@@ -327,10 +313,8 @@ export const ViewportPanel: React.FC = () => {
             transformRef.current = null;
             composerRef.current = null;
         };
-    }, []);
+    }, [selectedEntityId, updateComponent]);
 
-    // Sync entities to Three.js
-    // Sync entities to Three.js with Hierarchy support
     useEffect(() => {
         const scene = sceneRef.current;
         if (!scene) return;
@@ -348,14 +332,16 @@ export const ViewportPanel: React.FC = () => {
             if (render || entity.children.length > 0) {
                 if (!mesh) {
                     const onModelLoaded = (loadedGroup: THREE.Group) => {
-                        // 🧹 Elite Deep Clean: Find and delete ANY previous instances for this ID
+                        
                         const existing = entityMeshMap.get(id);
                         if (existing) {
-                            existing.traverse((node: any) => {
-                                if (node.geometry) node.geometry.dispose();
-                                if (node.material) {
-                                    const mats = Array.isArray(node.material) ? node.material : [node.material];
-                                    mats.forEach((m: any) => m.dispose());
+                            existing.traverse((node: THREE.Object3D) => {
+                                if (node instanceof THREE.Mesh) {
+                                    if (node.geometry) node.geometry.dispose();
+                                    if (node.material) {
+                                        const mats = Array.isArray(node.material) ? node.material : [node.material];
+                                        mats.forEach((m: THREE.Material) => m.dispose());
+                                    }
                                 }
                             });
                             existing.parent?.remove(existing);
@@ -363,8 +349,7 @@ export const ViewportPanel: React.FC = () => {
                         
                         loadedGroup.userData.entityId = id;
                         loadedGroup.userData.isModel = true;
-                        
-                        // Add to current parent (Scene or Parent Object)
+
                         const currentEntity = entities.get(id);
                         const parentId = currentEntity?.parentId;
                         const parentContainer = parentId !== null && parentId !== undefined ? entityMeshMap.get(parentId) : scene;
@@ -376,11 +361,10 @@ export const ViewportPanel: React.FC = () => {
                         }
                         
                         entityMeshMap.set(id, loadedGroup);
-                        
-                        // Force sync transform
+
                         const t = entities.get(id)?.components.find(c => c.type === 'Transform');
                         if (t) {
-                            const p = t.data.position || [0,0,0], r = t.data.rotation || [0,0,0], s = t.data.scale || [1,1,1];
+                            const p = (t.data.position as number[]) || [0,0,0], r = (t.data.rotation as number[]) || [0,0,0], s = (t.data.scale as number[]) || [1,1,1];
                             loadedGroup.position.set(p[0], p[1], p[2]);
                             loadedGroup.rotation.set(THREE.MathUtils.degToRad(r[0]), THREE.MathUtils.degToRad(r[1]), THREE.MathUtils.degToRad(r[2]));
                             loadedGroup.scale.set(s[0], s[1], s[2]);
@@ -388,9 +372,9 @@ export const ViewportPanel: React.FC = () => {
                     };
 
                     mesh = createMeshForEntity(
-                        render?.data.meshType || (entity.children.length > 0 ? 'group' : 'cube'), 
-                        render?.data.color || '#6366f1', 
-                        render?.data.modelPath,
+                        (render?.data.meshType as string) || (entity.children.length > 0 ? 'group' : 'cube'), 
+                        (render?.data.color as string) || '#6366f1', 
+                        render?.data.modelPath as string | undefined,
                         id,
                         onModelLoaded,
                         !!launchedProject
@@ -400,35 +384,31 @@ export const ViewportPanel: React.FC = () => {
                     entityMeshMap.set(id, mesh);
                 }
 
-                // Ensure it's attached to the right parent if hierarchy changed
                 if (mesh.parent !== parentObject) {
                     parentObject.add(mesh);
                 }
 
                 if (transform && !transformRef.current?.dragging) {
-                    const p = transform.data.position || [0,0,0], r = transform.data.rotation || [0,0,0], s = transform.data.scale || [1,1,1];
+                    const p = (transform.data.position as number[]) || [0,0,0], r = (transform.data.rotation as number[]) || [0,0,0], s = (transform.data.scale as number[]) || [1,1,1];
                     mesh.position.set(p[0], p[1], p[2]);
                     mesh.rotation.set(THREE.MathUtils.degToRad(r[0]), THREE.MathUtils.degToRad(r[1]), THREE.MathUtils.degToRad(r[2]));
                     mesh.scale.set(s[0], s[1], s[2]);
                 }
             }
 
-            // Recurse children
             entity.children.forEach(childId => syncEntity(childId, mesh || parentObject));
         };
 
         rootEntityIds.forEach(id => syncEntity(id, scene));
 
-        // Cleanup removed entities
         entityMeshMap.forEach((m, id) => { 
             if (!currentIds.has(id)) { 
                 m.parent?.remove(m); 
                 entityMeshMap.delete(id); 
             } 
         });
-    }, [entities, rootEntityIds]);
+    }, [entities, launchedProject, rootEntityIds]);
 
-    // REACTIVE GIZMO
     useEffect(() => {
         const controls = transformRef.current;
         if (!controls) return;
@@ -436,7 +416,7 @@ export const ViewportPanel: React.FC = () => {
         if (mesh) {
             controls.attach(mesh);
             const mode = editorMode === 'translate' ? 'translate' : editorMode === 'rotate' ? 'rotate' : 'scale';
-            controls.setMode(mode as any);
+            controls.setMode(mode as 'translate' | 'rotate' | 'scale');
         } else {
             controls.detach();
         }
@@ -452,9 +432,12 @@ export const ViewportPanel: React.FC = () => {
         entityMeshMap.forEach(m => pickable.push(m));
         const intersects = raycasterRef.current.intersectObjects(pickable, true);
         if (intersects.length > 0) {
-            let obj: any = intersects[0].object;
+            let obj: THREE.Object3D | null = intersects[0].object;
             while (obj) {
-                if (obj.userData.entityId !== undefined) { selectEntity(obj.userData.entityId); return; }
+                if ('entityId' in obj.userData && obj.userData.entityId !== undefined) { 
+                    selectEntity(obj.userData.entityId as number); 
+                    return; 
+                }
                 obj = obj.parent;
             }
         } else { selectEntity(null); }
@@ -489,8 +472,8 @@ export const ViewportPanel: React.FC = () => {
                 <ViewportToolbar />
                 <StatusBar />
                 
-                {/* Viewport is now completely clean - Sovereign Elite Standard */}
-                {/* Viewport content is now completely clean of HUD elements */}
+                {}
+                {}
             </div>
         </div>
     );

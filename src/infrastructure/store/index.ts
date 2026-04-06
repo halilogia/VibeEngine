@@ -1,9 +1,4 @@
-/**
- * Sovereign Infrastructure Store Index
- * 🏛️⚛️💎🚀
- * 
- * Central SSOT (Single Source of Truth) for all Zustand stores.
- */
+
 
 export * from './editorStore';
 export * from './sceneStore';

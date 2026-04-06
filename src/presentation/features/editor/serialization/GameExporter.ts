@@ -1,18 +1,29 @@
-/**
- * Game Exporter - Export scene as standalone HTML/Electron app
- */
+import { serializeScene } from "./SceneSerializer";
+import { useProjectStore } from "@infrastructure/store/useProjectStore";
+import { useToastStore } from "@infrastructure/store/toastStore";
 
-import { serializeScene } from './SceneSerializer';
-import { useProjectStore } from '@infrastructure/store/useProjectStore';
-import { useToastStore } from '@infrastructure/store/toastStore';
+interface ProjectScannerCommandResult {
+  success: boolean;
+}
 
-/**
- * Generate standalone HTML game file
- */
-export function exportToHTML(gameName: string = 'MyGame'): void {
-    const sceneData = serializeScene();
+interface ProjectScanner {
+  createFolder(path: string): Promise<void>;
+  saveFile(path: string, content: string): Promise<void>;
+  copyFolder(src: string, dest: string): Promise<void>;
+  runCommand(
+    command: string,
+    workingDir: string,
+  ): Promise<ProjectScannerCommandResult>;
+}
 
-    const html = `<!DOCTYPE html>
+interface WindowWithProjectScanner {
+  ProjectScanner?: ProjectScanner;
+}
+
+export function exportToHTML(gameName: string = "MyGame"): void {
+  const sceneData = serializeScene();
+
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -56,10 +67,7 @@ export function exportToHTML(gameName: string = 'MyGame'): void {
         import * as THREE from 'three';
         import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
         
-        // Scene data embedded
         const sceneData = ${sceneData};
-        
-        // Setup
         const canvas = document.getElementById('game');
         const loading = document.getElementById('loading');
         
@@ -76,8 +84,6 @@ export function exportToHTML(gameName: string = 'MyGame'): void {
         
         const controls = new OrbitControls(camera, canvas);
         controls.enableDamping = true;
-        
-        // Lighting
         const ambient = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambient);
         
@@ -85,8 +91,6 @@ export function exportToHTML(gameName: string = 'MyGame'): void {
         directional.position.set(10, 20, 10);
         directional.castShadow = true;
         scene.add(directional);
-        
-        // Create entities from scene data
         function createMesh(meshType, color) {
             let geometry;
             switch (meshType) {
@@ -102,8 +106,6 @@ export function exportToHTML(gameName: string = 'MyGame'): void {
             mesh.receiveShadow = true;
             return mesh;
         }
-        
-        // Load entities
         for (const entity of sceneData.entities) {
             const renderComp = entity.components.find(c => c.type === 'Render');
             const transformComp = entity.components.find(c => c.type === 'Transform');
@@ -131,19 +133,13 @@ export function exportToHTML(gameName: string = 'MyGame'): void {
                 scene.add(mesh);
             }
         }
-        
-        // Hide loading
         loading.classList.add('hidden');
-        
-        // Animation loop
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
         }
         animate();
-        
-        // Handle resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -155,25 +151,21 @@ export function exportToHTML(gameName: string = 'MyGame'): void {
 </body>
 </html>`;
 
-    // Download
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${gameName.replace(/\\s+/g, '_')}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${gameName.replace(/\\s+/g, "_")}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 
-    console.log('📦 Game exported as HTML!');
+  console.log("📦 Game exported as HTML!");
 }
 
-/**
- * Generate mobile-optimized runtime HTML
- */
 function generateMobileRuntime(gameName: string, sceneData: string): string {
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -208,8 +200,6 @@ function generateMobileRuntime(gameName: string, sceneData: string): string {
         const sceneData = ${sceneData};
         const canvas = document.getElementById('game');
         const loader = new GLTFLoader();
-
-        // 🌊 VibeMobile Core
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x050508);
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
@@ -225,8 +215,6 @@ function generateMobileRuntime(gameName: string, sceneData: string): string {
         const sun = new THREE.DirectionalLight(0xffffff, 1.2);
         sun.position.set(100, 200, 100);
         scene.add(sun);
-
-        // Native Entity Loader
         const entities = new Map();
         sceneData.entities.forEach(ent => {
             const group = new THREE.Group();
@@ -252,8 +240,6 @@ function generateMobileRuntime(gameName: string, sceneData: string): string {
             
             entities.set(ent.id, group);
         });
-
-        // Hierarchy Sync
         sceneData.entities.forEach(ent => {
             const mesh = entities.get(ent.id);
             if (ent.parentId !== null) {
@@ -282,81 +268,102 @@ function generateMobileRuntime(gameName: string, sceneData: string): string {
 </html>`;
 }
 
-/**
- * Export for Capacitor (Mobile Real Build - Zero Terminal)
- */
-export async function exportToCapacitor(gameName: string = 'MyGame'): Promise<void> {
-    const sceneData = serializeScene();
-    const scanner = (window as any).ProjectScanner;
-    const addToast = useToastStore.getState().addToast;
-    const launchedProject = useProjectStore.getState().launchedProject;
-    
-    if (scanner && launchedProject) {
-        try {
-            const projectPath = launchedProject.path.replace(/\\/g, '/');
-            const buildPath = `${projectPath}/capacitor_build`;
-            const assetSrc = `${projectPath}/public/assets`;
+export async function exportToCapacitor(
+  gameName: string = "MyGame",
+): Promise<void> {
+  const sceneData = serializeScene();
+  const scanner = (window as unknown as WindowWithProjectScanner)
+    .ProjectScanner;
+  const addToast = useToastStore.getState().addToast;
+  const launchedProject = useProjectStore.getState().launchedProject;
 
-            addToast('🌊 VibeMobile: Starting build process...', 'info');
+  if (scanner && launchedProject) {
+    try {
+      const projectPath = launchedProject.path.replace(/\\/g, "/");
+      const buildPath = `${projectPath}/capacitor_build`;
+      const assetSrc = `${projectPath}/public/assets`;
 
-            // 1. Create Structure
-            await scanner.createFolder(buildPath);
-            await scanner.createFolder(`${buildPath}/www`);
+      addToast("🌊 VibeMobile: Starting build process...", "info");
 
-            // 2. Write Configs
-            const config = {
-                appId: `com.vibeengine.${gameName.toLowerCase().replace(/\s+/g, '')}`,
-                appName: gameName,
-                webDir: 'www',
-                bundledWebRuntime: false
-            };
-            await scanner.saveFile(`${buildPath}/capacitor.config.json`, JSON.stringify(config, null, 2));
-            await scanner.saveFile(`${buildPath}/www/index.html`, generateMobileRuntime(gameName, sceneData));
-            await scanner.saveFile(`${buildPath}/www/scene.json`, sceneData);
+      await scanner.createFolder(buildPath);
+      await scanner.createFolder(`${buildPath}/www`);
 
-            // 3. 📦 Elite Asset Mirroring
-            addToast('📂 Mirroring assets to build folder...', 'info');
-            await scanner.copyFolder(assetSrc, `${buildPath}/www/assets`);
+      const config = {
+        appId: `com.vibeengine.${gameName.toLowerCase().replace(/\s+/g, "")}`,
+        appName: gameName,
+        webDir: "www",
+        bundledWebRuntime: false,
+      };
+      await scanner.saveFile(
+        `${buildPath}/capacitor.config.json`,
+        JSON.stringify(config, null, 2),
+      );
+      await scanner.saveFile(
+        `${buildPath}/www/index.html`,
+        generateMobileRuntime(gameName, sceneData),
+      );
+      await scanner.saveFile(`${buildPath}/www/scene.json`, sceneData);
 
-            // 4. 🚀 Autonomous Dependency Injection
-            addToast('⚡ Injecting Capacitor CLI...', 'info');
-            // We use npm install --no-save to keep it light
-            const installRes = await scanner.runCommand('npm install @capacitor/core @capacitor/cli', buildPath);
-            
-            if (installRes.success) {
-                addToast('🔄 Syncing Native Bridge...', 'info');
-                await scanner.runCommand('npx cap sync', buildPath);
-                addToast('✅ BUILD SUCCESSFUL! Capacitor project ready.', 'success');
-            } else {
-                addToast('⚠️ Dependency injection skipped or failed, but files are ready.', 'warning');
-            }
+      addToast("📂 Mirroring assets to build folder...", "info");
+      await scanner.copyFolder(assetSrc, `${buildPath}/www/assets`);
 
-            return;
-        } catch (e) {
-            addToast(`❌ Build failed: ${(e as Error).message}`, 'error');
-            return;
-        }
+      addToast("⚡ Injecting Capacitor CLI...", "info");
+
+      const installRes = await scanner.runCommand(
+        "npm install @capacitor/core @capacitor/cli",
+        buildPath,
+      );
+
+      if (installRes.success) {
+        addToast("🔄 Syncing Native Bridge...", "info");
+        await scanner.runCommand("npx cap sync", buildPath);
+        addToast("✅ BUILD SUCCESSFUL! Capacitor project ready.", "success");
+      } else {
+        addToast(
+          "⚠️ Dependency injection skipped or failed, but files are ready.",
+          "warning",
+        );
+      }
+
+      return;
+    } catch (e) {
+      addToast(`❌ Build failed: ${(e as Error).message}`, "error");
+      return;
     }
+  }
 
-    // Fallback for browser (JSON Manifest)
-    const config = { appId: `com.vibeengine.${gameName.toLowerCase().replace(/\s+/g, '')}`, appName: gameName, webDir: 'www' };
-    const projectData = { scene: JSON.parse(sceneData), capacitorConfig: config, exportedAt: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${gameName.replace(/\s+/g, '_')}_capacitor.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const config = {
+    appId: `com.vibeengine.${gameName.toLowerCase().replace(/\s+/g, "")}`,
+    appName: gameName,
+    webDir: "www",
+  };
+  const projectData = {
+    scene: JSON.parse(sceneData),
+    capacitorConfig: config,
+    exportedAt: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(projectData, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${gameName.replace(/\s+/g, "_")}_capacitor.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
-/**
- * Get export options for the menu
- */
 export function getExportFormats(): { label: string; action: () => void }[] {
-    return [
-        { label: 'Export for Capacitor', action: () => exportToCapacitor('MyGame') },
-        { label: 'Mobile Build (Beta)', action: () => alert('Native mobile build is being prepared by Neural Engine...') },
-    ];
+  return [
+    {
+      label: "Export for Capacitor",
+      action: () => exportToCapacitor("MyGame"),
+    },
+    {
+      label: "Mobile Build (Beta)",
+      action: () =>
+        alert("Native mobile build is being prepared by Neural Engine..."),
+    },
+  ];
 }

@@ -1,8 +1,4 @@
-/**
- * SovereignHeader Molecule - Standardized Studio Panel Header
- * Consolidates Drag Handle, Icon, Title, and Action buttons.
- * 🏛️⚛️💎🖱️🚀
- */
+
 
 import React from 'react';
 import { VibeIcons, type VibeIconName } from '@ui/common/VibeIcons';
@@ -11,7 +7,7 @@ import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 interface SovereignHeaderProps {
     title: string;
     icon: VibeIconName;
-    dragHandleProps?: any;
+    dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
     actions?: React.ReactNode;
     children?: React.ReactNode;
     style?: React.CSSProperties;

@@ -1,6 +1,4 @@
-/**
- * ProjectStore - Manages project state
- */
+
 
 import { create } from 'zustand';
 
@@ -11,14 +9,13 @@ export interface ProjectInfo {
     description?: string;
     author?: string;
     mainScene: string;
-    path: string; // Project folder path
+    path: string; 
 }
 
 interface ProjectState {
     currentProject: ProjectInfo | null;
     recentProjects: string[];
 
-    // Actions
     openProject: (projectPath: string) => Promise<boolean>;
     closeProject: () => void;
     addRecentProject: (path: string) => void;
@@ -30,8 +27,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
     openProject: async (projectPath: string) => {
         try {
-            // In browser, we'll use a relative path or fetch from server
-            // In Electron, we'll use native file access
+
             const projectJsonPath = `${projectPath}/project-data.json`;
 
             const response = await fetch(projectJsonPath);

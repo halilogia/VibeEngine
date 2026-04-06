@@ -1,7 +1,4 @@
-/**
- * ContextMenu (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React, { useEffect, useRef, useState } from 'react';
 import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
@@ -92,7 +89,6 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
         };
     }, [onClose]);
 
-    // Adjust position if menu goes off screen
     const adjustedX = Math.min(x, window.innerWidth - 200);
     const adjustedY = Math.min(y, window.innerHeight - (items.length * 40));
 

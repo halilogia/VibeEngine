@@ -1,7 +1,4 @@
-/**
- * ScriptEditorPanel (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React, { useState } from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';
@@ -11,14 +8,12 @@ import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 import { scriptStyles as styles } from './ScriptEditorPanel.styles';
 
-import Editor, { loader } from '@monaco-editor/react';
+import Editor, { loader, type BeforeMount } from '@monaco-editor/react';
 
-// 🚀 Quantum Monaco Loader: Fix for Electron environment (using unpkg fallback)
 loader.config({ 
     paths: { vs: 'https://unpkg.com/monaco-editor@0.43.0/min/vs' } 
 });
 
-// #region Components
 interface TabProps {
     name: string;
     isActive: boolean;
@@ -58,10 +53,9 @@ const ScriptTab: React.FC<TabProps> = ({ name, isActive, isDirty, onClick, onClo
         </div>
     );
 };
-// #endregion
 
 interface ScriptEditorPanelProps {
-    dragHandleProps?: any;
+    dragHandleProps?: Record<string, unknown>;
 }
 
 export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandleProps }) => {
@@ -69,8 +63,7 @@ export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandle
         activePanelId, setActivePanel, engineConfig,
         isScriptFullScreen, setScriptFullScreen,
         openFiles, activeFileId, closeFile, setActiveFile, updateFileContent,
-        togglePanel, showConsole, showScriptEditor, showAICopilot, showInspector
-    } = useEditorStore();
+        showAICopilot    } = useEditorStore();
     const { selectedEntityId, entities } = useSceneStore();
     
     const activeScript = openFiles.find(s => s.id === activeFileId);
@@ -99,7 +92,7 @@ export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandle
         );
     }
 
-    const handleEditorWillMount = (monaco: any) => {
+    const handleEditorWillMount: BeforeMount = (monaco) => {
         console.log('💎 MONACO HANDSHAKE: THEME DEFINITION');
         monaco.editor.defineTheme('vibe-dark', {
             base: 'vs-dark',
@@ -151,9 +144,9 @@ export const ScriptEditorPanel: React.FC<ScriptEditorPanelProps> = ({ dragHandle
                 style={{ 
                     ...styles.header, 
                     cursor: isScriptFullScreen ? 'row-resize' : 'default',
-                    paddingRight: (showAICopilot && !isScriptFullScreen) ? '80px' : '12px' // 🛡️ AI Panel Shield
+                    paddingRight: (showAICopilot && !isScriptFullScreen) ? '80px' : '12px' 
                 }}
-                {...dragHandleProps}
+                {...(dragHandleProps as Record<string, unknown>)}
             >
                 <div style={styles.tabs}>
                     {openFiles.map(script => (

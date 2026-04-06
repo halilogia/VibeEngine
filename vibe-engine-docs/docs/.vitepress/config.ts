@@ -44,6 +44,7 @@ export default defineConfig({
           text: 'VibeEngine Studio',
           items: [
             { text: 'Overview', link: '/studio/index' },
+            { text: 'Project Manager', link: '/studio/project-manager' },
             { text: 'Quantum Fluid UI', link: '/studio/ui' },
             { text: 'Neural Copilot', link: '/studio/ai' }
           ]

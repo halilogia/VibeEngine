@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { VibeIcons } from '@ui/common/VibeIcons';
+import { VibeIcons, VibeIconName } from '@ui/common/VibeIcons';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 
@@ -26,7 +26,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, projectNa
     const activeTab = activeSettingsTab === 'about' ? 'project' : (activeSettingsTab as SettingsTabId);
     const { addToast } = useToastStore();
 
-    const TABS: { id: SettingsTabId; label: string; icon: any }[] = [
+    const TABS: { id: SettingsTabId; label: string; icon: VibeIconName }[] = [
         { id: 'project', label: t('settings.game_info'), icon: 'Layers' },
         { id: 'interface', label: t('settings.interface'), icon: 'Activity' },
         { id: 'input', label: t('settings.input'), icon: 'Cursor' },
@@ -49,7 +49,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, projectNa
                 
                 <div style={{ display: 'flex', height: '100%', overflow: 'hidden', fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
                     
-                    {/* Professional Sidebar */}
+                    {}
                     <div style={settingsSidebarStyle}>
                         <div style={{ padding: '2rem 1.5rem 1rem' }}>
                             <h3 style={{ fontSize: '11px', fontWeight: 700, color: VibeTheme.colors.textSecondary, letterSpacing: '1px', textTransform: 'uppercase' }}>
@@ -74,7 +74,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, projectNa
                         ))}
                     </div>
 
-                    {/* Content Area */}
+                    {}
                     <div style={settingsContentAreaStyle}>
                         <VibeButton variant="ghost" size="sm" onClick={onClose} style={closeButtonStyle}>
                             <VibeIcons name="X" size={18} />

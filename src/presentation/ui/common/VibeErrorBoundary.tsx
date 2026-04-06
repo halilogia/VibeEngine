@@ -1,40 +1,24 @@
-/**
- * VibeErrorBoundary - Structural resilience and panel-level protection.
- * 🛡️⚛️💎🚀
- */
+
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { VibeIcons } from './VibeIcons';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
 
-/**
- * Props for the VibeErrorBoundary component
- */
 interface Props {
-    /** The child components to wrap in the error boundary */
+    
     children: ReactNode;
-    /** Human-readable panel name for identifying the failure source */
+    
     name?: string;
 }
 
-/**
- * Internal state for tracking error occurrences
- */
 interface State {
-    /** Whether an error has been caught */
+    
     hasError: boolean;
-    /** The actual error object if caught */
+    
     error: Error | null;
 }
 
-/**
- * VibeErrorBoundary - Structural resilience and panel-level protection.
- * 🛡️⚛️💎🚀
- * 
- * Prevents a single panel crash from taking down the entire VibeEngine Studio.
- * Provides a specialized high-fidelity recovery UI for isolated components.
- */
 export class VibeErrorBoundary extends Component<Props, State> {
     public state: State = {
         hasError: false,
@@ -66,7 +50,7 @@ export class VibeErrorBoundary extends Component<Props, State> {
                         The rest of the engine is safe.
                     </p>
                     
-                    {/* 🕵️‍♂️ Debug Info (Temporary) */}
+                    {}
                     <div style={{ 
                         fontSize: '10px', 
                         color: '#ef4444', 

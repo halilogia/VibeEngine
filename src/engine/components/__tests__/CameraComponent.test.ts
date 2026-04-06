@@ -57,9 +57,8 @@ describe('CameraComponent', () => {
         const offset = new THREE.Vector3(0, 5, 10);
         cameraComponent.setFollowTarget(targetEntity, offset);
         
-        cameraComponent.updateFollow(1.0); // Large deltaTime for instant move
-        
-        // Target is at 0,0,0. Offset is 0,5,10. Camera should be at 0,5,10
+        cameraComponent.updateFollow(1.0); 
+
         expect(mockThreeCamera.position.x).toBeCloseTo(0);
         expect(mockThreeCamera.position.y).toBeCloseTo(5);
         expect(mockThreeCamera.position.z).toBeCloseTo(10);

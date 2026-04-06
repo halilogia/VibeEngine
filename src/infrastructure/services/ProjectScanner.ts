@@ -14,91 +14,129 @@ declare global {
   interface Window {
     ProjectScanner: {
       pickProjectFolder: () => Promise<ProjectInfo | null>;
-      scanProjectAssets: (path: string) => Promise<any[]>;
-      createFolder: (path: string) => Promise<{ success: boolean; error?: string }>;
-      createFile: (path: string, content: string) => Promise<{ success: boolean; error?: string }>;
-      readFile: (path: string) => Promise<{ success: boolean; content?: string; error?: string }>;
-      renameAsset: (oldPath: string, newPath: string) => Promise<{ success: boolean; error?: string }>;
-      deleteAsset: (path: string) => Promise<{ success: boolean; error?: string }>;
-      saveFile: (path: string, content: string) => Promise<{ success: boolean; error?: string }>;
-      setActiveProject: (path: string) => Promise<{ success: boolean; error?: string }>;
-      captureScene: (url: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+      scanProjectAssets: (path: string) => Promise<unknown[]>;
+      createFolder: (
+        path: string,
+      ) => Promise<{ success: boolean; error?: string }>;
+      createFile: (
+        path: string,
+        content: string,
+      ) => Promise<{ success: boolean; error?: string }>;
+      readFile: (
+        path: string,
+      ) => Promise<{ success: boolean; content?: string; error?: string }>;
+      renameAsset: (
+        oldPath: string,
+        newPath: string,
+      ) => Promise<{ success: boolean; error?: string }>;
+      deleteAsset: (
+        path: string,
+      ) => Promise<{ success: boolean; error?: string }>;
+      saveFile: (
+        path: string,
+        content: string,
+      ) => Promise<{ success: boolean; error?: string }>;
+      setActiveProject: (
+        path: string,
+      ) => Promise<{ success: boolean; error?: string }>;
+      captureScene: (
+        url: string,
+      ) => Promise<{ success: boolean; data?: unknown; error?: string }>;
     };
   }
 }
 
 export class ProjectScanner {
-  static async readFile(filePath: string): Promise<{ success: boolean; content?: string; error?: string }> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+  static async readFile(
+    filePath: string,
+  ): Promise<{ success: boolean; content?: string; error?: string }> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       return await window.ProjectScanner.readFile(filePath);
     }
-    return { success: false, error: 'Bridge not available' };
+    return { success: false, error: "Bridge not available" };
   }
 
   static async pickProjectFolder(): Promise<ProjectInfo | null> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       const bridge = window.ProjectScanner;
       return await bridge.pickProjectFolder();
     }
-    
-    throw new Error('Project picker bridge not available');
+
+    throw new Error("Project picker bridge not available");
   }
 
-  static async scanProjectAssets(projectPath: string): Promise<any[]> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+  static async scanProjectAssets(projectPath: string): Promise<unknown[]> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       const bridge = window.ProjectScanner;
       return await bridge.scanProjectAssets(projectPath);
     }
-    
+
     return [];
   }
 
-  static async createFolder(folderPath: string): Promise<{ success: boolean; error?: string }> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+  static async createFolder(
+    folderPath: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       return await window.ProjectScanner.createFolder(folderPath);
     }
-    return { success: false, error: 'Bridge not available' };
+    return { success: false, error: "Bridge not available" };
   }
 
-  static async createFile(filePath: string, content: string = ''): Promise<{ success: boolean; error?: string }> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+  static async createFile(
+    filePath: string,
+    content: string = "",
+  ): Promise<{ success: boolean; error?: string }> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       return await window.ProjectScanner.createFile(filePath, content);
     }
-    return { success: false, error: 'Bridge not available' };
+    return { success: false, error: "Bridge not available" };
   }
 
-  static async renameAsset(oldPath: string, newPath: string): Promise<{ success: boolean; error?: string }> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+  static async renameAsset(
+    oldPath: string,
+    newPath: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       return await window.ProjectScanner.renameAsset(oldPath, newPath);
     }
-    return { success: false, error: 'Bridge not available' };
+    return { success: false, error: "Bridge not available" };
   }
 
-  static async deleteAsset(assetPath: string): Promise<{ success: boolean; error?: string }> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+  static async deleteAsset(
+    assetPath: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       return await window.ProjectScanner.deleteAsset(assetPath);
     }
-    return { success: false, error: 'Bridge not available' };
+    return { success: false, error: "Bridge not available" };
   }
 
-  static async saveFile(filePath: string, content: string): Promise<{ success: boolean; error?: string }> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+  static async saveFile(
+    filePath: string,
+    content: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       return await window.ProjectScanner.saveFile(filePath, content);
     }
-    return { success: false, error: 'Bridge not available' };
+    return { success: false, error: "Bridge not available" };
   }
 
-  static async setActiveProject(projectPath: string): Promise<{ success: boolean; error?: string }> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+  static async setActiveProject(
+    projectPath: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       return await window.ProjectScanner.setActiveProject(projectPath);
     }
-    return { success: false, error: 'Bridge not available' };
+    return { success: false, error: "Bridge not available" };
   }
 
-  static async captureScene(url: string): Promise<{ success: boolean; data?: any; error?: string }> {
-    if (typeof window !== 'undefined' && 'ProjectScanner' in window) {
+  static async captureScene(
+    url: string,
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
       return await window.ProjectScanner.captureScene(url);
     }
-    return { success: false, error: 'Bridge not available' };
+    return { success: false, error: "Bridge not available" };
   }
 }

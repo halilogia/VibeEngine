@@ -1,18 +1,12 @@
-/**
- * Unified Minimalist MenuBar (Sovereign Elite Edition)
- * 🏛️⚛️💎🚀
- * 
- * This component now consolidates the MenuBar, Toolbar, and Play Controls
- * into a single minimalist header to maximize workspace and visual clarity.
- */
+
 
 import React, { useState, useRef } from 'react';
-import { VibeIcons } from '@ui/common/VibeIcons';
-import { useEditorStore, useSceneStore, type EditorMode } from '@infrastructure/store';
+import { VibeIcons, VibeIconName } from '@ui/common/VibeIcons';
+import { useEditorStore, useSceneStore } from '@infrastructure/store';
 import { useProjectStore } from '@infrastructure/store/useProjectStore';
 import { useToastStore } from '@infrastructure/store/toastStore';
 import { usePlayModeStore } from '@presentation/features/editor/core';
-import { downloadScene, loadSceneFromFile, createDefaultScene, exportToCapacitor, importRuntimeScene, importUniversalScene } from '@presentation/features/editor/serialization';
+import { downloadScene, loadSceneFromFile, createDefaultScene, exportToCapacitor, importUniversalScene } from '@presentation/features/editor/serialization';
 import { ProjectScanner } from '@infrastructure/services/ProjectScanner';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeTheme } from '@themes/VibeStyles';
@@ -38,17 +32,14 @@ export const MenuBar: React.FC = () => {
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    
-    // Stores
+
     const { 
         togglePanel, 
-        showAICopilot, showHierarchy, showConsole, showAssets, showInspector, showScriptEditor,
-        showAICopilotSettings, setShowAICopilotSettings
-    } = useEditorStore();
+        showAICopilot, showHierarchy, showConsole, showAssets, showInspector, showScriptEditor    } = useEditorStore();
     const { sceneName } = useSceneStore();
     const { setShowLauncher } = useProjectStore();
     const { addToast } = useToastStore();
-    const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
+    usePlayModeStore();
 
     const handleOpenLauncher = () => { setShowLauncher(true); setOpenMenu(null); };
     const handleOpen = () => fileInputRef.current?.click();
@@ -57,7 +48,7 @@ export const MenuBar: React.FC = () => {
         const file = e.target.files?.[0];
         if (file) {
             try { await loadSceneFromFile(file); addToast('Scene loaded', 'success'); } 
-            catch (error) { addToast('Load failed', 'error'); }
+            catch { addToast('Load failed', 'error'); }
         }
         e.target.value = ''; setOpenMenu(null);
     };
@@ -77,18 +68,19 @@ export const MenuBar: React.FC = () => {
         try {
             const result = await ProjectScanner.captureScene(url);
             if (result.success && result.data) {
+                const sceneData = result.data as { entities: import('@infrastructure/store').EntityData[]; rootEntityIds: number[] };
                 useSceneStore.getState().loadScene({
                     sceneName: 'Captured Scene',
                     version: '1.0.0',
-                    nextEntityId: result.data.entities.length + 1,
-                    entities: result.data.entities,
-                    rootEntityIds: result.data.rootEntityIds
+                    nextEntityId: sceneData.entities.length + 1,
+                    entities: sceneData.entities,
+                    rootEntityIds: sceneData.rootEntityIds
                 });
                 addToast('✅ Sahne başarıyla yakalandı!', 'success');
             } else {
                 addToast(`❌ Yakalama başarısız: ${result.error}`, 'error');
             }
-        } catch (e) {
+        } catch {
             addToast('❌ Beklenmedik hata', 'error');
         }
     };
@@ -100,7 +92,7 @@ export const MenuBar: React.FC = () => {
         try {
             const result = importUniversalScene(jsonInput);
             addToast(`✅ ${result.format} formatından ${result.entityCount} entity import edildi!`, 'success');
-        } catch (e) {
+        } catch {
             addToast('❌ Import başarısız: Geçersiz JSON formatı', 'error');
         }
     };
@@ -139,7 +131,7 @@ export const MenuBar: React.FC = () => {
         <div className="unified-header" style={styles.container}>
             <input type="file" ref={fileInputRef} accept=".json" style={{ display: 'none' }} onChange={handleFileChange} />
 
-            {/* LEFT: Menu & Transform Tools */}
+            {}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {menus.map(menu => (
                     <div
@@ -157,7 +149,7 @@ export const MenuBar: React.FC = () => {
                                             onMouseEnter={() => setHoveredItem(item.label)} onMouseLeave={() => setHoveredItem(null)}
                                             onClick={(e) => { e.stopPropagation(); item.action?.(); setOpenMenu(null); }}
                                         >
-                                            <VibeIcons name={item.icon ? (item.icon as any).props.name : 'Plus'} size={14} />
+                                            <VibeIcons name={item.icon && React.isValidElement(item.icon) ? ((item.icon.props as { name?: VibeIconName }).name ?? 'Plus') : 'Plus'} size={14} />
                                             <span style={{ marginLeft: '8px' }}>{item.label}</span>
                                         </div>
                                     )
@@ -172,13 +164,13 @@ export const MenuBar: React.FC = () => {
 
             <div style={styles.playbackGroup} />
 
-            {/* RIGHT: Layout & Utilities */}
+            {}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={styles.dividerVertical} />
 
-                {/* 🟢 Layout Toggle Suite (The only control box) */}
+                {}
                 <div style={{ display: 'flex', gap: '6px', background: VibeTheme.colors.glassBg, padding: '2px', borderRadius: '10px', border: `1px solid ${VibeTheme.colors.glassBorder}`, marginLeft: '12px' }}>
-                    {/* Left: Hierarchy */}
+                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('hierarchy')} 
                         style={{ 
@@ -190,7 +182,7 @@ export const MenuBar: React.FC = () => {
                         <VibeIcons name="Sidebar" size={16} />
                     </VibeButton>
                     
-                    {/* Bottom A: Assets */}
+                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('assets')} 
                         style={{ 
@@ -203,7 +195,7 @@ export const MenuBar: React.FC = () => {
                         <VibeIcons name="Grid" size={14} />
                     </VibeButton>
 
-                    {/* Bottom B: Console */}
+                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('console')} 
                         style={{ 
@@ -216,7 +208,7 @@ export const MenuBar: React.FC = () => {
                         <VibeIcons name="Terminal" size={14} />
                     </VibeButton>
 
-                    {/* Bottom C: Scripts */}
+                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('scriptEditor')} 
                         style={{ 
@@ -229,7 +221,7 @@ export const MenuBar: React.FC = () => {
                         <VibeIcons name="Code" size={14} />
                     </VibeButton>
 
-                    {/* Right A: Inspector */}
+                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('inspector')} 
                         style={{ 
@@ -242,7 +234,7 @@ export const MenuBar: React.FC = () => {
                         <VibeIcons name="Sidebar" size={16} />
                     </VibeButton>
 
-                    {/* Right B: AI Copilot */}
+                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('aiCopilot')} 
                         style={{ 

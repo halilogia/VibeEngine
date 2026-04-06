@@ -1,6 +1,4 @@
-/**
- * Core Engine Exports
- */
+
 
 export { Entity } from './Entity';
 export { Component, type ComponentClass } from './Component';

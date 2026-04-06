@@ -1,7 +1,4 @@
-/**
- * ToastContainer (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React from 'react';
 import { VibeIcons } from '@ui/common/VibeIcons';

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AudioComponent } from '../AudioComponent';
 
-// Mock Web Audio API nodes with accessible spies
 const mockSource = {
     buffer: null,
     loop: false,
@@ -24,7 +23,6 @@ class MockAudioContext {
 
 const mockAudioBuffer = {} as AudioBuffer;
 
-// Mock the global AudioContext
 vi.stubGlobal('AudioContext', MockAudioContext);
 
 describe('AudioComponent', () => {
@@ -33,7 +31,7 @@ describe('AudioComponent', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         audioComponent = new AudioComponent();
-        // Reset static context
+        
         AudioComponent.audioContext = null;
     });
 

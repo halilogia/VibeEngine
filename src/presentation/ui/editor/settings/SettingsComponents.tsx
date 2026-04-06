@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { VibeTheme } from '@themes/VibeStyles';
 
-// --- Shared CSS Interfaces ---
 interface GroupProps {
     title: string;
     children: React.ReactNode;

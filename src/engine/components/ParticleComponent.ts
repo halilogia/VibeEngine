@@ -1,37 +1,34 @@
-/**
- * ParticleComponent - Particle emitter configuration
- * Configures particle emission behavior.
- */
+
 
 import * as THREE from 'three';
 import { Component } from '@engine';
 
 export interface ParticleConfig {
-    /** Maximum number of particles */
+    
     maxParticles?: number;
-    /** Emission rate (particles per second) */
+    
     emissionRate?: number;
-    /** Particle lifetime in seconds */
+    
     lifetime?: number;
-    /** Initial velocity */
+    
     velocity?: THREE.Vector3;
-    /** Velocity randomization */
+    
     velocitySpread?: THREE.Vector3;
-    /** Particle size */
+    
     size?: number;
-    /** Size variation */
+    
     sizeSpread?: number;
-    /** Start color */
+    
     startColor?: THREE.Color;
-    /** End color */
+    
     endColor?: THREE.Color;
-    /** Gravity effect */
+    
     gravity?: THREE.Vector3;
-    /** Whether to loop */
+    
     loop?: boolean;
-    /** Texture for particles */
+    
     texture?: THREE.Texture | null;
-    /** Blend mode */
+    
     blendMode?: THREE.Blending;
 }
 
@@ -48,22 +45,16 @@ interface Particle {
 export class ParticleComponent extends Component {
     static readonly TYPE = 'Particle';
 
-    /** Emitter configuration */
     config: ParticleConfig;
 
-    /** Active particles */
     particles: Particle[] = [];
 
-    /** Time accumulator for emission */
     private emitAccumulator: number = 0;
 
-    /** Whether emitter is active */
     isPlaying: boolean = true;
 
-    /** Three.js Points object */
     pointsObject: THREE.Points | null = null;
 
-    /** Geometry for particles */
     geometry: THREE.BufferGeometry | null = null;
 
     constructor(config: Partial<ParticleConfig> = {}) {
@@ -85,13 +76,9 @@ export class ParticleComponent extends Component {
         };
     }
 
-    /**
-     * Initialize the particle system geometry
-     */
     initialize(scene: THREE.Scene): void {
         const maxParticles = this.config.maxParticles!;
 
-        // Create geometry
         this.geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(maxParticles * 3);
         const colors = new Float32Array(maxParticles * 4);
@@ -101,7 +88,6 @@ export class ParticleComponent extends Component {
         this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 4));
         this.geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-        // Create material
         const material = new THREE.PointsMaterial({
             size: this.config.size,
             vertexColors: true,
@@ -115,14 +101,10 @@ export class ParticleComponent extends Component {
             material.map = this.config.texture;
         }
 
-        // Create Points object
         this.pointsObject = new THREE.Points(this.geometry, material);
         scene.add(this.pointsObject);
     }
 
-    /**
-     * Emit a single particle
-     */
     emit(): void {
         if (this.particles.length >= this.config.maxParticles!) return;
 
@@ -145,13 +127,9 @@ export class ParticleComponent extends Component {
         this.particles.push(particle);
     }
 
-    /**
-     * Update particles
-     */
     update(deltaTime: number, worldPosition: THREE.Vector3): void {
         if (!this.isPlaying) return;
 
-        // Emit new particles
         if (this.config.loop || this.particles.length === 0) {
             this.emitAccumulator += deltaTime;
             const emitInterval = 1 / this.config.emissionRate!;
@@ -162,7 +140,6 @@ export class ParticleComponent extends Component {
             }
         }
 
-        // Update existing particles
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const p = this.particles[i];
             p.age += deltaTime;
@@ -172,25 +149,18 @@ export class ParticleComponent extends Component {
                 continue;
             }
 
-            // Apply gravity
             p.velocity.add(this.config.gravity!.clone().multiplyScalar(deltaTime));
 
-            // Update position
             p.position.add(p.velocity.clone().multiplyScalar(deltaTime));
 
-            // Interpolate color
             const t = p.age / p.lifetime;
             p.color.lerpColors(this.config.startColor!, this.config.endColor!, t);
             p.alpha = 1 - t;
         }
 
-        // Update geometry
         this.updateGeometry(worldPosition);
     }
 
-    /**
-     * Update Three.js geometry
-     */
     private updateGeometry(worldPosition: THREE.Vector3): void {
         if (!this.geometry) return;
 
@@ -212,7 +182,7 @@ export class ParticleComponent extends Component {
 
                 sizes[i] = p.size;
             } else {
-                // Hide unused particles
+                
                 positions[i * 3] = 0;
                 positions[i * 3 + 1] = -9999;
                 positions[i * 3 + 2] = 0;
@@ -225,30 +195,18 @@ export class ParticleComponent extends Component {
         this.geometry.attributes.size.needsUpdate = true;
     }
 
-    /**
-     * Play the emitter
-     */
     play(): void {
         this.isPlaying = true;
     }
 
-    /**
-     * Stop the emitter
-     */
     stop(): void {
         this.isPlaying = false;
     }
 
-    /**
-     * Clear all particles
-     */
     clear(): void {
         this.particles = [];
     }
 
-    /**
-     * Dispose resources
-     */
     dispose(): void {
         if (this.pointsObject) {
             this.pointsObject.parent?.remove(this.pointsObject);

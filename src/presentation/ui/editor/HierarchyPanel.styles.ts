@@ -1,8 +1,4 @@
-/**
- * HierarchyPanel Styles - Sovereign TypeScript Styling
- * Implements architectural separation of design and layout.
- * 🏛️⚛️💎🚀
- */
+
 
 import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 

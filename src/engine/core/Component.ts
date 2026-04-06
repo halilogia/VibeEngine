@@ -1,76 +1,35 @@
-/**
- * Component - Base class for all components in the ECS
- * Components hold DATA only, no logic. Logic goes in Systems or Scripts.
- * 
- * @example
- * class HealthComponent extends Component {
- *   static readonly TYPE = 'Health';
- *   current = 100;
- *   max = 100;
- * }
- */
-
-import type { Entity } from './Entity';
+import type { Entity } from "./Entity";
 
 export abstract class Component {
-    /** Unique type identifier - MUST be overridden by subclasses */
-    static readonly TYPE: string = 'Component';
+  static readonly TYPE: string = "Component";
 
-    /** Reference to the entity this component is attached to */
-    entity: Entity | null = null;
+  entity: Entity | null = null;
 
-    /** Whether this component is active */
-    enabled: boolean = true;
+  enabled: boolean = true;
 
-    /**
-     * Get the component type name
-     */
-    get type(): string {
-        return (this.constructor as typeof Component).TYPE;
-    }
+  get type(): string {
+    return (this.constructor as typeof Component).TYPE;
+  }
 
-    /**
-     * Called when component is added to an entity
-     */
-    onAttach?(): void;
+  onAttach?(): void;
 
-    /**
-     * Called when component is enabled
-     */
-    onEnable?(): void;
+  onEnable?(): void;
 
-    /**
-     * Called when component is disabled
-     */
-    onDisable?(): void;
+  onDisable?(): void;
 
-    /**
-     * Called when component is removed from entity
-     */
-    onDetach?(): void;
+  onDetach?(): void;
 
-    /**
-     * Called when entity is destroyed
-     */
-    onDestroy?(): void;
+  onDestroy?(): void;
 
-    /**
-     * Clone this component (for prefab instantiation)
-     * @returns A shallow copy of the component.
-     */
-    clone(): Component {
-        const cloned = Object.create(Object.getPrototypeOf(this));
-        Object.assign(cloned, this);
-        cloned.entity = null;
-        return cloned;
-    }
+  clone(): Component {
+    const cloned = Object.create(Object.getPrototypeOf(this));
+    Object.assign(cloned, this);
+    cloned.entity = null;
+    return cloned;
+  }
 }
 
-/** 
- * ComponentClass - Type helper for component constructor functions.
- * Includes the static TYPE requirement.
- */
 export type ComponentClass<T extends Component = Component> = {
-    new(...args: any[]): T;
-    readonly TYPE: string;
+  new (...args: unknown[]): T;
+  readonly TYPE: string;
 };

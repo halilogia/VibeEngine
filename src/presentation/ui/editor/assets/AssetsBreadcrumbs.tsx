@@ -3,10 +3,15 @@ import { VibeIcons } from '@ui/common/VibeIcons';
 import { VibeTheme } from '@themes/VibeStyles';
 import { assetsStyles as styles } from '../AssetsPanel.styles';
 
+interface Breadcrumb {
+    id: string;
+    name: string;
+}
+
 interface AssetsBreadcrumbsProps {
     currentFolderId: string | null;
     setCurrentFolderId: (id: string | null) => void;
-    breadcrumbs: any[];
+    breadcrumbs: Breadcrumb[];
 }
 
 export const AssetsBreadcrumbs: React.FC<AssetsBreadcrumbsProps> = ({
@@ -22,7 +27,7 @@ export const AssetsBreadcrumbs: React.FC<AssetsBreadcrumbsProps> = ({
             >
                 <VibeIcons name="Home" size={12} /> Root
             </span>
-            {breadcrumbs.map((b: any) => (
+            {breadcrumbs.map((b: Breadcrumb) => (
                 <React.Fragment key={b.id}>
                     <VibeIcons name="ChevronRight" size={10} style={{ opacity: 0.3 }} />
                     <span 

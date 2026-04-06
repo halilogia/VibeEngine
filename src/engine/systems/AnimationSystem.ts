@@ -1,13 +1,11 @@
-/**
- * AnimationSystem - Updates animation mixers for all entities
- */
+
 
 import { System } from '@engine';
 import type { Entity } from '@engine';
 import { AnimationComponent } from '@engine';
 
 export class AnimationSystem extends System {
-    readonly priority = 30; // After physics
+    readonly priority = 30; 
     readonly requiredComponents = [AnimationComponent];
 
     update(deltaTime: number, entities: Entity[]): void {

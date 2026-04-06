@@ -1,7 +1,4 @@
-/**
- * AssetLoader - Load models, textures, and audio
- * Provides async loading with caching.
- */
+
 
 import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -13,35 +10,26 @@ export interface LoadedModel {
 }
 
 export class AssetLoader {
-    /** GLTF/GLB loader */
+    
     private readonly gltfLoader: GLTFLoader = new GLTFLoader();
 
-    /** Texture loader */
     private readonly textureLoader: THREE.TextureLoader = new THREE.TextureLoader();
 
-    /** Audio loader */
     private readonly audioLoader: THREE.AudioLoader = new THREE.AudioLoader();
 
-    /** Model cache */
     private readonly modelCache: Map<string, LoadedModel> = new Map();
 
-    /** Texture cache */
     private readonly textureCache: Map<string, THREE.Texture> = new Map();
 
-    /** Audio cache */
     private readonly audioCache: Map<string, AudioBuffer> = new Map();
 
-    /** Loading progress callback */
     onProgress?: (url: string, loaded: number, total: number) => void;
 
-    /**
-     * Load a GLTF/GLB model
-     */
     async loadModel(url: string, cache: boolean = true): Promise<LoadedModel> {
-        // Check cache
+        
         if (cache && this.modelCache.has(url)) {
             const cached = this.modelCache.get(url)!;
-            // Return cloned scene to avoid shared state
+            
             return {
                 scene: cached.scene.clone(),
                 animations: cached.animations,
@@ -83,11 +71,8 @@ export class AssetLoader {
         });
     }
 
-    /**
-     * Load a texture
-     */
     async loadTexture(url: string, cache: boolean = true): Promise<THREE.Texture> {
-        // Check cache
+        
         if (cache && this.textureCache.has(url)) {
             return this.textureCache.get(url)!;
         }
@@ -115,11 +100,8 @@ export class AssetLoader {
         });
     }
 
-    /**
-     * Load an audio file
-     */
     async loadAudio(url: string, cache: boolean = true): Promise<AudioBuffer> {
-        // Check cache
+        
         if (cache && this.audioCache.has(url)) {
             return this.audioCache.get(url)!;
         }
@@ -147,9 +129,6 @@ export class AssetLoader {
         });
     }
 
-    /**
-     * Load multiple assets in parallel
-     */
     async loadAll<T>(
         urls: string[],
         loader: (url: string) => Promise<T>
@@ -157,31 +136,20 @@ export class AssetLoader {
         return Promise.all(urls.map(url => loader(url)));
     }
 
-    /**
-     * Preload multiple models
-     */
     async preloadModels(urls: string[]): Promise<void> {
         await this.loadAll(urls, url => this.loadModel(url));
     }
 
-    /**
-     * Clear all caches
-     */
     clearCache(): void {
-        // Dispose textures
+        
         this.textureCache.forEach(texture => texture.dispose());
         this.textureCache.clear();
 
-        // Clear model cache (don't dispose, might still be in use)
         this.modelCache.clear();
 
-        // Clear audio cache
         this.audioCache.clear();
     }
 
-    /**
-     * Get cache statistics
-     */
     getCacheStats(): { models: number; textures: number; audio: number } {
         return {
             models: this.modelCache.size,
@@ -191,5 +159,4 @@ export class AssetLoader {
     }
 }
 
-/** Singleton asset loader */
 export const assetLoader = new AssetLoader();

@@ -1,11 +1,8 @@
-/**
- * CommandPalette (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React, { useState, useEffect, useRef } from 'react';
-import { VibeIcons } from '@ui/common/VibeIcons';
-import { useEditorStore, useSceneStore } from '@infrastructure/store';
+import { VibeIcons, VibeIconName } from '@ui/common/VibeIcons';
+import { useEditorStore, useSceneStore, type EditorState } from '@infrastructure/store';
 import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
 
 const styles = createVibeStyles({
@@ -90,15 +87,24 @@ const animations = `
 `;
 
 export const CommandPalette: React.FC = () => {
-    const { showCommandPalette, toggleCommandPalette, play, selectEntity } = useEditorStore() as any;
-    const { entities, addEntity, addComponent } = useSceneStore();
+    const { showCommandPalette, toggleCommandPalette, play } = useEditorStore() as EditorState;
+    const { addEntity, addComponent } = useSceneStore();
     const [search, setSearch] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const getItems = () => {
-        const items = [
+    interface CommandItem {
+        id: string;
+        label: string;
+        desc: string;
+        icon: VibeIconName;
+        cat: string;
+        onSelect: () => void;
+    }
+
+    const getItems = (): CommandItem[] => {
+        const items: CommandItem[] = [
             { id: 'cube', label: 'Add Cube', desc: 'Create a primitive cube mesh', icon: 'Box', cat: 'Action', onSelect: () => {
                 const id = addEntity('Cube', null);
                 addComponent(id, { type: 'Render', data: { meshType: 'cube' }, enabled: true });
@@ -151,7 +157,7 @@ export const CommandPalette: React.FC = () => {
                             onMouseLeave={() => setHoveredIdx(null)}
                             onClick={() => { item.onSelect(); toggleCommandPalette(false); }}
                         >
-                            <VibeIcons name={item.icon as any} size={20} />
+                            <VibeIcons name={item.icon} size={20} />
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: '15px', fontWeight: 600 }}>{item.label}</div>
                                 <div style={{ fontSize: '12px', color: VibeTheme.colors.textSecondary }}>{item.desc}</div>

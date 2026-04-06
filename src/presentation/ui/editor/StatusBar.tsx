@@ -1,19 +1,15 @@
-/**
- * StatusBar Component (Sovereign Atomic Edition)
- * 🏛️⚛️💎🚀
- */
+
 
 import React from 'react';
 import { useEditorStore, useSceneStore } from '@infrastructure/store';
 import { VibeIcons } from '@ui/common/VibeIcons';
-import { VibeTheme } from '@themes/VibeStyles';
 import { statusBarStyles as styles } from './StatusBar.styles';
 
 const FPSCounter: React.FC = () => {
     const [fps, setFps] = React.useState(0);
     React.useEffect(() => {
         const interval = setInterval(() => {
-            const current = (window as any).VibeFPS || 0;
+            const current = (window as unknown as Record<string, unknown>).VibeFPS as number || 0;
             if (current !== fps) setFps(current);
         }, 1000);
         return () => clearInterval(interval);

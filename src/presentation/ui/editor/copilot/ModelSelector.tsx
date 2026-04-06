@@ -42,7 +42,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [showModelMenu]);
+    }, [setShowModelMenu, showModelMenu]);
 
     return (
         <div ref={menuRef}>

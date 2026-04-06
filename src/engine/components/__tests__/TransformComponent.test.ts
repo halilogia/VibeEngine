@@ -45,11 +45,11 @@ describe('TransformComponent', () => {
     });
 
     it('should provide correct direction vectors', () => {
-        // Rotate 90 degrees around Y axis
+        
         transform.setRotation(0, Math.PI / 2, 0);
         
         const forward = transform.getForward();
-        // After 90 deg Y rotation, forward (-Z) becomes -X
+        
         expect(forward.x).toBeCloseTo(-1);
         expect(forward.z).toBeCloseTo(0);
     });

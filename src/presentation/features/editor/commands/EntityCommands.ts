@@ -1,14 +1,9 @@
-/**
- * Entity Commands - Undo/Redo operations for entity management
- */
+
 
 import { Entity } from '@engine';
 import { Scene } from '@engine';
 import type { ICommand } from './HistoryManager';
 
-/**
- * Command for adding an entity
- */
 export class AddEntityCommand implements ICommand {
     description: string;
     private scene: Scene;
@@ -29,9 +24,6 @@ export class AddEntityCommand implements ICommand {
     }
 }
 
-/**
- * Command for removing an entity
- */
 export class RemoveEntityCommand implements ICommand {
     description: string;
     private scene: Scene;
@@ -52,9 +44,6 @@ export class RemoveEntityCommand implements ICommand {
     }
 }
 
-/**
- * Command for renaming an entity
- */
 export class RenameEntityCommand implements ICommand {
     description: string;
     private entity: Entity;

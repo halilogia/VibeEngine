@@ -20,8 +20,7 @@ interface ProjectState {
   showLauncher: boolean;
   isLoading: boolean;
   error: string | null;
-  
-  // Actions
+
   setProjects: (projects: ProjectInfo[]) => void;
   selectProject: (project: ProjectInfo | null) => void;
   launchProject: (project: ProjectInfo | null) => void;

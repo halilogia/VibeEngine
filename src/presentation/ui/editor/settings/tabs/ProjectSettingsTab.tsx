@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { SettingsGroup, SettingsGrid, SettingsField, SettingsInput, SettingsSelect } from '../SettingsComponents';
+import { SettingsGroup, SettingsGrid, SettingsField, SettingsInput } from '../SettingsComponents';
 
 export const ProjectSettingsTab: React.FC<{ projectName: string }> = ({ projectName }) => {
     const { t } = useTranslation();

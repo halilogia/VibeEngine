@@ -1,100 +1,107 @@
-/**
- * KeyboardShortcuts - Global keyboard shortcuts for the editor
- */
-
-import { useEffect } from 'react';
-import { useEditorStore } from '@infrastructure/store';
-import { useUndoRedoStore } from '@infrastructure/store';
-import { downloadScene, createDefaultScene } from '@editor/serialization';
-import { useSceneStore } from '@infrastructure/store';
+import { useEffect } from "react";
+import { useEditorStore } from "@infrastructure/store";
+import { useUndoRedoStore } from "@infrastructure/store";
+import { downloadScene, createDefaultScene } from "@editor/serialization";
+import { useSceneStore } from "@infrastructure/store";
 
 export function useKeyboardShortcuts(): void {
-    const { setEditorMode, selectEntity, selectedEntityId, toggleCommandPalette } = useEditorStore();
-    const { removeEntity } = useSceneStore();
-    const { undo, redo, canUndo, canRedo, pushState } = useUndoRedoStore();
+  const {
+    setEditorMode,
+    selectEntity,
+    selectedEntityId,
+    toggleCommandPalette,
+  } = useEditorStore();
+  const { removeEntity } = useSceneStore();
+  const { undo, redo, canUndo, canRedo, pushState } = useUndoRedoStore();
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // Ignore if typing in input
-            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-                return;
-            }
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
 
-            const ctrl = e.ctrlKey || e.metaKey;
+      const ctrl = e.ctrlKey || e.metaKey;
 
-            // Transform modes
-            if (!ctrl) {
-                switch (e.key.toLowerCase()) {
-                    case 'w':
-                        setEditorMode('translate');
-                        e.preventDefault();
-                        break;
-                    case 'e':
-                        setEditorMode('rotate');
-                        e.preventDefault();
-                        break;
-                    case 'r':
-                        setEditorMode('scale');
-                        e.preventDefault();
-                        break;
-                }
-            }
+      if (!ctrl) {
+        switch (e.key.toLowerCase()) {
+          case "w":
+            setEditorMode("translate");
+            e.preventDefault();
+            break;
+          case "e":
+            setEditorMode("rotate");
+            e.preventDefault();
+            break;
+          case "r":
+            setEditorMode("scale");
+            e.preventDefault();
+            break;
+        }
+      }
 
-            // Undo/Redo
-            if (ctrl && e.key.toLowerCase() === 'z') {
-                if (e.shiftKey) {
-                    if (canRedo()) redo();
-                } else {
-                    if (canUndo()) undo();
-                }
-                e.preventDefault();
-            }
+      if (ctrl && e.key.toLowerCase() === "z") {
+        if (e.shiftKey) {
+          if (canRedo()) redo();
+        } else {
+          if (canUndo()) undo();
+        }
+        e.preventDefault();
+      }
 
-            if (ctrl && e.key.toLowerCase() === 'y') {
-                if (canRedo()) redo();
-                e.preventDefault();
-            }
+      if (ctrl && e.key.toLowerCase() === "y") {
+        if (canRedo()) redo();
+        e.preventDefault();
+      }
 
-            // Save
-            if (ctrl && e.key.toLowerCase() === 's') {
-                const { sceneName } = useSceneStore.getState();
-                downloadScene(`${sceneName.replace(/\s+/g, '_')}.json`);
-                e.preventDefault();
-            }
+      if (ctrl && e.key.toLowerCase() === "s") {
+        const { sceneName } = useSceneStore.getState();
+        downloadScene(`${sceneName.replace(/\s+/g, "_")}.json`);
+        e.preventDefault();
+      }
 
-            // New scene
-            if (ctrl && e.key.toLowerCase() === 'n') {
-                createDefaultScene();
-                e.preventDefault();
-            }
+      if (ctrl && e.key.toLowerCase() === "n") {
+        createDefaultScene();
+        e.preventDefault();
+      }
 
-            // Delete
-            if (e.key === 'Delete' && selectedEntityId !== null) {
-                pushState(); // Save for undo
-                removeEntity(selectedEntityId);
-                selectEntity(null);
-                e.preventDefault();
-            }
+      if (e.key === "Delete" && selectedEntityId !== null) {
+        pushState();
+        removeEntity(selectedEntityId);
+        selectEntity(null);
+        e.preventDefault();
+      }
 
-            // Command Palette (Ctrl+P)
-            if (ctrl && e.key.toLowerCase() === 'p') {
-                toggleCommandPalette();
-                e.preventDefault();
-            }
+      if (ctrl && e.key.toLowerCase() === "p") {
+        toggleCommandPalette();
+        e.preventDefault();
+      }
 
-            // Escape - deselect or close palette
-            if (e.key === 'Escape') {
-                const { showCommandPalette } = useEditorStore.getState();
-                if (showCommandPalette) {
-                    toggleCommandPalette(false);
-                } else {
-                    selectEntity(null);
-                }
-                e.preventDefault();
-            }
-        };
+      if (e.key === "Escape") {
+        const { showCommandPalette } = useEditorStore.getState();
+        if (showCommandPalette) {
+          toggleCommandPalette(false);
+        } else {
+          selectEntity(null);
+        }
+        e.preventDefault();
+      }
+    };
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedEntityId, setEditorMode, selectEntity, removeEntity, undo, redo, canUndo, canRedo, pushState]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    selectedEntityId,
+    setEditorMode,
+    selectEntity,
+    removeEntity,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    pushState,
+    toggleCommandPalette,
+  ]);
 }

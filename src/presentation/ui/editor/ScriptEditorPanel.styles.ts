@@ -1,7 +1,4 @@
-/**
- * ScriptEditorPanel Styles - Sovereign TypeScript Styling
- * 🏛️⚛️💎🚀
- */
+
 
 import { createVibeStyles, VibeTheme } from '@themes/VibeStyles';
 
@@ -10,7 +7,7 @@ export const scriptStyles = createVibeStyles({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        background: VibeTheme.colors.bgPrimary, // Linked to theme
+        background: VibeTheme.colors.bgPrimary, 
         overflow: 'hidden',
         position: 'relative',
     },
@@ -91,7 +88,7 @@ export const scriptStyles = createVibeStyles({
         flex: 1,
         position: 'relative',
         overflow: 'hidden',
-        background: VibeTheme.colors.bgPrimary, // Prevent white flashes
+        background: VibeTheme.colors.bgPrimary, 
     },
     emptyState: {
         flex: 1,

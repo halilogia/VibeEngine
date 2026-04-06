@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { Entity } from '../Entity';
 import { Component } from '../Component';
 
-// Mock component for testing
 class MockComponent extends Component {
     static override readonly TYPE = 'MockComponent';
     

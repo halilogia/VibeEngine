@@ -1,7 +1,4 @@
-/**
- * Engine Demo - Test the game engine
- * This file demonstrates basic engine usage.
- */
+
 
 import * as THREE from 'three';
 import {
@@ -18,8 +15,6 @@ import {
     RenderSystem,
     Prefab,
 } from '..';
-
-// ============ DEMO SCRIPTS ============
 
 class RotatorScript extends Script {
     speed = 1;
@@ -57,24 +52,19 @@ class PlayerMoveScript extends Script {
     }
 }
 
-// ============ DEMO SETUP ============
-
 export function runEngineDemo(canvas: HTMLCanvasElement): Application {
     console.log('🚀 Starting Engine Demo...');
 
-    // Create application
     const app = new Application(canvas, {
         backgroundColor: 0x1a1a2e,
         antialias: true,
     });
 
-    // Add systems
     app.addSystem(new InputSystem());
     app.addSystem(new ScriptSystem());
     app.addSystem(new PhysicsSystem());
     app.addSystem(new RenderSystem());
 
-    // Create floor
     const floor = new Entity('Floor');
     floor.addComponent(new TransformComponent().setPosition(0, -0.5, 0));
     const floorGeometry = new THREE.BoxGeometry(20, 1, 20);
@@ -84,7 +74,6 @@ export function runEngineDemo(canvas: HTMLCanvasElement): Application {
     floor.addComponent(floorRender);
     app.scene.addEntity(floor);
 
-    // Create rotating cube prefab
     const cubePrefab = new Prefab('RotatingCube')
         .addComponentFactory(() => new TransformComponent())
         .addComponentFactory(() => {
@@ -99,14 +88,13 @@ export function runEngineDemo(canvas: HTMLCanvasElement): Application {
         })
         .addComponentFactory(() => new CollisionComponent({ type: 'box' }));
 
-    // Spawn multiple cubes
     for (let i = 0; i < 5; i++) {
         const cube = cubePrefab.instantiate(app.scene);
         const transform = cube.getComponent(TransformComponent);
         if (transform) {
             transform.setPosition((i - 2) * 3, 0.5, -5);
         }
-        // Vary rotation speed
+        
         const script = cube.getComponent(ScriptComponent);
         const rotator = script?.getScript(RotatorScript);
         if (rotator) {
@@ -114,7 +102,6 @@ export function runEngineDemo(canvas: HTMLCanvasElement): Application {
         }
     }
 
-    // Create player (controllable sphere)
     const player = new Entity('Player');
     player.addComponent(new TransformComponent().setPosition(0, 0.5, 5));
     const playerGeometry = new THREE.SphereGeometry(0.5, 32, 32);
@@ -128,7 +115,6 @@ export function runEngineDemo(canvas: HTMLCanvasElement): Application {
     player.tags.add('player');
     app.scene.addEntity(player);
 
-    // Add lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     app.threeScene.add(ambientLight);
 
@@ -137,11 +123,9 @@ export function runEngineDemo(canvas: HTMLCanvasElement): Application {
     directionalLight.castShadow = true;
     app.threeScene.add(directionalLight);
 
-    // Position camera
     app.camera.position.set(0, 10, 15);
     app.camera.lookAt(0, 0, 0);
 
-    // Start game loop
     app.start();
 
     console.log('✅ Engine Demo running!');

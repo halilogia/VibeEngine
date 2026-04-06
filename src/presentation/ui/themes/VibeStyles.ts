@@ -1,8 +1,4 @@
-/**
- * VibeStyles - Sovereign TypeScript Styling System
- * Provides type-safe styling objects for VibeEngine components.
- * 🏛️💎 CSS-in-TS Architecture
- */
+
 
 import { CSSProperties } from 'react';
 
@@ -10,16 +6,10 @@ export type VibeStyleObject = {
     [key: string]: CSSProperties;
 };
 
-/**
- * Utility to define and verify Sovereign styles
- */
 export const createVibeStyles = <T extends VibeStyleObject>(styles: T): T => {
     return styles;
 };
 
-/**
- * Global Sovereign Theme Tokens (Synced with index.css)
- */
 export const VibeTheme = {
     colors: {
         accent: 'var(--vibe-accent)',
