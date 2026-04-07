@@ -37,7 +37,7 @@ export const useProjectStore = create<ProjectState>()(
       projects: [],
       selectedProject: null,
       launchedProject: null,
-      showLauncher: false,
+      showLauncher: true,
       isLoading: false,
       error: null,
 
@@ -58,7 +58,7 @@ export const useProjectStore = create<ProjectState>()(
       partialize: (state) => ({
         projects: state.projects,
         selectedProject: state.selectedProject,
-        launchedProject: state.launchedProject,
+        // launchedProject'i buradan çıkardık, böylece her girişte Launcher açılacak
       }),
     }
   )

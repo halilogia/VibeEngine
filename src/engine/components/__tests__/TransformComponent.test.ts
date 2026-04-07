@@ -56,7 +56,7 @@ describe('TransformComponent', () => {
 
     it('should clone correctly', () => {
         transform.setPosition(1, 2, 3);
-        const cloned = transform.clone();
+        const cloned = transform.clone() as TransformComponent;
         
         expect(cloned.position.x).toBe(1);
         expect(cloned.position.y).toBe(2);

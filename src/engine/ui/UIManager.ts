@@ -1,5 +1,3 @@
-
-
 export type UIElementType = 'text' | 'bar' | 'button' | 'panel' | 'image';
 
 export interface UIElementStyle {
@@ -40,7 +38,6 @@ interface UIElement {
 
 export class UIManager {
     private static instance: UIManager | null = null;
-
     private container: HTMLDivElement | null = null;
     private elements: Map<string, UIElement> = new Map();
     private initialized = false;
@@ -74,14 +71,7 @@ export class UIManager {
     }
 
     createText(id: string, text: string, x: number, y: number, style?: UIElementStyle): void {
-        this.createElement({
-            id,
-            type: 'text',
-            x,
-            y,
-            text,
-            style
-        });
+        this.createElement({ id, type: 'text', x, y, text, style });
     }
 
     createBar(
@@ -95,18 +85,7 @@ export class UIManager {
         barColor: string = '#22c55e',
         barBgColor: string = '#374151'
     ): void {
-        this.createElement({
-            id,
-            type: 'bar',
-            x,
-            y,
-            width,
-            height,
-            value,
-            maxValue,
-            barColor,
-            barBgColor
-        });
+        this.createElement({ id, type: 'bar', x, y, width, height, value, maxValue, barColor, barBgColor });
     }
 
     createButton(
@@ -117,15 +96,7 @@ export class UIManager {
         onClick: () => void,
         style?: UIElementStyle
     ): void {
-        this.createElement({
-            id,
-            type: 'button',
-            x,
-            y,
-            text,
-            onClick,
-            style
-        });
+        this.createElement({ id, type: 'button', x, y, text, onClick, style });
     }
 
     createPanel(
@@ -136,15 +107,7 @@ export class UIManager {
         height: number,
         style?: UIElementStyle
     ): void {
-        this.createElement({
-            id,
-            type: 'panel',
-            x,
-            y,
-            width,
-            height,
-            style
-        });
+        this.createElement({ id, type: 'panel', x, y, width, height, style });
     }
 
     createElement(config: UIElementConfig): void {
@@ -349,5 +312,3 @@ export class UIManager {
         }
     }
 }
-
-export const ui = UIManager.getInstance();

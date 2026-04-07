@@ -136,11 +136,13 @@ export const EditorApp: React.FC = () => {
                 {showAICopilotSettings && <SettingsModal onClose={() => setShowAICopilotSettings(false)} projectName={launchedProject?.name} />}
             </AnimatePresence>
             
-            {showLauncher && !showSplash && (
+            {(showLauncher || !launchedProject) && !showSplash && (
                 <div style={modalOverlayStyle}>
                     <div style={{ width: '95%', height: '92%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                         <ProjectLauncher />
-                        <button onClick={() => setShowLauncher(false)} style={launcherCloseButtonStyle}>×</button>
+                        {launchedProject && (
+                            <button onClick={() => setShowLauncher(false)} style={launcherCloseButtonStyle}>×</button>
+                        )}
                     </div>
                 </div>
             )}

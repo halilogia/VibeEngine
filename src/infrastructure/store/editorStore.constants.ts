@@ -1,0 +1,116 @@
+import { ShortcutBinding } from "./editorStore.types";
+
+export const DEFAULT_SHORTCUTS: Record<string, ShortcutBinding> = {
+  translate: { key: "w", ctrl: false, shift: false, alt: false },
+  rotate: { key: "e", ctrl: false, shift: false, alt: false },
+  scale: { key: "r", ctrl: false, shift: false, alt: false },
+  undo: { key: "z", ctrl: true, shift: false, alt: false },
+  redo: { key: "y", ctrl: true, shift: false, alt: false },
+  redoAlt: { key: "z", ctrl: true, shift: true, alt: false },
+  save: { key: "s", ctrl: true, shift: false, alt: false },
+  newScene: { key: "n", ctrl: true, shift: false, alt: false },
+  delete: { key: "delete", ctrl: false, shift: false, alt: false },
+  commandPalette: { key: "p", ctrl: true, shift: false, alt: false },
+  escape: { key: "escape", ctrl: false, shift: false, alt: false },
+};
+
+export const PANEL_MAP = {
+  hierarchy: "showHierarchy",
+  inspector: "showInspector",
+  assets: "showAssets",
+  console: "showConsole",
+  aiCopilot: "showAICopilot",
+  scriptEditor: "showScriptEditor",
+} as const;
+
+export const SIZE_MAP = {
+  left: "leftWidth",
+  right: "rightWidth",
+  inspector: "inspectorWidth",
+  bottom: "bottomHeight",
+  assets: "assetsWidth",
+  console: "consoleWidth",
+} as const;
+
+export const PERSIST_KEYS = [
+  "showHierarchy",
+  "showInspector",
+  "showAssets",
+  "showConsole",
+  "showAICopilot",
+  "showScriptEditor",
+  "leftWidth",
+  "rightWidth",
+  "inspectorWidth",
+  "bottomHeight",
+  "assetsWidth",
+  "consoleWidth",
+  "activePanelId",
+  "editorMode",
+  "viewMode",
+  "showGrid",
+  "showAxes",
+  "shadingMode",
+  "showBloom",
+  "showEnvironment",
+  "showAICopilotSettings",
+  "engineConfig",
+  "shortcuts",
+] as const;
+
+export const DEFAULT_ENGINE_CONFIG = {
+  editorTheme: "Sovereign Dark",
+  uiScale: 100,
+  locale: "English (Global)",
+  cameraSensitivity: 0.5,
+  interactionMargin: 2,
+  invertY: false,
+  smartSnap: true,
+  antiAliasing: "8x Samples",
+  shadowResolution: "2048px (Elite)",
+  textureFiltering: "Anisotropic 16x",
+  vSync: "Synchronized",
+  enableSSR: true,
+  enableMotionBlur: true,
+  neuralMaxTokens: 4096,
+  neuralTemperature: 0.72,
+};
+
+export const LAYOUT_PRESETS = {
+  architect: {
+    showHierarchy: true,
+    showInspector: true,
+    showAssets: true,
+    showConsole: false,
+    showScriptEditor: false,
+    leftWidth: 260,
+    rightWidth: 340,
+    inspectorWidth: 320,
+    bottomHeight: 280,
+    assetsWidth: 500,
+  },
+  programmer: {
+    showHierarchy: true,
+    showInspector: false,
+    showAssets: false,
+    showConsole: true,
+    showScriptEditor: true,
+    leftWidth: 220,
+    rightWidth: 400,
+    inspectorWidth: 320,
+    bottomHeight: 320,
+    assetsWidth: 500,
+  },
+  animator: {
+    showHierarchy: false,
+    showInspector: true,
+    showAssets: true,
+    showConsole: false,
+    showScriptEditor: false,
+    leftWidth: 200,
+    rightWidth: 300,
+    inspectorWidth: 320,
+    bottomHeight: 450,
+    assetsWidth: 500,
+  },
+} as const;

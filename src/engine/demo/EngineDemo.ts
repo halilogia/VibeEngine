@@ -66,7 +66,8 @@ export function runEngineDemo(canvas: HTMLCanvasElement): Application {
     app.addSystem(new RenderSystem());
 
     const floor = new Entity('Floor');
-    floor.addComponent(new TransformComponent().setPosition(0, -0.5, 0));
+    const floorTransform = new TransformComponent(new THREE.Vector3(0, -0.5, 0));
+    floor.addComponent(floorTransform);
     const floorGeometry = new THREE.BoxGeometry(20, 1, 20);
     const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x16213e });
     const floorRender = new RenderComponent(new THREE.Mesh(floorGeometry, floorMaterial));
@@ -103,7 +104,8 @@ export function runEngineDemo(canvas: HTMLCanvasElement): Application {
     }
 
     const player = new Entity('Player');
-    player.addComponent(new TransformComponent().setPosition(0, 0.5, 5));
+    const playerTransform = new TransformComponent(new THREE.Vector3(0, 0.5, 5));
+    player.addComponent(playerTransform);
     const playerGeometry = new THREE.SphereGeometry(0.5, 32, 32);
     const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x0f3460 });
     const playerRender = new RenderComponent(new THREE.Mesh(playerGeometry, playerMaterial));

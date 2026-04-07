@@ -23,13 +23,24 @@ export abstract class Component {
 
   clone(): Component {
     const cloned = Object.create(Object.getPrototypeOf(this));
-    Object.assign(cloned, this);
+    Object.getOwnPropertyNames(this).forEach((key) => {
+      const value = (this as Record<string, unknown>)[key];
+      if (value && typeof value === 'object' && 'clone' in value && typeof (value as { clone: unknown }).clone === 'function') {
+        (cloned as Record<string, unknown>)[key] = (value as { clone: () => unknown }).clone();
+      } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+        (cloned as Record<string, unknown>)[key] = { ...value };
+      } else {
+        (cloned as Record<string, unknown>)[key] = value;
+      }
+    });
     cloned.entity = null;
     return cloned;
   }
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type ComponentClass<T extends Component = Component> = {
-  new (...args: unknown[]): T;
+  new (...args: any[]): T;
   readonly TYPE: string;
 };
+/* eslint-enable @typescript-eslint/no-explicit-any */

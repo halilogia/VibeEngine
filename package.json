@@ -13,7 +13,8 @@
     "main": "electron-main/main.cjs",
     "scripts": {
         "start": "npm run electron:dev",
-        "lint": "eslint src",
+        "lint": "eslint src --fix",
+        "lint:check": "eslint src",
         "dev": "vite",
         "test": "vitest",
         "test:coverage": "vitest run --coverage",

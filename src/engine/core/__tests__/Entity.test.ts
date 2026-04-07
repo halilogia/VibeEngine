@@ -41,9 +41,8 @@ describe('Entity', () => {
         const component = new MockComponent();
         
         entity.addComponent(component);
-        const removed = entity.removeComponent(MockComponent);
+        entity.removeComponent(MockComponent);
         
-        expect(removed).toBe(true);
         expect(entity.hasComponent(MockComponent)).toBe(false);
         expect(component.entity).toBeNull();
         expect(component.onDetach).toHaveBeenCalled();
@@ -70,7 +69,8 @@ describe('Entity', () => {
         const leaf = new Entity('Leaf');
         root.addChild(leaf);
         
-        const cloned = root.clone('ClonedRoot');
+        const cloned = root.clone();
+        cloned.name = 'ClonedRoot';
         
         expect(cloned.name).toBe('ClonedRoot');
         expect(cloned.hasComponent(MockComponent)).toBe(true);

@@ -6,12 +6,14 @@ import type { ApplicationOptions } from "./types";
 
 export class Application {
   readonly threeScene: THREE.Scene;
+  readonly editorScene: THREE.Scene;
   readonly camera: THREE.PerspectiveCamera;
   readonly renderer: THREE.WebGLRenderer;
   readonly canvas: HTMLCanvasElement;
 
   readonly scene: Scene;
   private readonly systems: System[] = [];
+  private readonly boundOnResize: () => void;
 
   private running: boolean = false;
   private lastTime: number = 0;
@@ -31,8 +33,11 @@ export class Application {
 
     this.threeScene = new THREE.Scene();
     this.threeScene.background = new THREE.Color(
-      options.backgroundColor ?? 0x000000,
+      options.backgroundColor ?? 0x11111a,
     );
+
+    this.editorScene = new THREE.Scene();
+    this.editorScene.background = null;
 
     this.camera = new THREE.PerspectiveCamera(
       75,
@@ -58,9 +63,19 @@ export class Application {
     this.renderer.toneMappingExposure = 1.0;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    this.threeScene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    directionalLight.position.set(10, 20, 10);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.set(2048, 2048);
+    this.threeScene.add(directionalLight);
+
     this.scene = new Scene("MainScene");
 
-    window.addEventListener("resize", this.onResize.bind(this));
+    this.boundOnResize = this.onResize.bind(this);
+    window.addEventListener("resize", this.boundOnResize);
 
     console.log("✅ Application initialized");
   }
@@ -164,7 +179,7 @@ export class Application {
 
     this.renderer.dispose();
 
-    window.removeEventListener("resize", this.onResize.bind(this));
+    window.removeEventListener("resize", this.boundOnResize);
 
     console.log("🗑️ Application destroyed");
   }
@@ -198,7 +213,13 @@ export class Application {
       this.updateSystems(frameTime);
     }
 
+    this.renderer.autoClear = false;
+    this.renderer.clear();
     this.renderer.render(this.threeScene, this.camera);
+
+    if (this.editorScene.children.length > 0) {
+      this.renderer.render(this.editorScene, this.camera);
+    }
   };
 
   private updateSystems(deltaTime: number): void {
@@ -218,13 +239,20 @@ export class Application {
   }
 
   private onResize(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-
-    this.renderer.setSize(width, height);
+    const parent = this.canvas.parentElement;
+    if (parent) {
+      const width = parent.clientWidth;
+      const height = parent.clientHeight;
+      this.camera.aspect = width / height;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(width, height);
+    } else {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      this.camera.aspect = width / height;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(width, height);
+    }
   }
 
   get fps(): number {

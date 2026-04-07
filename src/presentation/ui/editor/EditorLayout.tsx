@@ -13,7 +13,7 @@ import {
     TitleBar} from './index';
 import { useEditorStore } from '@infrastructure/store';
 import { VibeTheme } from '@themes/VibeStyles';
-import { layoutStyles as styles } from './EditorLayout.styles';
+import { layoutStyles as styles, globalEditorStyles } from './EditorLayout.styles';
 import { VibeErrorBoundary } from '@ui/common/VibeErrorBoundary';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -265,74 +265,7 @@ export const EditorLayout: React.FC = () => {
                 </div>
             </div>
 
-            <style dangerouslySetInnerHTML={{ __html: `
-                .v-resizer { 
-                    z-index: 3000; 
-                    transition: all 0.2s; 
-                    position: relative;
-                    background: transparent !important;
-                }
-                .v-resizer-vertical {
-                    width: 8px;
-                    cursor: col-resize;
-                    margin: 0 -4px;
-                }
-                .v-resizer-vertical::after {
-                    content: '';
-                    position: absolute;
-                    left: 50%;
-                    top: 0;
-                    bottom: 0;
-                    width: 1px;
-                    background: transparent;
-                    transition: all 0.2s;
-                    transform: translateX(-50%);
-                }
-                .v-resizer-vertical:hover::after {
-                    width: 3px;
-                    background: ${VibeTheme.colors.accent};
-                    box-shadow: 0 0 10px ${VibeTheme.colors.accent}66;
-                }
-                .h-resizer { 
-                    height: 8px; 
-                    cursor: row-resize; 
-                    z-index: 3000; 
-                    transition: all 0.2s; 
-                    background: transparent !important;
-                    position: relative;
-                }
-                .h-resizer::after {
-                    content: '';
-                    position: absolute;
-                    top: 50%;
-                    left: 0;
-                    right: 0;
-                    height: 1px;
-                    background: transparent;
-                    transition: all 0.2s;
-                    transform: translateY(-50%);
-                }
-                .h-resizer:hover::after { 
-                    height: 3px;
-                    background: ${VibeTheme.colors.accent}; 
-                    box-shadow: 0 0 10px ${VibeTheme.colors.accent}66;
-                }
-                
-                *::-webkit-scrollbar {
-                    width: 4px;
-                    height: 4px;
-                }
-                *::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                *::-webkit-scrollbar-thumb {
-                    background: rgba(255, 255, 255, 0.05);
-                    border-radius: 10px;
-                }
-                *::-webkit-scrollbar-thumb:hover {
-                    background: ${VibeTheme.colors.accent}66;
-                }
-            ` }} />
+            <style dangerouslySetInnerHTML={{ __html: globalEditorStyles(VibeTheme) }} />
         </div>
     );
 };

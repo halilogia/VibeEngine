@@ -23,7 +23,7 @@ describe('CollisionComponent', () => {
     it('should calculate world bounding box correctly', () => {
         const transform = e1.getComponent(TransformComponent)!;
         transform.position.set(10, 0, 0);
-        transform.setScale(2); 
+        transform.setScale(2, 2, 2);
         
         c1.setBox(1, 1, 1);
         const bbox = c1.getWorldBoundingBox();
@@ -35,7 +35,7 @@ describe('CollisionComponent', () => {
     it('should calculate world bounding sphere correctly', () => {
         const transform = e1.getComponent(TransformComponent)!;
         transform.position.set(0, 5, 0);
-        transform.setScale(3);
+        transform.setScale(3, 3, 3);
         
         c1.setSphere(1);
         const sphere = c1.getWorldBoundingSphere();

@@ -50,22 +50,50 @@ export class VibeErrorBoundary extends Component<Props, State> {
                         The rest of the engine is safe.
                     </p>
                     
-                    {}
-                    <div style={{ 
-                        fontSize: '10px', 
-                        color: '#ef4444', 
-                        background: 'rgba(0,0,0,0.5)', 
-                        padding: '10px', 
-                        borderRadius: '4px', 
-                        textAlign: 'left',
-                        maxWidth: '90%',
-                        overflow: 'auto',
-                        fontFamily: 'monospace'
-                    }}>
-                        {this.state.error?.message}
+                    {/* Error Detail with Copy Action */}
+                    <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <div style={{ 
+                            fontSize: '11px', 
+                            color: '#ef4444', 
+                            background: 'rgba(5, 5, 8, 0.8)', 
+                            padding: '12px', 
+                            paddingRight: '36px',
+                            borderRadius: '8px', 
+                            textAlign: 'left',
+                            maxWidth: '90%',
+                            maxHeight: '120px',
+                            overflow: 'auto',
+                            fontFamily: '"Fira Code", monospace',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            position: 'relative'
+                        }}>
+                            <div style={{ fontWeight: 800, marginBottom: '4px', textTransform: 'uppercase', fontSize: '9px', opacity: 0.6 }}>Diagnostics</div>
+                            {this.state.error?.name}: {this.state.error?.message}
+                            <VibeButton 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => {
+                                    const fullError = `Panel: ${this.props.name}\nError: ${this.state.error?.name}\nMessage: ${this.state.error?.message}\nStack: ${this.state.error?.stack}`;
+                                    navigator.clipboard.writeText(fullError);
+                                    alert('Error details copied to clipboard!');
+                                }}
+                                style={{ 
+                                    position: 'absolute', 
+                                    top: '8px', 
+                                    right: '8px', 
+                                    padding: '4px', 
+                                    height: '24px', 
+                                    width: '24px',
+                                    color: '#ef4444'
+                                }}
+                            >
+                                <VibeIcons name="Copy" size={12} />
+                            </VibeButton>
+                        </div>
                     </div>
 
-                    <VibeButton variant="primary" size="sm" onClick={this.handleReset}>
+                    <VibeButton variant="primary" size="sm" onClick={this.handleReset} style={{ marginTop: '8px' }}>
                         <VibeIcons name="RefreshCcw" size={14} /> Restore Panel
                     </VibeButton>
                 </div>

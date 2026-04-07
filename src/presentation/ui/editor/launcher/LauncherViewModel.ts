@@ -3,7 +3,10 @@ import {
   ProjectInfo,
 } from "@infrastructure/store/useProjectStore";
 import { ProjectScanner } from "@infrastructure/services/ProjectScanner";
-import { useSceneStore, type AssetData } from "@infrastructure/store/sceneStore";
+import {
+  useSceneStore,
+  type AssetData,
+} from "@infrastructure/store/sceneStore";
 import { deserializeScene } from "@editor/serialization/SceneSerializer";
 
 export const useLauncherViewModel = () => {
@@ -60,33 +63,29 @@ export const useLauncherViewModel = () => {
     if (selectedProject) {
       setLoading(true);
       try {
-        
-        const assets = await ProjectScanner.scanProjectAssets(
+        const assets = (await ProjectScanner.scanProjectAssets(
           selectedProject.path,
-        ) as AssetData[];
+        )) as AssetData[];
         setAssets(assets);
 
         await ProjectScanner.setActiveProject(selectedProject.path);
 
-        const sceneName = selectedProject.mainScene || "main"; 
+        const sceneName = selectedProject.mainScene || "main";
         const baseFolder = selectedProject.path;
         const sceneFile = `${baseFolder}/src/levels/${sceneName}.json`;
 
         try {
           const result = await ProjectScanner.readFile(sceneFile);
           if (result.success && result.content) {
-            
             deserializeScene(result.content);
             console.log(`✅ Scene auto-loaded from: ${sceneFile}`);
           } else {
-            
             const rootScene = `${baseFolder}/scene.json`;
             const rootRes = await ProjectScanner.readFile(rootScene);
             if (rootRes.success && rootRes.content) {
               deserializeScene(rootRes.content);
               console.log(`✅ Scene auto-loaded from: ${rootScene}`);
             } else {
-              
               console.log(
                 '🔍 No scene found. Attempting automatic "Ultimate Snapshot" from local dev server...',
               );
@@ -137,12 +136,78 @@ export const useLauncherViewModel = () => {
     }
   };
 
+  const createNewProject = async (name: string) => {
+    if (!name) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await ProjectScanner.pickProjectFolder();
+      if (result) {
+        const projectPath = result.path;
+
+        // Construct basic project structure
+        await ProjectScanner.createFolder(`${projectPath}/src/levels`);
+        await ProjectScanner.createFolder(`${projectPath}/src/domain`);
+        await ProjectScanner.createFolder(`${projectPath}/assets/models`);
+        await ProjectScanner.createFolder(`${projectPath}/assets/textures`);
+
+        // Create initial scene (Unity-style main.json)
+        const defaultScene = {
+          entities: [],
+          rootEntityIds: [],
+          metadata: {
+            name: "Main Scene",
+            version: "1.0.0",
+            engine: "vibe-engine",
+          },
+        };
+
+        await ProjectScanner.createFile(
+          `${projectPath}/src/levels/main.json`,
+          JSON.stringify(defaultScene, null, 2),
+        );
+
+        // Create project-data.json
+        const projectData = {
+          name,
+          version: "0.1.0",
+          engine: "vibe-engine",
+          mainScene: "main",
+          author: "Developer",
+          description: "A new VibeEngine project",
+        };
+
+        await ProjectScanner.createFile(
+          `${projectPath}/project-data.json`,
+          JSON.stringify(projectData, null, 2),
+        );
+
+        const newProject: ProjectInfo = {
+          ...result,
+          name,
+          hasDomain: true,
+          mainScene: "main",
+        };
+
+        addProject(newProject);
+        selectProject(newProject);
+        console.log(`🚀 New project created: ${name} at ${projectPath}`);
+      }
+    } catch (e) {
+      console.error("Project creation error:", e);
+      setError("Proje oluşturulamadı. Lütfen klasör izinlerini kontrol edin.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     projects,
     selectedProject,
     isLoading,
     error,
     pickProjectFolder,
+    createNewProject,
     handleProjectSelect,
     handleProjectRemove,
     launchActiveProject,
