@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string) => void;
+  onCreate: (name: string, pickCustomPath?: boolean) => void;
 }
 
 export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, onClose, onCreate }) => {
@@ -72,18 +72,25 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, 
           />
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <button onClick={onClose} style={{ 
             flex: 1, padding: '1.25rem', background: 'transparent', 
             border: '1px solid var(--vibe-border)', color: 'var(--vibe-text-secondary)',
-            borderRadius: '16px', cursor: 'pointer', fontWeight: 600 
+            borderRadius: '16px', cursor: 'pointer', fontWeight: 600, minWidth: '120px'
           }}>
             {t('settings.cancel')}
           </button>
-          <button onClick={handleCreate} disabled={!newProjectName} style={{ 
+          <button onClick={() => onCreate(newProjectName, true)} style={{ 
+            flex: 1, padding: '1.25rem', backgroundColor: 'var(--vibe-bg-secondary)', 
+            color: 'var(--vibe-text-main)', border: '1px solid var(--vibe-border)', borderRadius: '16px', 
+            cursor: 'pointer', fontWeight: 600, minWidth: '150px'
+          }}>
+            {t('launcher.select_location')}
+          </button>
+          <button onClick={() => onCreate(newProjectName, false)} disabled={!newProjectName} style={{ 
             flex: 2, padding: '1.25rem', backgroundColor: 'var(--vibe-accent)', 
             color: '#fff', border: 'none', borderRadius: '16px', 
-            cursor: 'pointer', fontWeight: 900, opacity: newProjectName ? 1 : 0.5
+            cursor: 'pointer', fontWeight: 900, opacity: newProjectName ? 1 : 0.5, minWidth: '150px'
           }}>
             {t('launcher.create')}
           </button>

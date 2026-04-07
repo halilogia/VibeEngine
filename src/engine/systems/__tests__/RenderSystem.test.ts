@@ -73,15 +73,25 @@ describe('RenderSystem', () => {
         entity.addComponent(new TransformComponent());
         const render = entity.addComponent(new RenderComponent(new THREE.Mesh()));
 
+        // First update to add the object to scene
+        renderSystem.update(0.016, [entity]);
+        expect(mockThreeScene.children.length).toBe(1);
+        expect(render.object3D?.visible).toBe(true);
+
+        // Test entity disabled - activeInHierarchy should be false
         entity.enabled = false;
         renderSystem.update(0.016, [entity]);
         expect(render.object3D?.visible).toBe(false);
 
+        // Re-enable entity for next test
         entity.enabled = true;
+        
+        // Test render component disabled
         render.enabled = false;
         renderSystem.update(0.016, [entity]);
         expect(render.object3D?.visible).toBe(false);
 
+        // Test both enabled
         render.enabled = true;
         renderSystem.update(0.016, [entity]);
         expect(render.object3D?.visible).toBe(true);

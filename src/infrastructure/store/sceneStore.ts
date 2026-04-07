@@ -78,24 +78,26 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   selectedEntityId: null,
 
   addEntity: (name = "New Entity", parentId = null) => {
-    const id = get().nextEntityId;
-    const entity: EntityData = {
-      id,
-      name,
-      parentId,
-      children: [],
-      components: [
-        {
-          type: "Transform",
-          data: { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
-          enabled: true,
-        },
-      ],
-      enabled: true,
-      tags: [],
-    };
-
+    let newId = 0;
     set((state) => {
+      const id = state.nextEntityId;
+      newId = id;
+      const entity: EntityData = {
+        id,
+        name,
+        parentId,
+        children: [],
+        components: [
+          {
+            type: "Transform",
+            data: { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+            enabled: true,
+          },
+        ],
+        enabled: true,
+        tags: [],
+      };
+
       const newEntities = new Map(state.entities);
       newEntities.set(id, entity);
 
@@ -105,7 +107,11 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       } else {
         const parent = newEntities.get(parentId);
         if (parent) {
-          parent.children.push(id);
+          // Clone parent to avoid mutation
+          newEntities.set(parentId, {
+            ...parent,
+            children: [...parent.children, id],
+          });
         }
       }
 
@@ -117,7 +123,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       };
     });
 
-    return id;
+    return newId;
   },
 
   removeEntity: (id) =>

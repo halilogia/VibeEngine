@@ -1,38 +1,30 @@
+import { System, Entity } from '@engine';
 
+export type ActionType = 'Button' | 'Axis';
 
-import { System } from '@engine';
-import type { Entity } from '@engine';
+export interface ActionMapping {
+    name: string;
+    type: ActionType;
+    keys: string[];
+    // For Axis
+    positiveKeys?: string[];
+    negativeKeys?: string[];
+}
 
 export interface InputState {
-    
     horizontal: number;
-    
     vertical: number;
-    
     mousePosition: { x: number; y: number };
-    
     mouseNDC: { x: number; y: number };
-    
     isPointerDown: boolean;
-    
-    keysDown: Set<string>;
-    
-    keysPressed: Set<string>;
-    
-    keysReleased: Set<string>;
-    
     swipe: 'left' | 'right' | 'up' | 'down' | null;
-    
     tapped: boolean;
-    
     doubleTapped: boolean;
-    
     isTouching: boolean;
 }
 
 export class InputSystem extends System {
-    
-    readonly priority = 0;
+    readonly priority = -100; // Run early
 
     readonly state: InputState = {
         horizontal: 0,
@@ -40,14 +32,18 @@ export class InputSystem extends System {
         mousePosition: { x: 0, y: 0 },
         mouseNDC: { x: 0, y: 0 },
         isPointerDown: false,
-        keysDown: new Set(),
-        keysPressed: new Set(),
-        keysReleased: new Set(),
         swipe: null,
         tapped: false,
         doubleTapped: false,
         isTouching: false,
     };
+
+    private keysDown: Set<string> = new Set();
+    private keysPressed: Set<string> = new Set();
+    private keysReleased: Set<string> = new Set();
+
+    private actions: Map<string, ActionMapping> = new Map();
+    private actionValues: Map<string, number> = new Map();
 
     private touchStartX = 0;
     private touchStartY = 0;
@@ -59,14 +55,9 @@ export class InputSystem extends System {
     private readonly TAP_DURATION = 200;
     private readonly DOUBLE_TAP_GAP = 300;
 
-    private keyAxisMapping = {
-        horizontal: { positive: ['d', 'D', 'ArrowRight'], negative: ['a', 'A', 'ArrowLeft'] },
-        vertical: { positive: ['w', 'W', 'ArrowUp'], negative: ['s', 'S', 'ArrowDown'] },
-    };
-
     initialize(): void {
-        window.addEventListener('keydown', this.onKeyDown);
-        window.addEventListener('keyup', this.onKeyUp);
+        window.addEventListener('keydown', this.handleKeyDown);
+        window.addEventListener('keyup', this.handleKeyUp);
         window.addEventListener('mousedown', this.onPointerDown);
         window.addEventListener('mouseup', this.onPointerUp);
         window.addEventListener('mousemove', this.onMouseMove);
@@ -74,76 +65,87 @@ export class InputSystem extends System {
         window.addEventListener('touchend', this.onTouchEnd);
         window.addEventListener('touchmove', this.onTouchMove, { passive: false });
 
-        console.log('✅ InputSystem: Unified input listener attached');
+        // Default ELITE Mappings
+        this.registerAction({ name: 'Horizontal', type: 'Axis', keys: [], positiveKeys: ['d', 'ArrowRight'], negativeKeys: ['a', 'ArrowLeft'] });
+        this.registerAction({ name: 'Vertical', type: 'Axis', keys: [], positiveKeys: ['w', 'ArrowUp'], negativeKeys: ['s', 'ArrowDown'] });
+        this.registerAction({ name: 'Jump', type: 'Button', keys: [' ', 'Spacebar'] });
+        this.registerAction({ name: 'Fire', type: 'Button', keys: ['f', 'F', 'Control'] });
+
+        console.log('🎮 InputSystem: Action-Based Mapping Core Online');
     }
 
     update(_deltaTime: number, _entities: Entity[]): void {
-        this.updateAxisFromKeyboard();
+        this.actions.forEach((mapping, name) => {
+            if (mapping.type === 'Button') {
+                const isDown = mapping.keys.some(k => this.keysDown.has(k.toLowerCase()) || this.keysDown.has(k));
+                this.actionValues.set(name, isDown ? 1 : 0);
+            } else {
+                const pos = mapping.positiveKeys?.some(k => this.keysDown.has(k.toLowerCase()) || this.keysDown.has(k)) ? 1 : 0;
+                const neg = mapping.negativeKeys?.some(k => this.keysDown.has(k.toLowerCase()) || this.keysDown.has(k)) ? 1 : 0;
+                this.actionValues.set(name, pos - neg);
+            }
+        });
+
+        // Sync legacy state
+        this.state.horizontal = this.getAxis('Horizontal');
+        this.state.vertical = this.getAxis('Vertical');
     }
 
     postUpdate(): void {
-        this.state.keysPressed.clear();
-        this.state.keysReleased.clear();
+        this.keysPressed.clear();
+        this.keysReleased.clear();
         this.state.swipe = null;
         this.state.tapped = false;
         this.state.doubleTapped = false;
     }
 
-    destroy(): void {
-        window.removeEventListener('keydown', this.onKeyDown);
-        window.removeEventListener('keyup', this.onKeyUp);
-        window.removeEventListener('mousedown', this.onPointerDown);
-        window.removeEventListener('mouseup', this.onPointerUp);
-        window.removeEventListener('mousemove', this.onMouseMove);
-        window.removeEventListener('touchstart', this.onTouchStart);
-        window.removeEventListener('touchend', this.onTouchEnd);
-        window.removeEventListener('touchmove', this.onTouchMove);
-    }
-
+    // Legacy compatibility
     isKeyDown(key: string): boolean {
-        return this.state.keysDown.has(key) || this.state.keysDown.has(key.toLowerCase());
+        return this.keysDown.has(key) || this.keysDown.has(key.toLowerCase());
     }
 
     isKeyPressed(key: string): boolean {
-        return this.state.keysPressed.has(key) || this.state.keysPressed.has(key.toLowerCase());
+        return this.keysPressed.has(key) || this.keysPressed.has(key.toLowerCase());
     }
 
     isKeyReleased(key: string): boolean {
-        return this.state.keysReleased.has(key) || this.state.keysReleased.has(key.toLowerCase());
+        return this.keysReleased.has(key) || this.keysReleased.has(key.toLowerCase());
     }
 
-    getAxis(name: 'horizontal' | 'vertical'): number {
-        return name === 'horizontal' ? this.state.horizontal : this.state.vertical;
+    // ELITE API
+    getAxis(name: string): number {
+        return this.actionValues.get(name) ?? 0;
     }
 
-    private updateAxisFromKeyboard(): void {
-        const mapping = this.keyAxisMapping;
-
-        const hPositive = mapping.horizontal.positive.some(k => this.state.keysDown.has(k));
-        const hNegative = mapping.horizontal.negative.some(k => this.state.keysDown.has(k));
-
-        if (!this.state.isTouching) {
-            this.state.horizontal = (hPositive ? 1 : 0) - (hNegative ? 1 : 0);
-        }
-
-        const vPositive = mapping.vertical.positive.some(k => this.state.keysDown.has(k));
-        const vNegative = mapping.vertical.negative.some(k => this.state.keysDown.has(k));
-
-        if (!this.state.isTouching) {
-            this.state.vertical = (vPositive ? 1 : 0) - (vNegative ? 1 : 0);
-        }
+    getAction(name: string): number {
+        return this.getAxis(name);
     }
 
-    private onKeyDown = (e: KeyboardEvent): void => {
-        if (!this.state.keysDown.has(e.key)) {
-            this.state.keysPressed.add(e.key);
+    getButton(name: string): boolean {
+        return this.getAction(name) > 0.5;
+    }
+
+    getButtonDown(name: string): boolean {
+        const mapping = this.actions.get(name);
+        if (!mapping) return false;
+        return mapping.keys.some(k => this.keysPressed.has(k.toLowerCase()) || this.keysPressed.has(k));
+    }
+
+    registerAction(mapping: ActionMapping): void {
+        this.actions.set(mapping.name, mapping);
+        this.actionValues.set(mapping.name, 0);
+    }
+
+    private handleKeyDown = (e: KeyboardEvent) => {
+        if (!this.keysDown.has(e.key)) {
+            this.keysPressed.add(e.key);
         }
-        this.state.keysDown.add(e.key);
+        this.keysDown.add(e.key);
     };
 
-    private onKeyUp = (e: KeyboardEvent): void => {
-        this.state.keysDown.delete(e.key);
-        this.state.keysReleased.add(e.key);
+    private handleKeyUp = (e: KeyboardEvent) => {
+        this.keysDown.delete(e.key);
+        this.keysReleased.add(e.key);
     };
 
     private onPointerDown = (e: MouseEvent): void => {
@@ -199,8 +201,6 @@ export class InputSystem extends System {
 
         this.state.isTouching = false;
         this.state.isPointerDown = false;
-        this.state.horizontal = 0;
-        this.state.vertical = 0;
     };
 
     private onTouchMove = (e: TouchEvent): void => {
@@ -211,18 +211,28 @@ export class InputSystem extends System {
 
             const dx = touch.clientX - this.touchStartX;
             const dy = touch.clientY - this.touchStartY;
-            const maxDrag = 50; 
+            const maxDrag = 50;
 
             this.state.horizontal = Math.max(-1, Math.min(1, dx / maxDrag));
-            this.state.vertical = Math.max(-1, Math.min(1, -dy / maxDrag)); 
+            this.state.vertical = Math.max(-1, Math.min(1, -dy / maxDrag));
         }
     };
 
     private updateMousePosition(x: number, y: number): void {
         this.state.mousePosition.x = x;
         this.state.mousePosition.y = y;
-
         this.state.mouseNDC.x = (x / window.innerWidth) * 2 - 1;
         this.state.mouseNDC.y = -(y / window.innerHeight) * 2 + 1;
+    }
+
+    destroy(): void {
+        window.removeEventListener('keydown', this.handleKeyDown);
+        window.removeEventListener('keyup', this.handleKeyUp);
+        window.removeEventListener('mousedown', this.onPointerDown);
+        window.removeEventListener('mouseup', this.onPointerUp);
+        window.removeEventListener('mousemove', this.onMouseMove);
+        window.removeEventListener('touchstart', this.onTouchStart);
+        window.removeEventListener('touchend', this.onTouchEnd);
+        window.removeEventListener('touchmove', this.onTouchMove);
     }
 }

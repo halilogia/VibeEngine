@@ -57,7 +57,8 @@ const defaultState = {
   showBloom: true,
   showEnvironment: true,
   showAICopilotSettings: false,
-  activeSettingsTab: "project",
+  showBuildModal: false,
+  activeSettingsTab: "project" as "project" | "interface" | "input" | "graphics" | "neural" | "ai",
   isScriptFullScreen: false,
   showAboutModal: false,
   previousTrayState: null,
@@ -105,8 +106,9 @@ export const useEditorStore = create<EditorState>()(
       setShowAICopilotSettings: (show, tab) =>
         set((s) => ({
           showAICopilotSettings: show,
-          activeSettingsTab: tab || s.activeSettingsTab,
+          activeSettingsTab: tab === "about" ? "project" : (tab ?? s.activeSettingsTab),
         })),
+      setShowBuildModal: (show) => set({ showBuildModal: show }),
       setShowAboutModal: (show) => set({ showAboutModal: show }),
       setScriptFullScreen: (val, restore) =>
         set((s) => {

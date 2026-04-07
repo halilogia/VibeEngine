@@ -14,19 +14,39 @@ export abstract class Script {
     return this.scriptComponent?.app ?? null;
   }
 
+  // ELITE: Script properties exposed to Inspector
+  properties: Record<
+    string,
+    {
+      type: "number" | "string" | "boolean" | "color";
+      value: unknown;
+      min?: number;
+      max?: number;
+    }
+  > = {};
+
   getComponent<T extends Component>(type: ComponentClass<T>): T | null {
     return this.entity?.getComponent(type) ?? null;
   }
 
+  // ELITE: Scripting Helpers
+  async waitForSeconds(seconds: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  }
+
   initialize?(): void;
-
   start?(): void;
-
   update?(deltaTime: number): void;
-
   lateUpdate?(deltaTime: number): void;
-
   destroy?(): void;
+
+  onEnable?(): void;
+  onDisable?(): void;
+
+  onCollisionEnter?(other: Entity): void;
+  onCollisionExit?(other: Entity): void;
+  onTriggerEnter?(other: Entity): void;
+  onTriggerExit?(other: Entity): void;
 
   clone(): Script {
     const cloned = Object.create(Object.getPrototypeOf(this));
@@ -102,6 +122,30 @@ export class ScriptComponent extends Component {
     }
   }
 
+  onCollisionEnter(other: Entity): void {
+    for (const script of this.scripts) {
+      if (script.onCollisionEnter) script.onCollisionEnter(other);
+    }
+  }
+
+  onCollisionExit(other: Entity): void {
+    for (const script of this.scripts) {
+      if (script.onCollisionExit) script.onCollisionExit(other);
+    }
+  }
+
+  onTriggerEnter(other: Entity): void {
+    for (const script of this.scripts) {
+      if (script.onTriggerEnter) script.onTriggerEnter(other);
+    }
+  }
+
+  onTriggerExit(other: Entity): void {
+    for (const script of this.scripts) {
+      if (script.onTriggerExit) script.onTriggerExit(other);
+    }
+  }
+
   override onAttach(): void {
     this.initializeAll();
   }
@@ -109,6 +153,15 @@ export class ScriptComponent extends Component {
   override onEnable(): void {
     if (!this.started) {
       this.startAll();
+    }
+    for (const script of this.scripts) {
+      if (script.onEnable) script.onEnable();
+    }
+  }
+
+  override onDisable(): void {
+    for (const script of this.scripts) {
+      if (script.onDisable) script.onDisable();
     }
   }
 

@@ -39,10 +39,12 @@ class PlayerMoveScript extends Script {
         const input = this.app?.getSystem(InputSystem);
 
         if (transform && input) {
+            const h = input.getAxis('Horizontal');
+            const v = input.getAxis('Vertical');
             transform.translate(
-                input.state.horizontal * this.speed * deltaTime,
+                h * this.speed * deltaTime,
                 0,
-                -input.state.vertical * this.speed * deltaTime
+                -v * this.speed * deltaTime
             );
         }
     }

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { System, Entity, TransformComponent, RenderComponent, Component } from "@engine";
+import { System, Entity, TransformComponent, RenderComponent, Component, SeaComponent, WeatherComponent, AudioComponent, InputReceiverComponent, PostProcessingComponent, LightComponent } from "@engine";
 import { useSceneStore, type EntityData } from "@infrastructure/store";
 import { MeshUtils } from "../../utils/MeshUtils";
 
@@ -26,6 +26,49 @@ const componentRegistry: Record<string, ComponentFactory> = {
     const mesh = MeshUtils.createMesh(meshType, color);
     return new RenderComponent(mesh);
   },
+  SeaComponent: (data) => {
+    const seaParams = {
+        speed: data.speed as number,
+        amplitude: data.amplitude as number,
+        frequency: data.frequency as number,
+        color: data.color as string,
+    };
+    return new SeaComponent(seaParams);
+  },
+  WeatherComponent: (data) => {
+    return new WeatherComponent({
+        weatherType: data.weatherType as WeatherComponent["weatherType"],
+        intensity: data.intensity as number,
+        timeOfDay: data.timeOfDay as number,
+    });
+  },
+  AudioComponent: (data) => {
+    return new AudioComponent(data.isPositional as boolean ?? true, {
+        volume: data.volume as number ?? 1.0,
+        autoplay: data.autoplay as boolean ?? true,
+        loop: data.loop as boolean ?? true,
+    });
+  },
+  InputReceiver: (data) => {
+      return new InputReceiverComponent(data.playerId as number ?? 0);
+  },
+  PostProcessing: (data) => {
+      return new PostProcessingComponent({
+          bloomEnabled: data.bloomEnabled as boolean,
+          bloomStrength: data.bloomStrength as number,
+          bloomRadius: data.bloomRadius as number,
+          bloomThreshold: data.bloomThreshold as number,
+          exposure: data.exposure as number,
+      });
+  },
+  Light: (data) => {
+      return new LightComponent({
+          type: data.lightType as LightComponent["lightType"],
+          color: data.color as string,
+          intensity: data.intensity as number,
+          castShadow: data.castShadow as boolean,
+      });
+  }
 };
 
 export function registerComponentFactory(

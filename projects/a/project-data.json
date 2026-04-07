@@ -1,8 +1,8 @@
 {
-  "name": "halil",
+  "name": "a",
   "version": "0.1.0",
   "engine": "vibe-engine",
   "mainScene": "main",
-  "author": "Vibe Developer",
+  "author": "Developer",
   "description": "A new VibeEngine project"
 }

@@ -109,7 +109,33 @@ export const CommandPalette: React.FC = () => {
                 const id = addEntity('Cube', null);
                 addComponent(id, { type: 'Render', data: { meshType: 'cube' }, enabled: true });
             }},
-            { id: 'play', label: 'Play / Stop', desc: 'Toggle scene simulation', icon: 'Play', cat: 'Action', onSelect: play },
+            { id: 'storm', label: 'Create Storm Scene', desc: 'Initialize Ocean and Storm weather', icon: 'Sun' as VibeIconName, cat: 'Sovereign', onSelect: () => {
+                const seaId = addEntity('Ocean', null);
+                addComponent(seaId, { type: 'Render', data: { meshType: 'plane', color: '#1e3a8a' }, enabled: true });
+                addComponent(seaId, { type: 'SeaComponent', data: { speed: 1.8, amplitude: 1.2, frequency: 0.8 }, enabled: true });
+
+                const rainId = addEntity('RainParticles', null);
+                addComponent(rainId, { type: 'ParticleComponent', data: { 
+                    maxParticles: 5000, 
+                    size: 0.05, 
+                    color: '#ffffff', 
+                    velocity: [0, -20, 0],
+                    spawnRate: 200,
+                    lifetime: 2
+                }, enabled: true });
+                
+                useEditorStore.getState().toggleEnvironment();
+            }},
+            { id: 'rain', label: 'Weather: Heavy Rain', desc: 'Activate rain and storm clouds', icon: 'Cloud' as VibeIconName, cat: 'Atmosphere', onSelect: () => {
+                const id = addEntity('RainWeather', null);
+                addComponent(id, { type: 'WeatherComponent', data: { weatherType: 'rain', intensity: 0.8, timeOfDay: 14 }, enabled: true });
+            }},
+            { id: 'night', label: 'Weather: Mid Night', desc: 'Set time to 00:00', icon: 'Moon' as VibeIconName, cat: 'Atmosphere', onSelect: () => {
+                const id = addEntity('NightWeather', null);
+                addComponent(id, { type: 'WeatherComponent', data: { weatherType: 'clear', intensity: 0, timeOfDay: 0 }, enabled: true });
+            }},
+            { id: 'play', label: 'Play / Stop', desc: 'Toggle scene simulation', icon: 'Play' as VibeIconName, cat: 'Action', onSelect: play },
+            { id: 'build', label: 'Build Project', desc: 'Export for Web, Mobile, or Desktop', icon: 'Box' as VibeIconName, cat: 'Export', onSelect: () => useEditorStore.getState().setShowBuildModal(true) },
         ];
         if (!search) return items;
         return items.filter(i => i.label.toLowerCase().includes(search.toLowerCase()));

@@ -6,8 +6,10 @@ import { EditorApp } from './EditorApp';
 import '@lib/i18n';
 
 import { syncAICopilot, syncSceneContext } from '@editor/bridge';
+import { initConsoleBridge } from '@infrastructure/bridge/ConsoleBridge';
 import '@themes/SovereignTheme.css';
 
+initConsoleBridge();
 syncAICopilot();
 syncSceneContext();
 

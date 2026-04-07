@@ -52,6 +52,7 @@ export class Entity {
         const type = component.constructor as ComponentClass;
         this.components.set(type, component);
         component.entity = this;
+        if (component.onAttach) component.onAttach();
         return component;
     }
 
@@ -106,11 +107,12 @@ export class Entity {
 
     clone(): Entity {
         const cloned = new Entity(`${this.name}_clone`);
-        cloned.name = this.name;
         cloned._enabled = this._enabled;
         this.tags.forEach((tag) => cloned.tags.add(tag));
         this.components.forEach((comp) => {
-            cloned.components.set(comp.constructor as ComponentClass, comp.clone());
+            const clonedComp = comp.clone();
+            clonedComp.entity = cloned;
+            cloned.components.set(comp.constructor as ComponentClass, clonedComp);
         });
         this.children.forEach((child) => {
             const clonedChild = child.clone();

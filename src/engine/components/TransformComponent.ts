@@ -54,7 +54,17 @@ export class TransformComponent extends Component {
     }
 
     getWorldPosition(): THREE.Vector3 {
-        return this.position.clone();
+        if (!this.entity?.parent) {
+            return this.position.clone();
+        }
+
+        const parentTransform = this.entity.parent.getComponent(TransformComponent);
+        if (!parentTransform) {
+            return this.position.clone();
+        }
+
+        const parentWorldPos = parentTransform.getWorldPosition();
+        return parentWorldPos.add(this.position);
     }
 
     getForward(): THREE.Vector3 {

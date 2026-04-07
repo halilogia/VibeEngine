@@ -5,6 +5,7 @@ import type { Entity } from '@engine';
 import { TransformComponent } from '@engine';
 import { RigidbodyComponent } from '@engine';
 import { CollisionComponent } from '@engine';
+import { ScriptComponent } from '@engine';
 
 export class PhysicsSystem extends System {
     
@@ -99,9 +100,17 @@ export class PhysicsSystem extends System {
         if (a.isTrigger || b.isTrigger) {
             if (a.onTriggerEnter) a.onTriggerEnter(b);
             if (b.onTriggerEnter) b.onTriggerEnter(a);
+
+            // Script Dispatch
+            a.entity?.getComponent(ScriptComponent)?.onTriggerEnter(b.entity!);
+            b.entity?.getComponent(ScriptComponent)?.onTriggerEnter(a.entity!);
         } else {
             if (a.onCollisionEnter) a.onCollisionEnter(b);
             if (b.onCollisionEnter) b.onCollisionEnter(a);
+
+            // Script Dispatch
+            a.entity?.getComponent(ScriptComponent)?.onCollisionEnter(b.entity!);
+            b.entity?.getComponent(ScriptComponent)?.onCollisionEnter(a.entity!);
         }
     }
 
@@ -112,9 +121,17 @@ export class PhysicsSystem extends System {
         if (a.isTrigger || b.isTrigger) {
             if (a.onTriggerExit) a.onTriggerExit(b);
             if (b.onTriggerExit) b.onTriggerExit(a);
+
+            // Script Dispatch
+            a.entity?.getComponent(ScriptComponent)?.onTriggerExit(b.entity!);
+            b.entity?.getComponent(ScriptComponent)?.onTriggerExit(a.entity!);
         } else {
             if (a.onCollisionExit) a.onCollisionExit(b);
             if (b.onCollisionExit) b.onCollisionExit(a);
+
+            // Script Dispatch
+            a.entity?.getComponent(ScriptComponent)?.onCollisionExit(b.entity!);
+            b.entity?.getComponent(ScriptComponent)?.onCollisionExit(a.entity!);
         }
     }
 

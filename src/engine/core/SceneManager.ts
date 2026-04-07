@@ -1,120 +1,61 @@
-
-
-export type GameState = 'loading' | 'menu' | 'playing' | 'paused' | 'gameover';
-
-export interface StateConfig {
-    onEnter?: () => void;
-    onExit?: () => void;
-    onUpdate?: (deltaTime: number) => void;
-}
-
-type StateListener = (newState: GameState, oldState: GameState) => void;
+import { Scene } from "./Scene";
+import { Entity } from "./Entity";
+import type { Application } from "./Application";
 
 export class SceneManager {
-    private static instance: SceneManager | null = null;
-    
-    private currentState: GameState = 'loading';
-    private states: Map<GameState, StateConfig> = new Map();
-    private listeners: StateListener[] = [];
-    private isPaused: boolean = false;
+    private app: Application;
+    private scenes: Map<string, Scene> = new Map();
+    private activeScene: Scene | null = null;
+    private persistentEntities: Set<Entity> = new Set();
 
-    static getInstance(): SceneManager {
-        if (!SceneManager.instance) {
-            SceneManager.instance = new SceneManager();
-        }
-        return SceneManager.instance;
+    constructor(app: Application) {
+        this.app = app;
     }
 
-    registerState(state: GameState, config: StateConfig): this {
-        this.states.set(state, config);
-        return this;
+    get active(): Scene | null {
+        return this.activeScene;
     }
 
-    setState(newState: GameState): void {
-        if (newState === this.currentState) return;
-
-        const oldState = this.currentState;
-        const oldConfig = this.states.get(oldState);
-        const newConfig = this.states.get(newState);
-
-        if (oldConfig?.onExit) {
-            oldConfig.onExit();
-        }
-
-        this.currentState = newState;
-
-        if (newConfig?.onEnter) {
-            newConfig.onEnter();
-        }
-
-        this.listeners.forEach(listener => listener(newState, oldState));
-
-        console.log(`🎬 State: ${oldState} → ${newState}`);
+    createScene(name: string): Scene {
+        const scene = new Scene(name);
+        this.scenes.set(name, scene);
+        return scene;
     }
 
-    getState(): GameState {
-        return this.currentState;
-    }
-
-    isState(state: GameState): boolean {
-        return this.currentState === state;
-    }
-
-    pause(): void {
-        if (this.currentState === 'playing') {
-            this.isPaused = true;
-            this.setState('paused');
-        }
-    }
-
-    resume(): void {
-        if (this.currentState === 'paused') {
-            this.isPaused = false;
-            this.setState('playing');
-        }
-    }
-
-    togglePause(): void {
-        if (this.isPaused) {
-            this.resume();
-        } else {
-            this.pause();
-        }
-    }
-
-    goToMenu(): void {
-        this.setState('menu');
-    }
-
-    startGame(): void {
-        this.setState('playing');
-    }
-
-    gameOver(): void {
-        this.setState('gameover');
-    }
-
-    update(deltaTime: number): void {
-        if (this.isPaused) return;
+    async loadScene(name: string): Promise<void> {
+        console.log(`🎬 SceneManager: Loading Level [${name}]...`);
         
-        const config = this.states.get(this.currentState);
-        if (config?.onUpdate) {
-            config.onUpdate(deltaTime);
+        // 1. Cleanup current scene
+        if (this.activeScene) {
+            // Option: Persistent entities move to global state
+            this.activeScene.clear();
         }
+
+        // 2. Fetch/Initialize new scene
+        let scene = this.scenes.get(name);
+        if (!scene) {
+            scene = this.createScene(name);
+        }
+
+        this.activeScene = scene;
+        
+        // 3. Re-inject Persistent Entities (Elite DDOL)
+        for (const entity of this.persistentEntities) {
+            this.activeScene.addEntity(entity);
+        }
+
+        console.log(`✅ SceneManager: Active Level is now [${name}]`);
     }
 
-    onStateChange(listener: StateListener): () => void {
-        this.listeners.push(listener);
-        return () => {
-            const index = this.listeners.indexOf(listener);
-            if (index > -1) this.listeners.splice(index, 1);
-        };
+    /**
+     * Elite: Mark an entity as Persistent (Unity-Style DontDestroyOnLoad)
+     */
+    dontDestroyOnLoad(entity: Entity): void {
+        this.persistentEntities.add(entity);
+        console.log(`💎 SceneManager: Entity [${entity.name}] marked as Persistent`);
     }
 
-    reset(): void {
-        this.currentState = 'loading';
-        this.isPaused = false;
+    removePersistent(entity: Entity): void {
+        this.persistentEntities.delete(entity);
     }
 }
-
-export const sceneManager = SceneManager.getInstance();

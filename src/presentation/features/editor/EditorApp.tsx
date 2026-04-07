@@ -15,6 +15,7 @@ import { VibeTheme } from '@themes/VibeStyles';
 import { useConsoleStore } from '@infrastructure/store/consoleStore';
 import { usePlayModeStore } from './core';
 import { SettingsModal } from '../../ui/editor/settings/SettingsModal';
+import { BuildModal } from '../../ui/editor/BuildModal';
 
 export const EditorApp: React.FC = () => {
     usePlayModeStore();
@@ -48,7 +49,9 @@ export const EditorApp: React.FC = () => {
     const [showSplash, setShowSplash] = useState(true);
     const { launchedProject, showLauncher, setShowLauncher } = useProjectStore();
     const { 
-        showAICopilotSettings, setShowAICopilotSettings, engineConfig 
+        showAICopilotSettings, setShowAICopilotSettings, 
+        showBuildModal, setShowBuildModal,
+        engineConfig 
     } = useEditorStore();
 
     useEffect(() => {
@@ -134,6 +137,7 @@ export const EditorApp: React.FC = () => {
             {}
             <AnimatePresence>
                 {showAICopilotSettings && <SettingsModal onClose={() => setShowAICopilotSettings(false)} projectName={launchedProject?.name} />}
+                {showBuildModal && <BuildModal isOpen={showBuildModal} onClose={() => setShowBuildModal(false)} />}
             </AnimatePresence>
             
             {(showLauncher || !launchedProject) && !showSplash && (

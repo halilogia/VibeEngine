@@ -34,7 +34,7 @@ export class RenderSystem extends System {
         this.addedObjects.add(entity.id);
       }
 
-      render.object3D.visible = entity.activeInHierarchy;
+      render.object3D.visible = entity.activeInHierarchy && render.enabled;
 
       render.syncTransform();
     }

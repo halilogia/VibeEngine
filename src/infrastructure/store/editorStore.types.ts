@@ -51,6 +51,7 @@ export interface EngineConfig {
 
 export type ShadingMode = "lit" | "wireframe" | "solid";
 export type LayoutPreset = "architect" | "programmer" | "animator";
+export type SettingsTabType = "project" | "interface" | "input" | "graphics" | "neural" | "ai" | "about";
 export type PanelType =
   | "hierarchy"
   | "inspector"
@@ -93,7 +94,8 @@ export interface EditorState {
   showBloom: boolean;
   showEnvironment: boolean;
   showAICopilotSettings: boolean;
-  activeSettingsTab: string;
+  showBuildModal: boolean;
+  activeSettingsTab: "project" | "interface" | "input" | "graphics" | "neural" | "ai" | "about";
   isScriptFullScreen: boolean;
   showAboutModal: boolean;
   previousTrayState: PreviousTrayState | null;
@@ -119,7 +121,8 @@ export interface EditorState {
   toggleCommandPalette: (show?: boolean) => void;
   toggleBloom: () => void;
   toggleEnvironment: () => void;
-  setShowAICopilotSettings: (show: boolean, tab?: string) => void;
+  setShowAICopilotSettings: (show: boolean, tab?: "project" | "interface" | "input" | "graphics" | "neural" | "ai" | "about") => void;
+  setShowBuildModal: (show: boolean) => void;
   setShowAboutModal: (show: boolean) => void;
   setScriptFullScreen: (val: boolean, restore?: boolean) => void;
   setLayoutPreset: (preset: LayoutPreset) => void;

@@ -13,7 +13,8 @@ export interface ProjectInfo {
 declare global {
   interface Window {
     ProjectScanner: {
-      pickProjectFolder: () => Promise<ProjectInfo | null>;
+      getAppPath: () => Promise<string>;
+      pickProjectFolder: (options?: { title?: string; defaultPath?: string }) => Promise<ProjectInfo | null>;
       scanProjectAssets: (path: string) => Promise<unknown[]>;
       createFolder: (
         path: string,
@@ -56,10 +57,20 @@ export class ProjectScanner {
     return { success: false, error: "Bridge not available" };
   }
 
-  static async pickProjectFolder(): Promise<ProjectInfo | null> {
+  static async getAppPath(): Promise<string> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
+      return await window.ProjectScanner.getAppPath();
+    }
+    return "";
+  }
+
+  static async pickProjectFolder(options?: {
+    title?: string;
+    defaultPath?: string;
+  }): Promise<ProjectInfo | null> {
     if (typeof window !== "undefined" && "ProjectScanner" in window) {
       const bridge = window.ProjectScanner;
-      return await bridge.pickProjectFolder();
+      return await bridge.pickProjectFolder(options);
     }
 
     throw new Error("Project picker bridge not available");

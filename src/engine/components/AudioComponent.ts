@@ -1,123 +1,94 @@
+import { Audio, PositionalAudio, AudioListener } from "three";
 import { Component } from "@engine";
 
-export interface AudioClip {
-  name: string;
-  buffer: AudioBuffer;
+export interface AudioOptions {
+  volume?: number;
+  loop?: boolean;
+  autoplay?: boolean;
+  panningModel?: "equalpower" | "HRTF";
+  distanceModel?: "linear" | "inverse" | "exponential";
+  maxDistance?: number;
+  refDistance?: number;
+  rolloffFactor?: number;
 }
 
 export class AudioComponent extends Component {
   static readonly TYPE = "Audio";
 
-  readonly clips: Map<string, AudioClip> = new Map();
+  volume: number;
+  loop: boolean;
+  autoplay: boolean;
+  isPositional: boolean;
 
-  volume: number = 1.0;
+  audio: Audio<AudioNode> | PositionalAudio | null = null;
+  private buffer: AudioBuffer | null = null;
+  private listener: AudioListener | null = null;
 
-  spatial: boolean = false;
+  constructor(isPositional = true, options: AudioOptions = {}) {
+    super();
+    this.isPositional = isPositional;
+    this.volume = options.volume ?? 1.0;
+    this.loop = options.loop ?? false;
+    this.autoplay = options.autoplay ?? false;
+  }
 
-  private readonly activeSources: Map<string, AudioBufferSourceNode> =
-    new Map();
-
-  private readonly gainNodes: Map<string, GainNode> = new Map();
-
-  static audioContext: AudioContext | null = null;
-
-  static getAudioContext(): AudioContext {
-    if (!AudioComponent.audioContext) {
-      AudioComponent.audioContext = new AudioContext();
+  initialize(listener: AudioListener): void {
+    this.listener = listener;
+    if (this.isPositional) {
+      this.audio = new PositionalAudio(listener);
+    } else {
+      this.audio = new Audio(listener);
     }
-    return AudioComponent.audioContext;
-  }
 
-  addClip(name: string, buffer: AudioBuffer): this {
-    this.clips.set(name, { name, buffer });
-    return this;
-  }
-
-  play(
-    name: string,
-    options: { loop?: boolean; volume?: number } = {},
-  ): AudioBufferSourceNode | null {
-    const clip = this.clips.get(name);
-    if (!clip) return null;
-
-    const ctx = AudioComponent.getAudioContext();
-
-    this.stop(name);
-
-    const source = ctx.createBufferSource();
-    const gainNode = ctx.createGain();
-
-    source.buffer = clip.buffer;
-    source.loop = options.loop ?? false;
-    gainNode.gain.value = options.volume ?? this.volume;
-
-    source.connect(gainNode);
-    gainNode.connect(ctx.destination);
-
-    source.start();
-
-    this.activeSources.set(name, source);
-    this.gainNodes.set(name, gainNode);
-
-    source.onended = () => {
-      this.activeSources.delete(name);
-      this.gainNodes.delete(name);
-    };
-
-    return source;
-  }
-
-  stop(name: string): void {
-    const source = this.activeSources.get(name);
-    if (source) {
-      try {
-        source.stop();
-      } catch {
-        /* empty */
-      }
-      this.activeSources.delete(name);
-      this.gainNodes.delete(name);
+    if (this.buffer) {
+      this.audio.setBuffer(this.buffer);
+      this.setupAudio();
     }
   }
 
-  stopAll(): void {
-    this.activeSources.forEach((source) => {
-      try {
-        source.stop();
-      } catch {
-        /* empty */
-      }
-    });
-    this.activeSources.clear();
-    this.gainNodes.clear();
-  }
-
-  isPlaying(name: string): boolean {
-    return this.activeSources.has(name);
-  }
-
-  setVolume(name: string, volume: number): void {
-    const gain = this.gainNodes.get(name);
-    if (gain) {
-      gain.gain.value = volume;
+  setBuffer(buffer: AudioBuffer): void {
+    this.buffer = buffer;
+    if (this.audio) {
+      this.audio.setBuffer(buffer);
+      this.setupAudio();
     }
   }
 
-  updatePositions(): void {}
+  private setupAudio(): void {
+    if (!this.audio) return;
+    this.audio.setVolume(this.volume);
+    this.audio.setLoop(this.loop);
+
+    if (this.autoplay) {
+      this.play();
+    }
+  }
+
+  play(): void {
+    if (this.audio && !this.audio.isPlaying) {
+      this.audio.play();
+    }
+  }
+
+  stop(): void {
+    if (this.audio && this.audio.isPlaying) {
+      this.audio.stop();
+    }
+  }
+
+  setVolume(v: number): void {
+    this.volume = v;
+    if (this.audio) this.audio.setVolume(v);
+  }
+
+  override onDetach(): void {
+    this.stop();
+    if (this.audio && this.audio.parent) {
+      this.audio.parent.remove(this.audio);
+    }
+  }
 
   override onDestroy(): void {
-    this.stopAll();
-    this.clips.clear();
-  }
-
-  override clone(): AudioComponent {
-    const cloned = new AudioComponent();
-    cloned.volume = this.volume;
-    cloned.spatial = this.spatial;
-
-    this.clips.forEach((clip, name) => {
-      cloned.clips.set(name, clip);
-    });
-    return cloned;
+    this.stop();
   }
 }

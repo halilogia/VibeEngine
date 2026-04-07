@@ -136,15 +136,38 @@ export const useLauncherViewModel = () => {
     }
   };
 
-  const createNewProject = async (name: string) => {
+  const createNewProject = async (name: string, pickCustomPath: boolean = false) => {
     if (!name) return;
     setLoading(true);
     setError(null);
     try {
-      const result = await ProjectScanner.pickProjectFolder();
-      if (result) {
-        const projectPath = result.path;
+      let projectPath = "";
+      
+      if (pickCustomPath) {
+        const result = await ProjectScanner.pickProjectFolder({
+          title: "Proje Lokasyonu Seç"
+        });
+        if (!result) {
+          setLoading(false);
+          return;
+        }
+        projectPath = result.path;
+      } else {
+        // Create in default projects folder
+        const appPath = await ProjectScanner.getAppPath();
+        const defaultProjectsDir = `${appPath}/projects`;
+        projectPath = `${defaultProjectsDir}/${name}`;
+        
+        // Ensure projects dir exists
+        await ProjectScanner.createFolder(defaultProjectsDir);
+        // Create the specific project folder
+        const folderRes = await ProjectScanner.createFolder(projectPath);
+        if (!folderRes.success && folderRes.error !== "Folder already exists") {
+          throw new Error(folderRes.error);
+        }
+      }
 
+      if (projectPath) {
         // Construct basic project structure
         await ProjectScanner.createFolder(`${projectPath}/src/levels`);
         await ProjectScanner.createFolder(`${projectPath}/src/domain`);
@@ -183,10 +206,15 @@ export const useLauncherViewModel = () => {
         );
 
         const newProject: ProjectInfo = {
-          ...result,
+          path: projectPath,
           name,
-          hasDomain: true,
+          version: "0.1.0",
+          engine: "vibe-engine",
+          description: "A new VibeEngine project",
+          author: "Developer",
           mainScene: "main",
+          hasPackageJson: false,
+          hasDomain: true,
         };
 
         addProject(newProject);

@@ -23,7 +23,7 @@ interface SettingsModalProps {
 export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, projectName = 'New Project' }) => {
     const { t } = useTranslation();
     const { activeSettingsTab, setShowAICopilotSettings } = useEditorStore();
-    const activeTab = activeSettingsTab === 'about' ? 'project' : (activeSettingsTab as SettingsTabId);
+    const activeTab = (activeSettingsTab as string) === 'about' ? 'project' : (activeSettingsTab as SettingsTabId);
     const { addToast } = useToastStore();
 
     const TABS: { id: SettingsTabId; label: string; icon: VibeIconName }[] = [
@@ -40,7 +40,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, projectNa
     };
 
     const handleTabChange = (tabId: SettingsTabId) => {
-        setShowAICopilotSettings(true, tabId);
+        setShowAICopilotSettings(true, tabId as unknown as SettingsTabId);
     };
 
     return (

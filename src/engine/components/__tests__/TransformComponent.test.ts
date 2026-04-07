@@ -50,8 +50,9 @@ describe('TransformComponent', () => {
         
         const forward = transform.getForward();
         
-        expect(forward.x).toBeCloseTo(-1);
-        expect(forward.z).toBeCloseTo(0);
+        // Y-axis rotation by PI/2: (0,0,1) -> (1,0,0) in Three.js XYZ Euler order
+        expect(forward.x).toBeCloseTo(1, 5);
+        expect(forward.z).toBeCloseTo(0, 5);
     });
 
     it('should clone correctly', () => {

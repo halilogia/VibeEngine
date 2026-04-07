@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { serializeScene, deserializeScene } from '../SceneSerializer';
 
 const mockStore = {
     sceneName: 'Test Scene',
@@ -10,14 +9,16 @@ const mockStore = {
     clear: vi.fn(),
 };
 
-vi.mock('../../stores/sceneStore', () => ({
+vi.mock('@infrastructure/store', () => ({
     useSceneStore: {
         getState: () => mockStore,
-        setState: vi.fn((update) => {
+        setState: vi.fn((update: any) => {
             Object.assign(mockStore, typeof update === 'function' ? update(mockStore) : update);
         })
     }
 }));
+
+const { serializeScene, deserializeScene } = await import('../SceneSerializer');
 
 describe('SceneSerializer', () => {
     beforeEach(() => {

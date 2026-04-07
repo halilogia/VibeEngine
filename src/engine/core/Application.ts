@@ -1,7 +1,12 @@
 import * as THREE from "three";
 import { Scene } from "./Scene";
+import { SceneManager } from "./SceneManager";
 import { System } from "./System";
 import { initLoadingBridge, updateLoadingStatus, type LoadingStatus } from "./AppLoadingBridge";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import type { ApplicationOptions } from "./types";
 
 export class Application {
@@ -9,9 +14,13 @@ export class Application {
   readonly editorScene: THREE.Scene;
   readonly camera: THREE.PerspectiveCamera;
   readonly renderer: THREE.WebGLRenderer;
+  readonly uiRenderer: CSS2DRenderer;
   readonly canvas: HTMLCanvasElement;
+  readonly composer: EffectComposer;
+  readonly bloomPass: UnrealBloomPass;
 
   readonly scene: Scene;
+  readonly sceneManager: SceneManager;
   private readonly systems: System[] = [];
   private readonly boundOnResize: () => void;
 
@@ -63,21 +72,36 @@ export class Application {
     this.renderer.toneMappingExposure = 1.0;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    this.threeScene.add(ambientLight);
+    // 🌐 ELITE Integrated UI Renderer
+    this.uiRenderer = new CSS2DRenderer();
+    this.uiRenderer.setSize(window.innerWidth, window.innerHeight);
+    this.uiRenderer.domElement.style.position = 'absolute';
+    this.uiRenderer.domElement.style.top = '0px';
+    this.uiRenderer.domElement.style.pointerEvents = 'none'; // Click-through by default
+    this.canvas.parentElement?.appendChild(this.uiRenderer.domElement);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    directionalLight.position.set(10, 20, 10);
-    directionalLight.castShadow = true;
-    directionalLight.shadow.mapSize.set(2048, 2048);
-    this.threeScene.add(directionalLight);
+    // 🌊 ELITE Post-Processing Pipeline
+    this.composer = new EffectComposer(this.renderer);
+    const renderPass = new RenderPass(this.threeScene, this.camera);
+    this.composer.addPass(renderPass);
 
-    this.scene = new Scene("MainScene");
+    this.bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      1.5, // strength
+      0.4, // radius
+      0.85, // threshold
+    );
+    this.bloomPass.enabled = false; // Off by default, controller by editor store
+    this.composer.addPass(this.bloomPass);
+    
+    this.sceneManager = new SceneManager(this);
+    this.scene = this.sceneManager.createScene("MainScene");
+    this.sceneManager.loadScene("MainScene");
 
     this.boundOnResize = this.onResize.bind(this);
     window.addEventListener("resize", this.boundOnResize);
 
-    console.log("✅ Application initialized");
+    console.log("✅ Application initialized (Core Only)");
   }
 
   addSystem<T extends System>(system: T): T {
@@ -178,6 +202,9 @@ export class Application {
     this.scene.clear();
 
     this.renderer.dispose();
+    if (this.uiRenderer.domElement.parentElement) {
+        this.uiRenderer.domElement.parentElement.removeChild(this.uiRenderer.domElement);
+    }
 
     window.removeEventListener("resize", this.boundOnResize);
 
@@ -215,8 +242,14 @@ export class Application {
 
     this.renderer.autoClear = false;
     this.renderer.clear();
-    this.renderer.render(this.threeScene, this.camera);
 
+    // Use Composer for main scene (Bloom, etc.)
+    this.composer.render();
+
+    // Render World-Space UI
+    this.uiRenderer.render(this.threeScene, this.camera);
+
+    // Render Editor Scene (Grid, Gizmos) on top without PP
     if (this.editorScene.children.length > 0) {
       this.renderer.render(this.editorScene, this.camera);
     }
@@ -240,19 +273,14 @@ export class Application {
 
   private onResize(): void {
     const parent = this.canvas.parentElement;
-    if (parent) {
-      const width = parent.clientWidth;
-      const height = parent.clientHeight;
-      this.camera.aspect = width / height;
-      this.camera.updateProjectionMatrix();
-      this.renderer.setSize(width, height);
-    } else {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      this.camera.aspect = width / height;
-      this.camera.updateProjectionMatrix();
-      this.renderer.setSize(width, height);
-    }
+    const width = parent ? parent.clientWidth : window.innerWidth;
+    const height = parent ? parent.clientHeight : window.innerHeight;
+
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height);
+    this.composer.setSize(width, height);
+    this.uiRenderer.setSize(width, height);
   }
 
   get fps(): number {

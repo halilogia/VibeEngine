@@ -70,9 +70,8 @@ describe('Entity', () => {
         root.addChild(leaf);
         
         const cloned = root.clone();
-        cloned.name = 'ClonedRoot';
         
-        expect(cloned.name).toBe('ClonedRoot');
+        expect(cloned.name).toBe('Root_clone');
         expect(cloned.hasComponent(MockComponent)).toBe(true);
         expect(cloned.children.length).toBe(1);
         expect(cloned.children[0].name).toBe('Leaf_clone');
