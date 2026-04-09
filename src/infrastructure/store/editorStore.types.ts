@@ -97,6 +97,7 @@ export interface EditorState {
   showBuildModal: boolean;
   activeSettingsTab: "project" | "interface" | "input" | "graphics" | "neural" | "ai" | "about";
   isScriptFullScreen: boolean;
+  isViewportMaximized: boolean;
   showAboutModal: boolean;
   previousTrayState: PreviousTrayState | null;
   openFiles: OpenFile[];
@@ -125,6 +126,7 @@ export interface EditorState {
   setShowBuildModal: (show: boolean) => void;
   setShowAboutModal: (show: boolean) => void;
   setScriptFullScreen: (val: boolean, restore?: boolean) => void;
+  toggleViewportMaximize: () => void;
   setLayoutPreset: (preset: LayoutPreset) => void;
   openFile: (file: {
     id: string;

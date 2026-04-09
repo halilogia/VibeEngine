@@ -60,6 +60,7 @@ const defaultState = {
   showBuildModal: false,
   activeSettingsTab: "project" as "project" | "interface" | "input" | "graphics" | "neural" | "ai",
   isScriptFullScreen: false,
+  isViewportMaximized: false,
   showAboutModal: false,
   previousTrayState: null,
   openFiles: [] as OpenFile[],
@@ -137,6 +138,33 @@ export const useEditorStore = create<EditorState>()(
               previousTrayState: null,
             };
           return { isScriptFullScreen: val, previousTrayState: null };
+        }),
+      toggleViewportMaximize: () =>
+        set((s) => {
+          if (!s.isViewportMaximized) {
+            return {
+              isViewportMaximized: true,
+              previousTrayState: {
+                assets: s.showAssets,
+                console: s.showConsole,
+                hierarchy: s.showHierarchy,
+                inspector: s.showInspector,
+              },
+              showAssets: false,
+              showConsole: false,
+              showHierarchy: false,
+              showInspector: false,
+            };
+          } else {
+            return {
+              isViewportMaximized: false,
+              showAssets: s.previousTrayState?.assets ?? false,
+              showConsole: s.previousTrayState?.console ?? false,
+              showHierarchy: s.previousTrayState?.hierarchy ?? true,
+              showInspector: s.previousTrayState?.inspector ?? true,
+              previousTrayState: null,
+            };
+          }
         }),
       openFile: (file) =>
         set((s) => {

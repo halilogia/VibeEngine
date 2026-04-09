@@ -121,7 +121,7 @@ export function deserializeScene(json: string): void {
   useSceneStore.setState({
     entities: entityMap,
     rootEntityIds: rootIds,
-    nextEntityId: Math.max(...data.entities.map((e) => e.id)) + 1,
+    nextEntityId: data.entities.length > 0 ? Math.max(...data.entities.map((e) => e.id)) + 1 : 1,
     isDirty: false,
   });
 }

@@ -44,7 +44,8 @@ export const ViewportToolbar: React.FC = () => {
         showGrid, toggleGrid, 
         showAxes, toggleAxes,
         showBloom, toggleBloom,
-        showEnvironment, toggleEnvironment
+        showEnvironment, toggleEnvironment,
+        isViewportMaximized, toggleViewportMaximize
     } = useEditorStore();
     const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
 
@@ -245,6 +246,22 @@ export const ViewportToolbar: React.FC = () => {
                     title="Environment Lighting"
                 >
                     <VibeIcons name="Sun" size={14} color={showEnvironment ? '#fff' : 'rgba(255,255,255,0.5)'} />
+                </VibeButton>
+            </div>
+
+            <div style={styles.divider} />
+
+            <div style={styles.group}>
+                <VibeButton 
+                    variant={isViewportMaximized ? 'primary' : 'ghost'} 
+                    size="sm" 
+                    onClick={toggleViewportMaximize} 
+                    title={isViewportMaximized ? "Exit Maximize (Ctrl+Space)" : "Maximize Viewport (Ctrl+Space)"}
+                    style={{
+                        background: isViewportMaximized ? `${VibeTheme.colors.accent}44` : 'transparent',
+                    }}
+                >
+                    <VibeIcons name={isViewportMaximized ? "Minimize" : "Maximize"} size={14} color={isViewportMaximized ? VibeTheme.colors.accent : 'rgba(255,255,255,0.5)'} />
                 </VibeButton>
             </div>
         </div>

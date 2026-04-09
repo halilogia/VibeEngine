@@ -90,6 +90,12 @@ function handleKeyDown(e: KeyboardEvent): void {
         case "commandPalette":
           toggleCommandPalette();
           break;
+        case "viewportMaximize":
+          {
+            const { toggleViewportMaximize } = useEditorStore.getState();
+            toggleViewportMaximize();
+          }
+          break;
         case "escape":
           {
             const { showCommandPalette } = useEditorStore.getState();

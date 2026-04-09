@@ -8,6 +8,7 @@ import {
   type AssetData,
 } from "@infrastructure/store/sceneStore";
 import { deserializeScene } from "@editor/serialization/SceneSerializer";
+import { useEffect } from "react";
 
 export const useLauncherViewModel = () => {
   const { setAssets } = useSceneStore();
@@ -22,7 +23,34 @@ export const useLauncherViewModel = () => {
     setError,
     addProject,
     removeProject,
+    setProjects,
   } = useProjectStore();
+
+  useEffect(() => {
+    const refreshProjects = async () => {
+      setLoading(true);
+      try {
+        const diskProjects = await ProjectScanner.listProjects();
+        if (diskProjects && diskProjects.length > 0) {
+            setProjects(diskProjects);
+            
+            // Validate selected project
+            if (selectedProject) {
+              const exists = diskProjects.some(p => p.path === selectedProject.path);
+              if (!exists) {
+                selectProject(null);
+              }
+            }
+        }
+      } catch (e) {
+        console.error("Failed to refresh projects:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    refreshProjects();
+  }, []);
 
   const pickProjectFolder = async () => {
     setLoading(true);

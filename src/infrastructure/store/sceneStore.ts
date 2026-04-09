@@ -136,7 +136,10 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       if (entity.parentId !== null) {
         const parent = newEntities.get(entity.parentId);
         if (parent) {
-          parent.children = parent.children.filter((cid) => cid !== id);
+          newEntities.set(entity.parentId, {
+            ...parent,
+            children: parent.children.filter((cid) => cid !== id),
+          });
         }
       }
 
@@ -188,7 +191,10 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       } else {
         const newParent = newEntities.get(parentId);
         if (newParent) {
-          newParent.children.push(entityId);
+          newEntities.set(parentId, {
+            ...newParent,
+            children: [...newParent.children, entityId]
+          });
         }
       }
 

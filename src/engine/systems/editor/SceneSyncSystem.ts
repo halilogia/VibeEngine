@@ -1,7 +1,27 @@
 import * as THREE from "three";
-import { System, Entity, TransformComponent, RenderComponent, Component, SeaComponent, WeatherComponent, AudioComponent, InputReceiverComponent, PostProcessingComponent, LightComponent } from "@engine";
+import {
+  System,
+  Entity,
+  TransformComponent,
+  RenderComponent,
+  Component,
+  SeaComponent,
+  WeatherComponent,
+  AudioComponent,
+  InputReceiverComponent,
+  PostProcessingComponent,
+  LightComponent,
+  RigidbodyComponent,
+  ColliderComponent,
+  VehicleControllerComponent,
+  FollowCameraComponent,
+  CheckpointComponent,
+  WaypointComponent,
+  TrafficFollowerComponent,
+} from "@engine";
 import { useSceneStore, type EntityData } from "@infrastructure/store";
 import { MeshUtils } from "../../utils/MeshUtils";
+import { ModelLoader } from "../../utils/ModelLoader";
 
 type ComponentFactory = (data: Record<string, unknown>) => Component;
 
@@ -12,63 +32,169 @@ const componentRegistry: Record<string, ComponentFactory> = {
     const scale = data.scale as number[] | undefined;
     return new TransformComponent(
       pos ? new THREE.Vector3(pos[0], pos[1], pos[2]) : undefined,
-      rot ? new THREE.Euler(
-        THREE.MathUtils.degToRad(rot[0]),
-        THREE.MathUtils.degToRad(rot[1]),
-        THREE.MathUtils.degToRad(rot[2])
-      ) : undefined,
+      rot
+        ? new THREE.Euler(
+            THREE.MathUtils.degToRad(rot[0]),
+            THREE.MathUtils.degToRad(rot[1]),
+            THREE.MathUtils.degToRad(rot[2]),
+          )
+        : undefined,
       scale ? new THREE.Vector3(scale[0], scale[1], scale[2]) : undefined,
     );
   },
   Render: (data) => {
-    const meshType = (data.meshType as string) || "cube";
-    const color = (data.color as string) || "#6366f1";
-    const mesh = MeshUtils.createMesh(meshType, color);
-    return new RenderComponent(mesh);
+    const renderComp = new RenderComponent();
+    const modelPath = data.modelPath as string | undefined;
+
+    if (modelPath) {
+      // Async loading - the system will handle adding it to scene once loaded
+      ModelLoader.loadFBX(modelPath)
+        .then((fbx) => {
+          if (data.scale) {
+            const s = data.scale as number[];
+            fbx.scale.set(s[0], s[1], s[2]);
+          }
+          renderComp.setObject3D(fbx);
+        })
+        .catch((err) => {
+          console.error(
+            `❌ SceneSyncSystem: Failed to load model [${modelPath}]`,
+            err,
+          );
+        });
+    } else {
+      const meshType = (data.meshType as string) || "cube";
+      const color = (data.color as string) || "#6366f1";
+      const mesh = MeshUtils.createMesh(meshType, color);
+      renderComp.setObject3D(mesh);
+    }
+    return renderComp;
   },
   SeaComponent: (data) => {
     const seaParams = {
-        speed: data.speed as number,
-        amplitude: data.amplitude as number,
-        frequency: data.frequency as number,
-        color: data.color as string,
+      speed: data.speed as number,
+      amplitude: data.amplitude as number,
+      frequency: data.frequency as number,
+      color: data.color as string,
     };
     return new SeaComponent(seaParams);
   },
   WeatherComponent: (data) => {
     return new WeatherComponent({
-        weatherType: data.weatherType as WeatherComponent["weatherType"],
-        intensity: data.intensity as number,
-        timeOfDay: data.timeOfDay as number,
+      weatherType: data.weatherType as WeatherComponent["weatherType"],
+      intensity: data.intensity as number,
+      timeOfDay: data.timeOfDay as number,
     });
   },
   AudioComponent: (data) => {
-    return new AudioComponent(data.isPositional as boolean ?? true, {
-        volume: data.volume as number ?? 1.0,
-        autoplay: data.autoplay as boolean ?? true,
-        loop: data.loop as boolean ?? true,
+    return new AudioComponent((data.isPositional as boolean) ?? true, {
+      volume: (data.volume as number) ?? 1.0,
+      autoplay: (data.autoplay as boolean) ?? true,
+      loop: (data.loop as boolean) ?? true,
     });
   },
   InputReceiver: (data) => {
-      return new InputReceiverComponent(data.playerId as number ?? 0);
+    return new InputReceiverComponent((data.playerId as number) ?? 0);
   },
   PostProcessing: (data) => {
-      return new PostProcessingComponent({
-          bloomEnabled: data.bloomEnabled as boolean,
-          bloomStrength: data.bloomStrength as number,
-          bloomRadius: data.bloomRadius as number,
-          bloomThreshold: data.bloomThreshold as number,
-          exposure: data.exposure as number,
-      });
+    return new PostProcessingComponent({
+      bloomEnabled: data.bloomEnabled as boolean,
+      bloomStrength: data.bloomStrength as number,
+      bloomRadius: data.bloomRadius as number,
+      bloomThreshold: data.bloomThreshold as number,
+      exposure: data.exposure as number,
+    });
   },
   Light: (data) => {
-      return new LightComponent({
-          type: data.lightType as LightComponent["lightType"],
-          color: data.color as string,
-          intensity: data.intensity as number,
-          castShadow: data.castShadow as boolean,
-      });
-  }
+    return new LightComponent({
+      type: data.lightType as LightComponent["lightType"],
+      color: data.color as string,
+      intensity: data.intensity as number,
+      castShadow: data.castShadow as boolean,
+    });
+  },
+  Rigidbody: (data) => {
+    return new RigidbodyComponent({
+      bodyType: (data.bodyType as unknown) || "dynamic",
+      mass: (data.mass as number) || 1,
+      restitution: (data.restitution as number) || 0.5,
+      friction: (data.friction as number) || 0.5,
+      linearDamping: (data.linearDamping as number) || 0,
+      angularDamping: (data.angularDamping as number) || 0,
+      gravityScale: (data.gravityScale as number) || 1,
+    });
+  },
+  Collider: (data) => {
+    return new ColliderComponent({
+      shape: (data.shape as unknown) || "box",
+      size: data.size
+        ? new THREE.Vector3(
+            (data.size as unknown)[0],
+            (data.size as unknown)[1],
+            (data.size as unknown)[2],
+          )
+        : new THREE.Vector3(1, 1, 1),
+      radius: (data.radius as number) || 0.5,
+      height: (data.height as number) || 1,
+      isSensor: (data.isSensor as boolean) || false,
+      offset: data.offset
+        ? new THREE.Vector3(
+            (data.offset as unknown)[0],
+            (data.offset as unknown)[1],
+            (data.offset as unknown)[2],
+          )
+        : new THREE.Vector3(0, 0, 0),
+    });
+  },
+  VehicleController: (data) => {
+    return new VehicleControllerComponent({
+      acceleration: (data.acceleration as number) || 30,
+      maxSpeed: (data.maxSpeed as number) || 50,
+      steeringSensitivity: (data.steeringSensitivity as number) || 2.5,
+      brakeForce: (data.brakeForce as number) || 15,
+      driftFactor: (data.driftFactor as number) || 0.95,
+    });
+  },
+  FollowCamera: (data) => {
+    return new FollowCameraComponent({
+      targetId: data.targetId as number,
+      offset: data.offset
+        ? new THREE.Vector3(
+            (data.offset as number[])[0],
+            (data.offset as number[])[1],
+            (data.offset as number[])[2],
+          )
+        : undefined,
+      lookOffset: data.lookOffset
+        ? new THREE.Vector3(
+            (data.lookOffset as number[])[0],
+            (data.lookOffset as number[])[1],
+            (data.lookOffset as number[])[2],
+          )
+        : undefined,
+      smoothSpeed: (data.smoothSpeed as number) || 0.125,
+      fov: (data.fov as number) || 60,
+    });
+  },
+  Checkpoint: (data) => {
+    return new CheckpointComponent({
+      index: (data.index as number) || 0,
+      isFinishLine: (data.isFinishLine as boolean) || false,
+    });
+  },
+  Waypoint: (data) => {
+    return new WaypointComponent({
+      nextWaypointId: data.nextWaypointId as string | number | undefined,
+      radius: (data.radius as number) || 2.0,
+    });
+  },
+  TrafficFollower: (data) => {
+    return new TrafficFollowerComponent({
+      speed: (data.speed as number) || 5.0,
+      currentWaypointId: data.currentWaypointId as string | number | undefined,
+      rotationSpeed: (data.rotationSpeed as number) || 3.0,
+    });
+  },
 };
 
 export function registerComponentFactory(
@@ -78,7 +204,9 @@ export function registerComponentFactory(
   componentRegistry[type] = factory;
 }
 
-export function getComponentFactory(type: string): ComponentFactory | undefined {
+export function getComponentFactory(
+  type: string,
+): ComponentFactory | undefined {
   return componentRegistry[type];
 }
 
@@ -163,15 +291,30 @@ export class SceneSyncSystem extends System {
 
   private addComponents(entity: Entity, data: EntityData): void {
     data.components.forEach((comp) => {
-      const factory = componentRegistry[comp.type];
-      if (factory) {
-        const component = factory(comp.data as Record<string, unknown>);
-        entity.addComponent(component);
+      const componentType = comp.type;
+
+      // Check if entity already has this component via some mapping logic
+      // (Simplified check for this implementation)
+      const hasComponent = Array.from(entity.components.keys()).some(
+        (c) =>
+          (c as unknown as { TYPE: string }).TYPE === componentType ||
+          c.name === componentType,
+      );
+
+      if (!hasComponent) {
+        const factory = componentRegistry[componentType];
+        if (factory) {
+          const component = factory(comp.data as Record<string, unknown>);
+          entity.addComponent(component);
+        }
       }
     });
   }
 
   private updateComponents(entity: Entity, data: EntityData): void {
+    // Ensure all components from store exist on the engine entity
+    this.addComponents(entity, data);
+
     data.components.forEach((comp) => {
       if (comp.type === "Transform") {
         const tc = entity.getComponent(TransformComponent);

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { System, Entity, AudioComponent, RenderComponent } from "@engine";
+import { Howl, Howler } from "howler";
 
 export class AudioSystem extends System {
   readonly priority = 40;
@@ -8,6 +9,7 @@ export class AudioSystem extends System {
   private listener: THREE.AudioListener | null = null;
   private audioLoader: THREE.AudioLoader = new THREE.AudioLoader();
   private audioBuffers: Map<string, AudioBuffer> = new Map();
+  private globalSounds: Map<string, Howl> = new Map();
   private masterVolume: number = 1.0;
 
   initialize(): void {
@@ -93,6 +95,37 @@ export class AudioSystem extends System {
   }
 
   /**
+   * Play a high-fidelity global 2D sound using Howler.js (e.g., Music, UI, Ambient)
+   */
+  playGlobal(name: string, url: string, options: { volume?: number; loop?: boolean; autoplay?: boolean } = {}): Howl {
+    if (this.globalSounds.has(name)) {
+      const existing = this.globalSounds.get(name)!;
+      if (!existing.playing()) existing.play();
+      return existing;
+    }
+
+    const sound = new Howl({
+      src: [url],
+      volume: options.volume ?? 1.0,
+      loop: options.loop ?? false,
+      autoplay: options.autoplay ?? true,
+    });
+
+    this.globalSounds.set(name, sound);
+    return sound;
+  }
+
+  /**
+   * Stop a global sound
+   */
+  stopGlobal(name: string): void {
+    const sound = this.globalSounds.get(name);
+    if (sound) {
+      sound.stop();
+    }
+  }
+
+  /**
    * Get the master volume level (0.0 to 1.0)
    */
   getMasterVolume(): number {
@@ -104,10 +137,25 @@ export class AudioSystem extends System {
    */
   setMasterVolume(value: number): void {
     this.masterVolume = Math.max(0, Math.min(1, value));
+    
+    // Update WebAudio listener for 3D sounds
+    if (this.listener) {
+      this.listener.setMasterVolume(this.masterVolume);
+    }
+    
+    // Update Howler master volume for 2D sounds
+    Howler.volume(this.masterVolume);
   }
 
   destroy(): void {
     this.audioBuffers.clear();
-    console.log("🛑 AudioSystem: Shutdown");
+    
+    // Stop and clear all Howler sounds
+    for (const sound of this.globalSounds.values()) {
+      sound.unload();
+    }
+    this.globalSounds.clear();
+    
+    console.log("🛑 AudioSystem: Hybrid Audio Core Shutdown");
   }
 }

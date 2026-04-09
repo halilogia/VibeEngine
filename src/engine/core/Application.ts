@@ -6,6 +6,8 @@ import { initLoadingBridge, updateLoadingStatus, type LoadingStatus } from "./Ap
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import type { ApplicationOptions } from "./types";
 
@@ -18,6 +20,7 @@ export class Application {
   readonly canvas: HTMLCanvasElement;
   readonly composer: EffectComposer;
   readonly bloomPass: UnrealBloomPass;
+  readonly fxaaPass: ShaderPass;
 
   readonly scene: Scene;
   readonly sceneManager: SceneManager;
@@ -45,6 +48,10 @@ export class Application {
       options.backgroundColor ?? 0x11111a,
     );
 
+    // 💡 Add a default ambient light for editor visibility
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.threeScene.add(ambientLight);
+
     this.editorScene = new THREE.Scene();
     this.editorScene.background = null;
 
@@ -59,8 +66,8 @@ export class Application {
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: options.antialias ?? true,
-      alpha: true,
+      antialias: false,
+      alpha: false,
       powerPreference: "high-performance",
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -79,20 +86,31 @@ export class Application {
     this.uiRenderer.domElement.style.top = '0px';
     this.uiRenderer.domElement.style.pointerEvents = 'none'; // Click-through by default
     this.canvas.parentElement?.appendChild(this.uiRenderer.domElement);
-
+    
     // 🌊 ELITE Post-Processing Pipeline
     this.composer = new EffectComposer(this.renderer);
+    this.composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
     const renderPass = new RenderPass(this.threeScene, this.camera);
     this.composer.addPass(renderPass);
 
+    // ✨ ELITE Bloom (Cinema Effect)
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      1.5, // strength
+      0.5, // strength
       0.4, // radius
       0.85, // threshold
     );
-    this.bloomPass.enabled = false; // Off by default, controller by editor store
+    this.bloomPass.enabled = false;
     this.composer.addPass(this.bloomPass);
+
+    // 🕊️ ELITE Antialiasing (FXAA) - Universal standard for high compatibility
+    this.fxaaPass = new ShaderPass(FXAAShader);
+    this.fxaaPass.renderToScreen = true;
+    this.composer.addPass(this.fxaaPass);
+
+    // Initial FXAA resolution
+    this.updateFXAASize();
     
     this.sceneManager = new SceneManager(this);
     this.scene = this.sceneManager.createScene("MainScene");
@@ -134,7 +152,7 @@ export class Application {
     return (this.systems.find((s) => s instanceof type) as T) ?? null;
   }
 
-  start(): void {
+  async start(): Promise<void> {
     if (this.running) return;
 
     initLoadingBridge();
@@ -159,14 +177,17 @@ export class Application {
 
     for (const system of this.systems) {
       try {
-        if (system.initialize) system.initialize();
+        if (system.initialize) {
+          await system.initialize();
+        }
         updateLoadingStatus(
           system.constructor.name,
           "success",
           `${system.constructor.name} Initialized`,
           totalModules,
         );
-      } catch {
+      } catch (error) {
+        console.error(`❌ Application: Failed to initialize ${system.constructor.name}`, error);
         updateLoadingStatus(
           system.constructor.name,
           "error",
@@ -248,11 +269,6 @@ export class Application {
 
     // Render World-Space UI
     this.uiRenderer.render(this.threeScene, this.camera);
-
-    // Render Editor Scene (Grid, Gizmos) on top without PP
-    if (this.editorScene.children.length > 0) {
-      this.renderer.render(this.editorScene, this.camera);
-    }
   };
 
   private updateSystems(deltaTime: number): void {
@@ -271,16 +287,25 @@ export class Application {
     }
   }
 
-  private onResize(): void {
+  public onResize(overrideWidth?: number, overrideHeight?: number): void {
     const parent = this.canvas.parentElement;
-    const width = parent ? parent.clientWidth : window.innerWidth;
-    const height = parent ? parent.clientHeight : window.innerHeight;
+    const width = overrideWidth ?? (parent ? parent.clientWidth : window.innerWidth);
+    const height = overrideHeight ?? (parent ? parent.clientHeight : window.innerHeight);
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
     this.composer.setSize(width, height);
     this.uiRenderer.setSize(width, height);
+    this.updateFXAASize();
+  }
+
+  private updateFXAASize(): void {
+    if (this.fxaaPass) {
+      const pixelRatio = this.renderer.getPixelRatio();
+      this.fxaaPass.material.uniforms['resolution'].value.x = 1 / (this.canvas.clientWidth * pixelRatio);
+      this.fxaaPass.material.uniforms['resolution'].value.y = 1 / (this.canvas.clientHeight * pixelRatio);
+    }
   }
 
   get fps(): number {

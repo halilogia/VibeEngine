@@ -20,6 +20,7 @@ export const oceanFragmentShader = `
     vec3 lightDir = normalize(vec3(5.0, 10.0, 2.0));
     float diff = max(dot(vNormal, lightDir), 0.2);
     
-    gl_FragColor = vec4(finalColor * diff, 0.9);
+    vec3 finalColorWithDiff = finalColor * diff;
+    gl_FragColor = vec4(finalColorWithDiff, 0.9);
   }
 `;

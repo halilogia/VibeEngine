@@ -123,7 +123,7 @@ interface HierarchyPanelProps {
 }
 
 export const HierarchyPanel: React.FC<HierarchyPanelProps> = ({ dragHandleProps }) => {
-    const { entities, rootEntityIds, addEntity, addComponent, removeEntity } = useSceneStore();
+    const { entities, rootEntityIds, addEntity, removeEntity } = useSceneStore();
     const { 
         selectedEntityId, selectEntity, clearSelection,
         activePanelId, setActivePanel 
@@ -133,8 +133,6 @@ export const HierarchyPanel: React.FC<HierarchyPanelProps> = ({ dragHandleProps 
 
     const handleAddEntity = () => {
         const id = addEntity('New Entity', null);
-        // Add default Render component so entity is visible
-        addComponent(id, { type: 'Render', data: { meshType: 'cube', color: '#6366f1' }, enabled: true });
         selectEntity(id);
     };
 

@@ -9,9 +9,9 @@ const FPSCounter: React.FC = () => {
     const [fps, setFps] = React.useState(0);
     React.useEffect(() => {
         const interval = setInterval(() => {
-            const current = (window as unknown as Record<string, unknown>).VibeFPS as number || 0;
+            const current = (window as unknown as Record<string, number>).VibeFPS || 0;
             if (current !== fps) setFps(current);
-        }, 1000);
+        }, 500);
         return () => clearInterval(interval);
     }, [fps]);
     return <span style={{ color: fps > 60 ? '#10b981' : (fps > 30 ? '#f59e0b' : '#ef4444'), fontWeight: 900 }}>{fps} FPS</span>;

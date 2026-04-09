@@ -9,7 +9,7 @@ export type VibeIconName =
   | 'Sun' | 'Video' | 'Shield' | 'Magnet' | 'AlertCircle' | 'AlertTriangle' | 'CheckCircle'
   | 'Check' | 'Terminal' | 'Eye' | 'X' | 'Undo' | 'Redo' | 'Clipboard' | 'Package'
   | 'Send' | 'Bot' | 'User' | 'Wand' | 'WifiOff' | 'Cpu' | 'Grip' | 'RefreshCcw' | 'RefreshCw'
-  | 'Sidebar' | 'Zap' | 'Brain';
+  | 'Sidebar' | 'Zap' | 'Brain' | 'Minimize';
 
 export interface VibeIconsProps {
     name: VibeIconName;
@@ -84,6 +84,7 @@ const IconRegistry: Record<VibeIconName, React.ReactNode> = {
     Zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
     Brain: <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.54Zm5 0a2.5 2.5 0 0 0-2.5 2.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.54Z" />,
     Maximize: <><path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M21 8V5a2 2 0 0 0-2-2h-3" /><path d="M3 16v3a2 2 0 0 0 2 2h3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" /></>,
+    Minimize: <><path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M21 8V5a2 2 0 0 0-2-2h-3" /><path d="M3 16v3a2 2 0 0 0 2 2h3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" /><line x1="14" y1="10" x2="21" y2="3" /><line x1="3" y1="21" x2="10" y2="14" /></>,
 };
 
 export const VibeIcons: React.FC<VibeIconsProps> = ({ 

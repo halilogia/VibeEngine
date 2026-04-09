@@ -208,6 +208,41 @@ ipcMain.handle('pick-project-folder', async (event, options = {}) => {
     return readProjectInfo(filePaths[0]);
 });
 
+ipcMain.handle('list-projects', async (event, projectsPath) => {
+    try {
+        if (!projectsPath) {
+            projectsPath = path.join(app.getAppPath(), 'projects');
+        }
+
+        if (!fs.existsSync(projectsPath)) {
+            fs.mkdirSync(projectsPath, { recursive: true });
+            return [];
+        }
+
+        const entries = fs.readdirSync(projectsPath, { withFileTypes: true });
+        const projects = [];
+
+        for (const entry of entries) {
+            if (entry.isDirectory()) {
+                const fullPath = path.join(projectsPath, entry.name);
+                // Basic validation: must have project-data.json or package.json
+                const hasProjectData = fs.existsSync(path.join(fullPath, 'project-data.json'));
+                const hasPackageJson = fs.existsSync(path.join(fullPath, 'package.json'));
+                const hasDomain = fs.existsSync(path.join(fullPath, 'src', 'domain'));
+
+                if (hasProjectData || hasPackageJson || hasDomain) {
+                    projects.push(readProjectInfo(fullPath));
+                }
+            }
+        }
+
+        return projects;
+    } catch (e) {
+        console.error('List projects error:', e);
+        return [];
+    }
+});
+
 ipcMain.handle('scan-project-assets', async (event, projectPath) => {
     let scanPath = path.join(projectPath, 'src');
     if (!fs.existsSync(scanPath)) {

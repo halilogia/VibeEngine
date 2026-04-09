@@ -1,143 +1,177 @@
-
-
-import { System } from '@engine';
-import type { Entity } from '@engine';
-import { TransformComponent } from '@engine';
-import { RigidbodyComponent } from '@engine';
-import { CollisionComponent } from '@engine';
-import { ScriptComponent } from '@engine';
+import {
+  System,
+  Entity,
+  TransformComponent,
+  RigidbodyComponent,
+  ColliderComponent,
+} from "@engine";
+import RAPIER from "@dimforge/rapier3d-compat";
+import * as THREE from "three";
 
 export class PhysicsSystem extends System {
-    
-    readonly priority = 20;
+  readonly priority = 10;
+  private world: RAPIER.World | null = null;
+  private eventQueue: RAPIER.EventQueue | null = null;
+  private isInitialized = false;
 
-    readonly requiredComponents = [TransformComponent];
+  // Map to find entities from physics handles
+  private colliderToEntity = new Map<number, number>();
 
-    private colliders: CollisionComponent[] = [];
+  // Track active sensor triggers: Map<SensorEntityId, Set<CharacterEntityId>>
+  public activeTriggers = new Map<number, Set<number>>();
 
-    private readonly collidingPairs: Set<string> = new Set();
+  async initialize(): Promise<void> {
+    await RAPIER.init();
+    const gravity = { x: 0.0, y: -9.81, z: 0.0 };
+    this.world = new RAPIER.World(gravity);
+    this.eventQueue = new RAPIER.EventQueue(true);
+    this.isInitialized = true;
+    console.log("🛠️ PhysicsSystem: Rapier.js Core Online (Sensors Active)");
+  }
 
-    update(deltaTime: number, entities: Entity[]): void {
-        
-        this.colliders = [];
+  update(deltaTime: number, entities: Entity[]): void {
+    if (!this.world || !this.eventQueue || !this.isInitialized) return;
 
-        for (const entity of entities) {
-            const transform = entity.getComponent(TransformComponent);
-            if (!transform) continue;
+    // 1. Sync Entities to Physics World
+    for (const entity of entities) {
+      const rbComp = entity.getComponent(RigidbodyComponent);
+      const colComp = entity.getComponent(ColliderComponent);
+      const transform = entity.getComponent(TransformComponent);
 
-            const rigidbody = entity.getComponent(RigidbodyComponent);
-            if (rigidbody && !rigidbody.isKinematic) {
-                this.applyPhysics(transform, rigidbody, deltaTime);
-            }
+      if (!transform) continue;
 
-            const collider = entity.getComponent(CollisionComponent);
-            if (collider && collider.enabled) {
-                this.colliders.push(collider);
-            }
-        }
+      if (rbComp && !rbComp.handle) {
+        this.createRigidBody(entity, rbComp, transform);
+      }
 
-        this.checkCollisions();
+      if (colComp && rbComp?.handle && !colComp.handle) {
+        this.createCollider(entity, colComp, rbComp);
+        this.colliderToEntity.set(colComp.handle!.handle, entity.id);
+      }
+
+      // Sync Kinematic
+      if (
+        rbComp?.handle &&
+        (rbComp.bodyType === "kinematicPositionBased" ||
+          rbComp.bodyType === "kinematicVelocityBased")
+      ) {
+        const q = new THREE.Quaternion().setFromEuler(transform.rotation);
+        rbComp.handle.setNextKinematicTranslation({
+          x: transform.position.x,
+          y: transform.position.y,
+          z: transform.position.z,
+        });
+        rbComp.handle.setNextKinematicRotation({
+          x: q.x,
+          y: q.y,
+          z: q.z,
+          w: q.w,
+        });
+      }
     }
 
-    private applyPhysics(
-        transform: TransformComponent,
-        rigidbody: RigidbodyComponent,
-        deltaTime: number
-    ): void {
-        
-        rigidbody.applyGravity(deltaTime);
-        rigidbody.applyDrag(deltaTime);
-        rigidbody.clampVelocity();
+    // 2. Step World
+    const timestep = Math.min(deltaTime, 0.1);
+    this.world.timestep = timestep;
+    this.world.step(this.eventQueue);
 
-        transform.position.add(
-            rigidbody.velocity.clone().multiplyScalar(deltaTime)
+    // 3. Handle Events
+    this.eventQueue.drainCollisionEvents(
+      (handle1: number, handle2: number, started: boolean) => {
+        const entity1 = this.colliderToEntity.get(handle1);
+        const entity2 = this.colliderToEntity.get(handle2);
+
+        if (entity1 !== undefined && entity2 !== undefined) {
+          // We don't know which one is the sensor yet, so we'll check both
+          this.updateTrigger(entity1, entity2, started);
+          this.updateTrigger(entity2, entity1, started);
+        }
+      },
+    );
+
+    // 4. Sync Transforms back
+    for (const entity of entities) {
+      const rbComp = entity.getComponent(RigidbodyComponent);
+      const transform = entity.getComponent(TransformComponent);
+
+      if (rbComp?.handle && transform && rbComp.bodyType === "dynamic") {
+        const pos = rbComp.handle.translation();
+        const rot = rbComp.handle.rotation();
+        transform.position.set(pos.x, pos.y, pos.z);
+        transform.rotation.setFromQuaternion(
+          new THREE.Quaternion(rot.x, rot.y, rot.z, rot.w),
         );
-
-        if (rigidbody.angularVelocity.lengthSq() > 0) {
-            transform.rotation.x += rigidbody.angularVelocity.x * deltaTime;
-            transform.rotation.y += rigidbody.angularVelocity.y * deltaTime;
-            transform.rotation.z += rigidbody.angularVelocity.z * deltaTime;
-            transform.quaternion.setFromEuler(transform.rotation);
-        }
+      }
     }
+  }
 
-    private checkCollisions(): void {
-        const currentPairs = new Set<string>();
-
-        for (let i = 0; i < this.colliders.length; i++) {
-            for (let j = i + 1; j < this.colliders.length; j++) {
-                const a = this.colliders[i];
-                const b = this.colliders[j];
-
-                if (!a.entity || !b.entity) continue;
-
-                const pairKey = this.getPairKey(a, b);
-                const wasColliding = this.collidingPairs.has(pairKey);
-                const isColliding = a.intersects(b);
-
-                if (isColliding) {
-                    currentPairs.add(pairKey);
-
-                    if (!wasColliding) {
-                        
-                        this.onCollisionEnter(a, b);
-                    }
-                } else if (wasColliding) {
-                    
-                    this.onCollisionExit(a, b);
-                }
-            }
-        }
-
-        this.collidingPairs.clear();
-        currentPairs.forEach(pair => this.collidingPairs.add(pair));
+  private updateTrigger(sensorId: number, visitorId: number, started: boolean) {
+    // Check if sensorId is actually a sensor in a real race system,
+    // but here we just track all sensor-collider pairs.
+    if (started) {
+      if (!this.activeTriggers.has(sensorId))
+        this.activeTriggers.set(sensorId, new Set());
+      this.activeTriggers.get(sensorId)!.add(visitorId);
+    } else {
+      this.activeTriggers.get(sensorId)?.delete(visitorId);
     }
+  }
 
-    private onCollisionEnter(a: CollisionComponent, b: CollisionComponent): void {
-        a.activeCollisions.add(b);
-        b.activeCollisions.add(a);
+  private createRigidBody(
+    entity: Entity,
+    rbComp: RigidbodyComponent,
+    transform: TransformComponent,
+  ) {
+    if (!this.world) return;
+    let bodyType = RAPIER.RigidBodyType.Dynamic;
+    if (rbComp.bodyType === "static") bodyType = RAPIER.RigidBodyType.Fixed;
+    else if (rbComp.bodyType === "kinematicPositionBased")
+      bodyType = RAPIER.RigidBodyType.KinematicPositionBased;
+    else if (rbComp.bodyType === "kinematicVelocityBased")
+      bodyType = RAPIER.RigidBodyType.KinematicVelocityBased;
 
-        if (a.isTrigger || b.isTrigger) {
-            if (a.onTriggerEnter) a.onTriggerEnter(b);
-            if (b.onTriggerEnter) b.onTriggerEnter(a);
+    const rbDesc = new RAPIER.RigidBodyDesc(bodyType)
+      .setTranslation(
+        transform.position.x,
+        transform.position.y,
+        transform.position.z,
+      )
+      .setLinearDamping(rbComp.linearDamping)
+      .setAngularDamping(rbComp.angularDamping);
 
-            // Script Dispatch
-            a.entity?.getComponent(ScriptComponent)?.onTriggerEnter(b.entity!);
-            b.entity?.getComponent(ScriptComponent)?.onTriggerEnter(a.entity!);
-        } else {
-            if (a.onCollisionEnter) a.onCollisionEnter(b);
-            if (b.onCollisionEnter) b.onCollisionEnter(a);
+    const q = new THREE.Quaternion().setFromEuler(transform.rotation);
+    rbDesc.setRotation({ x: q.x, y: q.y, z: q.z, w: q.w });
 
-            // Script Dispatch
-            a.entity?.getComponent(ScriptComponent)?.onCollisionEnter(b.entity!);
-            b.entity?.getComponent(ScriptComponent)?.onCollisionEnter(a.entity!);
-        }
+    rbComp.handle = this.world.createRigidBody(rbDesc);
+  }
+
+  private createCollider(
+    entity: Entity,
+    colComp: ColliderComponent,
+    rbComp: RigidbodyComponent,
+  ) {
+    if (!this.world || !rbComp.handle) return;
+    let colDesc = RAPIER.ColliderDesc.cuboid(
+      colComp.size.x / 2,
+      colComp.size.y / 2,
+      colComp.size.z / 2,
+    );
+    if (colComp.shape === "sphere")
+      colDesc = RAPIER.ColliderDesc.ball(colComp.radius);
+
+    colDesc
+      .setSensor(colComp.isSensor)
+      .setRestitution(rbComp.restitution)
+      .setFriction(rbComp.friction)
+      .setTranslation(colComp.offset.x, colComp.offset.y, colComp.offset.z);
+
+    colComp.handle = this.world.createCollider(colDesc, rbComp.handle);
+  }
+
+  destroy(): void {
+    if (this.world) {
+      this.world.free();
+      this.world = null;
     }
-
-    private onCollisionExit(a: CollisionComponent, b: CollisionComponent): void {
-        a.activeCollisions.delete(b);
-        b.activeCollisions.delete(a);
-
-        if (a.isTrigger || b.isTrigger) {
-            if (a.onTriggerExit) a.onTriggerExit(b);
-            if (b.onTriggerExit) b.onTriggerExit(a);
-
-            // Script Dispatch
-            a.entity?.getComponent(ScriptComponent)?.onTriggerExit(b.entity!);
-            b.entity?.getComponent(ScriptComponent)?.onTriggerExit(a.entity!);
-        } else {
-            if (a.onCollisionExit) a.onCollisionExit(b);
-            if (b.onCollisionExit) b.onCollisionExit(a);
-
-            // Script Dispatch
-            a.entity?.getComponent(ScriptComponent)?.onCollisionExit(b.entity!);
-            b.entity?.getComponent(ScriptComponent)?.onCollisionExit(a.entity!);
-        }
-    }
-
-    private getPairKey(a: CollisionComponent, b: CollisionComponent): string {
-        const idA = a.entity?.id ?? 0;
-        const idB = b.entity?.id ?? 0;
-        return idA < idB ? `${idA}-${idB}` : `${idB}-${idA}`;
-    }
+  }
 }

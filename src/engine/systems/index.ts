@@ -2,6 +2,9 @@
 export { InputSystem, type ActionMapping, type ActionType } from './InputSystem';
 export { ScriptSystem } from './ScriptSystem';
 export { PhysicsSystem } from './PhysicsSystem';
+export { FollowCameraSystem } from './FollowCameraSystem';
+export { VehicleSystem } from './VehicleSystem';
+export { RaceSystem } from './RaceSystem';
 export { AnimationSystem } from './AnimationSystem';
 export { AudioSystem } from './AudioSystem';
 export { TrafficSystem } from './TrafficSystem';

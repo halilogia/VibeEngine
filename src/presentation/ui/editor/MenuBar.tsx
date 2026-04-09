@@ -72,7 +72,7 @@ export const MenuBar: React.FC = () => {
                 useSceneStore.getState().loadScene({
                     sceneName: 'Captured Scene',
                     version: '1.0.0',
-                    nextEntityId: sceneData.entities.length + 1,
+                    nextEntityId: sceneData.entities.length > 0 ? Math.max(...sceneData.entities.map(e => e.id)) + 1 : 1,
                     entities: sceneData.entities,
                     rootEntityIds: sceneData.rootEntityIds
                 });

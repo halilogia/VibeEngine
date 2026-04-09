@@ -11,6 +11,7 @@ export const DEFAULT_SHORTCUTS: Record<string, ShortcutBinding> = {
   newScene: { key: "n", ctrl: true, shift: false, alt: false },
   delete: { key: "delete", ctrl: false, shift: false, alt: false },
   commandPalette: { key: "p", ctrl: true, shift: false, alt: false },
+  viewportMaximize: { key: " ", ctrl: true, shift: false, alt: false },
   escape: { key: "escape", ctrl: false, shift: false, alt: false },
 };
 
@@ -39,6 +40,7 @@ export const PERSIST_KEYS = [
   "showConsole",
   "showAICopilot",
   "showScriptEditor",
+  "isViewportMaximized",
   "leftWidth",
   "rightWidth",
   "inspectorWidth",

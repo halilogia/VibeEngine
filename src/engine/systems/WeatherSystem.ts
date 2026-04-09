@@ -1,12 +1,11 @@
 import * as THREE from "three";
-import { System, Entity, WeatherComponent, ParticleComponent, TransformComponent, AudioComponent, AudioSystem } from "@engine";
+import { System, Entity, WeatherComponent, ParticleComponent, TransformComponent, AudioSystem } from "@engine";
 
 export class WeatherSystem extends System {
   readonly priority = 0;
   private weatherEntity: Entity | null = null;
   private rainParticle: ParticleComponent | null = null;
   private snowParticle: ParticleComponent | null = null;
-  private ambientAudio: AudioComponent | null = null;
   private currentAudioType: string = "none";
 
   initialize(): void {
@@ -16,6 +15,13 @@ export class WeatherSystem extends System {
   update(deltaTime: number, entities: Entity[]): void {
     const weather = entities.find(e => e.hasComponent(WeatherComponent))?.getComponent(WeatherComponent);
     if (!weather) return;
+
+    // Automatic day/night flow
+    if (weather.timeScale > 0) {
+      // timeOfDay is in hours (24), deltaTime is in seconds
+      weather.timeOfDay += (deltaTime / 3600) * weather.timeScale;
+      weather.timeOfDay %= 24; // loop back after 24 hours
+    }
 
     this.updateDayNightCycle(weather);
     this.updateWeatherEffects(weather);
@@ -105,27 +111,16 @@ export class WeatherSystem extends System {
     this.currentAudioType = targetAudio;
 
     if (targetAudio === "none") {
-        this.ambientAudio?.stop();
+        audioSystem.stopGlobal("weather_ambient");
         return;
     }
 
-    if (!this.ambientAudio) {
-        const entity = new Entity("AmbientWeatherAudio", 999);
-        this.ambientAudio = new AudioComponent(false, { volume: 0.5, loop: true, autoplay: true });
-        entity.addComponent(this.ambientAudio);
-        this.app!.scene.addEntity(entity);
-    }
-
-    // Load placeholder storm/rain audio url if needed
-    // For now, prepare the buffer structure
     const rainUrl = "https://www.soundjay.com/nature/rain-01.mp3";
     try {
-        const buffer = await audioSystem.loadClip("rain_ambient", rainUrl);
-        this.ambientAudio.setBuffer(buffer);
-        this.ambientAudio.play();
-        console.log("🔊 WeatherSystem: Playing Atmospheric Storm Context");
+        audioSystem.playGlobal("weather_ambient", rainUrl, { volume: 0.5, loop: true, autoplay: true });
+        console.log("🔊 WeatherSystem: Playing Atmospheric Storm Context via Howler");
     } catch (e) {
-        console.warn("WeatherSystem: Could not load ambient audio clip", e);
+        console.warn("WeatherSystem: Could not play ambient audio", e);
     }
   }
 

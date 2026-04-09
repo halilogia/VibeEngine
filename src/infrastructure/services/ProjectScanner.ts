@@ -43,6 +43,7 @@ declare global {
       captureScene: (
         url: string,
       ) => Promise<{ success: boolean; data?: unknown; error?: string }>;
+      listProjects: (projectsPath?: string) => Promise<ProjectInfo[]>;
     };
   }
 }
@@ -149,5 +150,12 @@ export class ProjectScanner {
       return await window.ProjectScanner.captureScene(url);
     }
     return { success: false, error: "Bridge not available" };
+  }
+
+  static async listProjects(projectsPath?: string): Promise<ProjectInfo[]> {
+    if (typeof window !== "undefined" && "ProjectScanner" in window) {
+      return await window.ProjectScanner.listProjects(projectsPath);
+    }
+    return [];
   }
 }

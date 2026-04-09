@@ -109,6 +109,16 @@ export const CommandPalette: React.FC = () => {
                 const id = addEntity('Cube', null);
                 addComponent(id, { type: 'Render', data: { meshType: 'cube' }, enabled: true });
             }},
+            { id: 'light', label: 'Add Light', desc: 'Add a cinematic directional light', icon: 'Sun' as VibeIconName, cat: 'Action', onSelect: () => {
+                const id = addEntity('Directional Light', null);
+                addComponent(id, { type: 'Light', data: { lightType: 'directional', color: '#ffffff', intensity: 1, castShadow: true }, enabled: true });
+                useSceneStore.getState().updateComponent(id, 'Transform', { position: [5, 10, 5], rotation: [-45, 30, 0] });
+            }},
+            { id: 'camera', label: 'Add Camera', desc: 'Add a new perspective camera', icon: 'Camera' as VibeIconName, cat: 'Action', onSelect: () => {
+                const id = addEntity('Main Camera', null);
+                addComponent(id, { type: 'Camera', data: { fov: 75, near: 0.1, far: 1000, isActive: true }, enabled: true });
+                useSceneStore.getState().updateComponent(id, 'Transform', { position: [0, 5, 10], rotation: [-20, 0, 0] });
+            }},
             { id: 'storm', label: 'Create Storm Scene', desc: 'Initialize Ocean and Storm weather', icon: 'Sun' as VibeIconName, cat: 'Sovereign', onSelect: () => {
                 const seaId = addEntity('Ocean', null);
                 addComponent(seaId, { type: 'Render', data: { meshType: 'plane', color: '#1e3a8a' }, enabled: true });

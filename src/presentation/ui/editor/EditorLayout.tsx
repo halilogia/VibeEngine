@@ -21,7 +21,7 @@ export const EditorLayout: React.FC = () => {
     const { 
         showHierarchy, showInspector, showConsole, showAssets, showAICopilot, showScriptEditor, setActivePanel,
         leftWidth, rightWidth, bottomHeight, inspectorWidth, assetsWidth, consoleWidth, setPanelSize,
-        isScriptFullScreen, setScriptFullScreen
+        isScriptFullScreen, setScriptFullScreen, isViewportMaximized
     } = useEditorStore();
 
     const handleResize = useCallback((dir: 'L' | 'R' | 'B' | 'I' | 'A' | 'C') => (e: React.MouseEvent) => {
@@ -81,7 +81,7 @@ export const EditorLayout: React.FC = () => {
             }}>
                 {}
                 <AnimatePresence>
-                    {showHierarchy && (
+                    {showHierarchy && !isViewportMaximized && (
                         <motion.div 
                             initial={{ width: 0, opacity: 0 }}
                             animate={{ width: leftWidth, opacity: 1 }}
@@ -113,7 +113,7 @@ export const EditorLayout: React.FC = () => {
 
                     {}
                     <AnimatePresence>
-                        {(showAssets || showConsole || showScriptEditor) && (
+                        {(showAssets || showConsole || showScriptEditor) && !isViewportMaximized && (
                             <motion.div 
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ 
@@ -223,7 +223,7 @@ export const EditorLayout: React.FC = () => {
                     )}
 
                     <AnimatePresence>
-                        {showInspector && (
+                        {showInspector && !isViewportMaximized && (
                             <motion.div 
                                 key="inspector"
                                 initial={{ width: 0, opacity: 0 }}
@@ -241,7 +241,7 @@ export const EditorLayout: React.FC = () => {
                             </motion.div>
                         )}
 
-                        {showAICopilot && (
+                        {showAICopilot && !isViewportMaximized && (
                             <motion.div 
                                 key="ai-copilot"
                                 initial={{ width: 0, opacity: 0 }}

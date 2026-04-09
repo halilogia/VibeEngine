@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('ProjectScanner', {
     createFolder: (path) => ipcRenderer.invoke('create-folder', path),
     createFile: (path, content) => ipcRenderer.invoke('create-file', path, content),
     readFile: (path) => ipcRenderer.invoke('read-file', path),
+    listProjects: (projectsPath) => ipcRenderer.invoke('list-projects', projectsPath),
     renameAsset: (oldPath, newPath) => ipcRenderer.invoke('rename-asset', oldPath, newPath),
     deleteAsset: (path) => ipcRenderer.invoke('delete-asset', path),
     saveFile: (path, content) => ipcRenderer.invoke('save-file', path, content),
