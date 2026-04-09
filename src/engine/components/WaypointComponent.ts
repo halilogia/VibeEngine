@@ -14,14 +14,14 @@ export class WaypointComponent extends Component {
     }
   }
 
-  override clone(): WaypointComponent {
+  clone(): WaypointComponent {
     return new WaypointComponent({
       nextWaypointId: this.nextWaypointId,
       radius: this.radius,
     });
   }
 
-  override toJSON(): Record<string, unknown> {
+  toJSON(): Record<string, unknown> {
     return {
       type: WaypointComponent.TYPE,
       nextWaypointId: this.nextWaypointId,

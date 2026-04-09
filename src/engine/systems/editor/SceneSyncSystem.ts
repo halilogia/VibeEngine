@@ -12,7 +12,9 @@ import {
   PostProcessingComponent,
   LightComponent,
   RigidbodyComponent,
+  type RigidBodyType,
   ColliderComponent,
+  type ColliderShape,
   VehicleControllerComponent,
   FollowCameraComponent,
   CheckpointComponent,
@@ -115,7 +117,7 @@ const componentRegistry: Record<string, ComponentFactory> = {
   },
   Rigidbody: (data) => {
     return new RigidbodyComponent({
-      bodyType: (data.bodyType as unknown) || "dynamic",
+      bodyType: (data.bodyType as RigidBodyType) || "dynamic",
       mass: (data.mass as number) || 1,
       restitution: (data.restitution as number) || 0.5,
       friction: (data.friction as number) || 0.5,
@@ -125,25 +127,15 @@ const componentRegistry: Record<string, ComponentFactory> = {
     });
   },
   Collider: (data) => {
+    const sizeArr = data.size as number[] | undefined;
+    const offArr  = data.offset as number[] | undefined;
     return new ColliderComponent({
-      shape: (data.shape as unknown) || "box",
-      size: data.size
-        ? new THREE.Vector3(
-            (data.size as unknown)[0],
-            (data.size as unknown)[1],
-            (data.size as unknown)[2],
-          )
-        : new THREE.Vector3(1, 1, 1),
+      shape: (data.shape as ColliderShape) || "box",
+      size: sizeArr ? new THREE.Vector3(sizeArr[0], sizeArr[1], sizeArr[2]) : new THREE.Vector3(1, 1, 1),
       radius: (data.radius as number) || 0.5,
       height: (data.height as number) || 1,
       isSensor: (data.isSensor as boolean) || false,
-      offset: data.offset
-        ? new THREE.Vector3(
-            (data.offset as unknown)[0],
-            (data.offset as unknown)[1],
-            (data.offset as unknown)[2],
-          )
-        : new THREE.Vector3(0, 0, 0),
+      offset: offArr ? new THREE.Vector3(offArr[0], offArr[1], offArr[2]) : new THREE.Vector3(0, 0, 0),
     });
   },
   VehicleController: (data) => {

@@ -16,7 +16,7 @@ export class TrafficFollowerComponent extends Component {
     }
   }
 
-  override clone(): TrafficFollowerComponent {
+  clone(): TrafficFollowerComponent {
     return new TrafficFollowerComponent({
       speed: this.speed,
       currentWaypointId: this.currentWaypointId,
@@ -24,7 +24,7 @@ export class TrafficFollowerComponent extends Component {
     });
   }
 
-  override toJSON(): Record<string, unknown> {
+  toJSON(): Record<string, unknown> {
     return {
       type: TrafficFollowerComponent.TYPE,
       speed: this.speed,
