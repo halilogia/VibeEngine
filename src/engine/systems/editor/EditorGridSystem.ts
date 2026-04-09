@@ -9,82 +9,94 @@ export class EditorGridSystem extends System {
   initialize(): void {
     if (!this.app) return;
 
-    // Create an ELITE Infinite Grid using Shaders
-    const geometry = new THREE.PlaneGeometry(2, 2);
+    // --- Infinite Grid Shader ---
+    const geometry = new THREE.PlaneGeometry(2000, 2000);
     const material = new THREE.ShaderMaterial({
       transparent: true,
       uniforms: {
-        uColor: { value: new THREE.Color(0x3b82f6) }, // Sovereign Blue
-        uOpacity: { value: 0.15 },
-        uLineThickness: { value: 0.02 },
-        uBackgroundOpacity: { value: 0.05 },
-        uGridScale: { value: 1.0 },
+        uTime: { value: 0 },
+        uColor: { value: new THREE.Color(0x334466) },
+        uSecondaryColor: { value: new THREE.Color(0x1a2233) },
+        uFadeDistance: { value: 800 },
       },
       vertexShader: `
-        varying vec3 vWorldPosition;
+        varying vec2 vUv;
+        varying vec3 vWorldPos;
         void main() {
-          vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-          vWorldPosition = worldPosition.xyz;
-          gl_Position = projectionMatrix * viewMatrix * worldPosition;
+          vUv = uv;
+          vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
       fragmentShader: `
-        varying vec3 vWorldPosition;
+        varying vec2 vUv;
+        varying vec3 vWorldPos;
         uniform vec3 uColor;
-        uniform float uOpacity;
-        uniform float uLineThickness;
-        uniform float uBackgroundOpacity;
-        uniform float uGridScale;
+        uniform vec3 uSecondaryColor;
+        uniform float uFadeDistance;
 
-        float grid(vec2 st, float res) {
-          vec2 grid = fract(st * res);
-          return (step(1.0 - uLineThickness, grid.x) + step(1.0 - uLineThickness, grid.y));
+        float grid(vec2 uv, float res) {
+          vec2 grid = fract(uv * res);
+          float line = min(grid.x, grid.y);
+          return 1.0 - smoothstep(0.0, 0.02, line);
         }
 
         void main() {
-          vec2 st = vWorldPosition.xz * uGridScale;
+          float dist = length(vWorldPos.xz);
+          float alpha = 1.0 - smoothstep(0.0, uFadeDistance, dist);
           
-          // Large main grid
-          float g1 = grid(st, 0.1);
-          // Finer sub-grid
-          float g2 = grid(st, 1.0);
+          // Main grid (1m)
+          float g1 = grid(vWorldPos.xz, 1.0);
+          // Large grid (10m)
+          float g2 = grid(vWorldPos.xz, 0.1);
           
-          float intensity = max(g1 * 0.8, g2 * 0.3);
-          
-          // Distance fading (ELITE FADE)
-          float dist = distance(vWorldPosition.xz, cameraPosition.xz);
-          float falloff = 1.0 - smoothstep(20.0, 100.0, dist);
-          
-          // Radial center glow
-          float centerGlow = 1.0 - smoothstep(0.0, 50.0, length(vWorldPosition.xz));
-          
-          vec3 finalColor = uColor * (intensity + (centerGlow * 0.2));
-          float alpha = (intensity * uOpacity + uBackgroundOpacity) * falloff;
-          
-          gl_FragColor = vec4(finalColor, alpha);
+          vec3 col = mix(uSecondaryColor, uColor, g1 * 0.5 + g2);
+          float finalAlpha = (g1 * 0.2 + g2 * 0.5) * alpha;
+
+          if (finalAlpha < 0.01) discard;
+          gl_FragColor = vec4(col, finalAlpha);
         }
       `,
-      side: THREE.DoubleSide,
-      depthWrite: false,
     });
 
     this.gridMesh = new THREE.Mesh(geometry, material);
     this.gridMesh.rotation.x = -Math.PI / 2;
-    this.gridMesh.scale.set(500, 500, 1);
-    this.gridMesh.name = "EliteInfiniteGrid";
+    this.gridMesh.renderOrder = -1; // Behind objects but before background
+    this.app.threeScene.add(this.gridMesh);
 
-    this.app.editorScene.add(this.gridMesh);
-    console.log("💎 EditorGridSystem: ELITE Infinite Grid Initialized");
+    // --- Center Axes (RGB Helper) ---
+    const axesHelper = new THREE.AxesHelper(5);
+    (axesHelper.material as THREE.Material).depthTest = false;
+    axesHelper.renderOrder = 10;
+    this.app.threeScene.add(axesHelper);
+
+    this.updateBackground();
+    console.log("💎 EditorGridSystem: Infinite Adaptive Grid Engaged");
   }
 
-  update(): void {
-    if (this.app && this.gridMesh) {
-      const camera = this.app.camera;
-      // Keep grid centered under camera for infinite effect
-      this.gridMesh.position.x = camera.position.x;
-      this.gridMesh.position.z = camera.position.z;
+  private updateBackground(): void {
+    if (!this.app) return;
+
+    const size = 512;
+    const canvas = document.createElement("canvas");
+    canvas.width = size; canvas.height = size;
+    const context = canvas.getContext("2d");
+
+    if (context) {
+      const gradient = context.createLinearGradient(0, 0, 0, size);
+      gradient.addColorStop(0, "#08090a"); // Space
+      gradient.addColorStop(0.48, "#141820"); // Sky
+      gradient.addColorStop(0.52, "#1c222d"); // Ground
+      gradient.addColorStop(1, "#0a0c10");
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, size, size);
     }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    this.app.threeScene.background = texture;
   }
+
+  update(): void {}
 
   setVisible(visible: boolean): void {
     if (this.gridMesh) this.gridMesh.visible = visible;
@@ -92,7 +104,7 @@ export class EditorGridSystem extends System {
 
   destroy(): void {
     if (this.app && this.gridMesh) {
-      this.app.editorScene.remove(this.gridMesh);
+      this.app.threeScene.remove(this.gridMesh);
     }
   }
 }

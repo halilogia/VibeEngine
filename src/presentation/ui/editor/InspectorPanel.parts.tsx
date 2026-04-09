@@ -5,7 +5,7 @@
  */
 import React, { useState } from 'react';
 import { VibeIcons, type VibeIconName } from '@ui/common/VibeIcons';
-import { type ComponentData } from '@infrastructure/store';
+import { type ComponentData, useSceneStore } from '@infrastructure/store';
 import { VibeButton } from '@ui/atomic/atoms/VibeButton';
 import { VibeInput } from '@ui/atomic/atoms/VibeInput';
 import { VibeSwitch } from '@ui/atomic/atoms/VibeSwitch';
@@ -99,6 +99,35 @@ export const ComponentSection: React.FC<ComponentSectionProps> = ({ component, o
             </div>
             {children && <div style={styles.sectionBody}>{children}</div>}
         </div>
+    );
+};
+
+interface TransformSectionProps {
+    data: any;
+    onChange: (updates: any) => void;
+}
+
+export const TransformSection: React.FC<TransformSectionProps> = ({ data, onChange }) => {
+    return (
+        <ComponentSection title="TRANSFORM" icon="Move">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <Vector3Field
+                    label="Position"
+                    value={data.position || [0, 0, 0]}
+                    onChange={(val) => onChange({ ...data, position: val })}
+                />
+                <Vector3Field
+                    label="Rotation"
+                    value={data.rotation || [0, 0, 0]}
+                    onChange={(val) => onChange({ ...data, rotation: val })}
+                />
+                <Vector3Field
+                    label="Scale"
+                    value={data.scale || [1, 1, 1]}
+                    onChange={(val) => onChange({ ...data, scale: val })}
+                />
+            </div>
+        </ComponentSection>
     );
 };
 

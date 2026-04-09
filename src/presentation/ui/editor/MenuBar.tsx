@@ -1,5 +1,3 @@
-
-
 import React, { useState, useRef } from 'react';
 import { VibeIcons, VibeIconName } from '@ui/common/VibeIcons';
 import { useEditorStore, useSceneStore } from '@infrastructure/store';
@@ -35,11 +33,11 @@ export const MenuBar: React.FC = () => {
 
     const { 
         togglePanel, 
-        showAICopilot, showHierarchy, showConsole, showAssets, showInspector, showScriptEditor    } = useEditorStore();
+        showHierarchy, showConsole, showAssets, showInspector, showScriptEditor, showAICopilot    } = useEditorStore();
     const { sceneName } = useSceneStore();
     const { setShowLauncher } = useProjectStore();
     const { addToast } = useToastStore();
-    usePlayModeStore();
+    const { isPlaying, isPaused, play, pause, stop } = usePlayModeStore();
 
     const handleOpenLauncher = () => { setShowLauncher(true); setOpenMenu(null); };
     const handleOpen = () => fileInputRef.current?.click();
@@ -131,8 +129,8 @@ export const MenuBar: React.FC = () => {
         <div className="unified-header" style={styles.container}>
             <input type="file" ref={fileInputRef} accept=".json" style={{ display: 'none' }} onChange={handleFileChange} />
 
-            {}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* LEFT: Menus */}
+            <div style={styles.leftSection}>
                 {menus.map(menu => (
                     <div
                         key={menu.label}
@@ -158,92 +156,90 @@ export const MenuBar: React.FC = () => {
                         )}
                     </div>
                 ))}
-
-                <div style={styles.dividerVertical} />
             </div>
 
-            <div style={styles.playbackGroup} />
+            {/* CENTER: Play Controls */}
+            <div style={styles.centerSection}>
+                <div style={styles.playbackGroup}>
+                    <VibeButton
+                        variant={isPlaying && !isPaused ? 'primary' : 'ghost'}
+                        size="sm"
+                        onClick={() => isPlaying ? stop() : play()}
+                        style={{
+                            width: '32px', height: '32px', padding: 0, borderRadius: '50%',
+                            background: isPlaying && !isPaused ? '#22c55e' : 'rgba(255,255,255,0.06)',
+                        }}
+                    >
+                        <VibeIcons name={isPlaying ? 'Square' : 'Play'} size={14} />
+                    </VibeButton>
 
-            {}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={styles.dividerVertical} />
+                    <VibeButton
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => isPaused ? play() : pause()}
+                        disabled={!isPlaying}
+                        style={{
+                            width: '32px', height: '32px', padding: 0, borderRadius: '50%',
+                            background: isPaused ? '#f59e0b22' : 'rgba(255,255,255,0.04)',
+                        }}
+                    >
+                        <VibeIcons name="Pause" size={14} />
+                    </VibeButton>
 
-                {}
-                <div style={{ display: 'flex', gap: '6px', background: VibeTheme.colors.glassBg, padding: '2px', borderRadius: '10px', border: `1px solid ${VibeTheme.colors.glassBorder}`, marginLeft: '12px' }}>
-                    {}
+                    <VibeButton
+                        variant="ghost"
+                        size="sm"
+                        disabled={!isPlaying}
+                        style={{ width: '24px', height: '24px', padding: 0 }}
+                    >
+                        <VibeIcons name="ChevronRight" size={12} />
+                    </VibeButton>
+                </div>
+            </div>
+
+            {/* RIGHT: Toggles & Save */}
+            <div style={styles.rightSection}>
+                <div style={{ display: 'flex', gap: '4px', background: 'rgba(255,255,255,0.03)', padding: '2px', borderRadius: '10px', border: `1px solid ${VibeTheme.colors.glassBorder}` }}>
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('hierarchy')} 
-                        style={{ 
-                            width: '32px', height: '32px', padding: 0, 
-                            color: showHierarchy ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary,
-                            filter: showHierarchy ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none'
-                        }}
+                        style={{ width: '28px', height: '28px', padding: 0, color: showHierarchy ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary }}
                     >
-                        <VibeIcons name="Sidebar" size={16} />
+                        <VibeIcons name="Sidebar" size={14} />
                     </VibeButton>
                     
-                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('assets')} 
-                        style={{ 
-                            width: '32px', height: '32px', padding: 0, 
-                            color: showAssets ? '#34d399' : VibeTheme.colors.textSecondary,
-                            filter: showAssets ? `drop-shadow(0 0 4px #34d39988)` : 'none',
-                            transform: 'rotate(90deg)'
-                        }}
+                        style={{ width: '28px', height: '28px', padding: 0, color: showAssets ? '#34d399' : VibeTheme.colors.textSecondary, transform: 'rotate(90deg)' }}
                     >
-                        <VibeIcons name="Grid" size={14} />
+                        <VibeIcons name="Grid" size={12} />
                     </VibeButton>
 
-                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('console')} 
-                        style={{ 
-                            width: '32px', height: '32px', padding: 0, 
-                            color: showConsole ? '#60a5fa' : VibeTheme.colors.textSecondary,
-                            filter: showConsole ? `drop-shadow(0 0 4px #60a5fa88)` : 'none',
-                            transform: 'rotate(90deg)'
-                        }}
+                        style={{ width: '28px', height: '28px', padding: 0, color: showConsole ? '#60a5fa' : VibeTheme.colors.textSecondary, transform: 'rotate(90deg)' }}
                     >
-                        <VibeIcons name="Terminal" size={14} />
+                        <VibeIcons name="Terminal" size={12} />
                     </VibeButton>
 
-                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('scriptEditor')} 
-                        style={{ 
-                            width: '32px', height: '32px', padding: 0, 
-                            color: showScriptEditor ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary,
-                            filter: showScriptEditor ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none',
-                            transform: 'rotate(90deg)'
-                        }}
+                        style={{ width: '28px', height: '28px', padding: 0, color: showScriptEditor ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary, transform: 'rotate(90deg)' }}
                     >
-                        <VibeIcons name="Code" size={14} />
+                        <VibeIcons name="Code" size={12} />
                     </VibeButton>
 
-                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('inspector')} 
-                        style={{ 
-                            width: '32px', height: '32px', padding: 0, 
-                            color: showInspector ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary,
-                            filter: showInspector ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none',
-                            transform: 'scaleX(-1)'
-                        }}
+                        style={{ width: '28px', height: '28px', padding: 0, color: showInspector ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary, transform: 'scaleX(-1)' }}
                     >
-                        <VibeIcons name="Sidebar" size={16} />
+                        <VibeIcons name="Sidebar" size={14} />
                     </VibeButton>
 
-                    {}
                     <VibeButton 
                         variant="ghost" size="sm" onClick={() => togglePanel('aiCopilot')} 
-                        style={{ 
-                            width: '32px', height: '32px', padding: 0, 
-                            color: showAICopilot ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary,
-                            filter: showAICopilot ? `drop-shadow(0 0 4px ${VibeTheme.colors.accent}88)` : 'none'
-                        }}
+                        style={{ width: '28px', height: '28px', padding: 0, color: showAICopilot ? VibeTheme.colors.accent : VibeTheme.colors.textSecondary }}
                     >
-                        <VibeIcons name="Sparkles" size={14} />
+                        <VibeIcons name="Sparkles" size={12} />
                     </VibeButton>
                 </div>
 
@@ -253,7 +249,7 @@ export const MenuBar: React.FC = () => {
                     variant="primary" 
                     size="sm" 
                     onClick={handleSave} 
-                    style={{ borderRadius: '8px', height: '32px', display: 'flex', gap: '8px', padding: '0 16px', fontWeight: 800 }}
+                    style={{ borderRadius: '8px', height: '32px', display: 'flex', gap: '8px', padding: '0 16px', fontWeight: 800, background: VibeTheme.colors.accent }}
                 >
                     <VibeIcons name="Save" size={14} />
                     SAVE

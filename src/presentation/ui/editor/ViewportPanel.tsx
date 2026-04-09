@@ -5,6 +5,7 @@ import React, { useRef, useEffect, useCallback, useState } from 'react';
 import * as THREE from 'three';
 import { 
     Application, 
+    engineBridge,
     RenderSystem, 
     EditorCameraSystem, 
     EditorGridSystem, 
@@ -22,11 +23,14 @@ import {
     PhysicsSystem,
     FollowCameraSystem,
     VehicleSystem,
-    RaceSystem
+    RaceSystem,
+    StoreSyncSystem,
+    SelectionSystem
 } from '@engine';
 import { useEditorStore } from '@infrastructure/store';
 import { ViewportToolbar } from '@ui/editor/ViewportToolbar';
 import { StatusBar } from './StatusBar';
+import { OrientationGizmo } from './OrientationGizmo';
 import { usePlayModeStore } from '@presentation/features/editor/core';
 import { motion, AnimatePresence } from 'framer-motion';
 import { viewportStyles as styles, viewportAnimations } from './ViewportPanel.styles';
@@ -85,8 +89,11 @@ export const ViewportPanel: React.FC = () => {
         app.addSystem(new LightGizmoSystem());
         app.addSystem(new UISystem());
         app.addSystem(new SelectionGizmoSystem());
+        app.addSystem(new StoreSyncSystem());
+        app.addSystem(new SelectionSystem());
 
         app.start();
+        engineBridge.registerApp(app);
         appRef.current = app;
 
         // Focus handling
@@ -151,7 +158,6 @@ export const ViewportPanel: React.FC = () => {
 
         // Environment Sync
         const isEnvActive = useEditorStore.getState().showEnvironment;
-        app.threeScene.background = new THREE.Color(isEnvActive ? 0x0a0a0f : 0x0f0f1a);
         app.renderer.toneMappingExposure = isEnvActive ? 1.2 : 1.0;
 
         // Mode Sync
@@ -235,30 +241,34 @@ export const ViewportPanel: React.FC = () => {
 
             <div style={styles.overlay}>
                 <div style={styles.topBar}>
-                    <AnimatePresence mode="wait">
-                        {isPlaying && (
-                            <motion.div
-                                key={isPaused ? 'paused' : 'live'}
-                                initial={{ x: -20, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                exit={{ x: -20, opacity: 0 }}
-                                style={isPaused ? styles.pausedIndicator : styles.liveIndicator}
-                            >
-                                <div style={{ 
-                                    ...styles.liveDot, 
-                                    background: isPaused ? '#f59e0b' : '#ef4444',
-                                    animation: isPaused ? 'none' : 'live-pulse 2s infinite'
-                                }} />
-                                <span style={isPaused ? styles.pausedText : styles.liveText}>
-                                    {isPaused ? 'PAUSED' : 'LIVE'}
-                                </span>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                        <AnimatePresence mode="wait">
+                            {isPlaying && (
+                                <motion.div
+                                    key={isPaused ? 'paused' : 'live'}
+                                    initial={{ x: -20, opacity: 0 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    exit={{ x: -20, opacity: 0 }}
+                                    style={isPaused ? styles.pausedIndicator : styles.liveIndicator}
+                                >
+                                    <div style={{ 
+                                        ...styles.liveDot, 
+                                        background: isPaused ? '#f59e0b' : '#ef4444',
+                                        animation: isPaused ? 'none' : 'live-pulse 2s infinite'
+                                    }} />
+                                    <span style={isPaused ? styles.pausedText : styles.liveText}>
+                                        {isPaused ? 'PAUSED' : 'LIVE'}
+                                    </span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
 
                     <div style={{ pointerEvents: 'auto' }}>
                         <ViewportToolbar />
                     </div>
+
+                    <div style={{ flex: 1 }} />
                 </div>
 
                 <AnimatePresence>
@@ -282,6 +292,12 @@ export const ViewportPanel: React.FC = () => {
                     </AnimatePresence>
                     <div style={{ flex: 1 }} />
                 </div>
+
+                <AnimatePresence>
+                    {!isPlaying && appRef.current && (
+                        <OrientationGizmo camera={appRef.current.camera} />
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Bottom Status Layer */}

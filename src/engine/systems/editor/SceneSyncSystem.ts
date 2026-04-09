@@ -2,9 +2,11 @@ import * as THREE from "three";
 import {
   System,
   Entity,
+  Component,
+} from "../../core";
+import {
   TransformComponent,
   RenderComponent,
-  Component,
   SeaComponent,
   WeatherComponent,
   AudioComponent,
@@ -20,7 +22,7 @@ import {
   CheckpointComponent,
   WaypointComponent,
   TrafficFollowerComponent,
-} from "@engine";
+} from "../../components";
 import { useSceneStore, type EntityData } from "@infrastructure/store";
 import { MeshUtils } from "../../utils/MeshUtils";
 import { ModelLoader } from "../../utils/ModelLoader";
@@ -213,26 +215,26 @@ export class SceneSyncSystem extends System {
   private lastSyncedEntities: Map<number, EntityData> = new Map();
 
   initialize(): void {
-    this.unsubscribe = useSceneStore.subscribe((state) => {
+    // 🚀 ENGINE-FIRST: Only sync what actually changed
+    this.unsubscribe = useSceneStore.subscribe((state, prevState) => {
       if (this.pendingSync) return;
-      this.pendingSync = true;
-
-      requestAnimationFrame(() => {
-        this.pendingSync = false;
-        this.sync(state.entities, state.rootEntityIds);
-      });
+      
+      // If the number of entities changed, or a specific entity data changed
+      // we check for differences.
+      if (state.entities !== prevState.entities || state.rootEntityIds !== prevState.rootEntityIds) {
+        this.pendingSync = true;
+        requestAnimationFrame(() => {
+          this.pendingSync = false;
+          this.sync(state.entities, state.rootEntityIds);
+        });
+      }
     });
 
     const state = useSceneStore.getState();
     this.sync(state.entities, state.rootEntityIds);
     this.initialized = true;
 
-    console.log("✅ SceneSyncSystem: Unity-style bridge established");
-  }
-
-  forceSync(): void {
-    const state = useSceneStore.getState();
-    this.sync(state.entities, state.rootEntityIds);
+    console.log("✅ SceneSyncSystem: Delta-based Sync Active");
   }
 
   private sync(
@@ -242,7 +244,16 @@ export class SceneSyncSystem extends System {
     if (!this.app) return;
 
     const syncIds = new Set<number>();
+    const entitiesArray = Array.from(entities.values());
 
+    // 1. Identify missing entities and remove them (Engine-First Cleanup)
+    for (const [id, entity] of this.entityMap) {
+      if (!entities.has(id)) {
+        this.removeEngineEntity(id, entity);
+      }
+    }
+
+    // 2. Add or Update entities
     const syncRecursive = (id: number, parent?: Entity) => {
       const data = entities.get(id);
       if (!data) return;
@@ -250,35 +261,41 @@ export class SceneSyncSystem extends System {
 
       let entity = this.entityMap.get(id);
 
+      // CREATE if it doesn't exist
       if (!entity) {
         entity = new Entity(data.name, id);
         this.entityMap.set(id, entity);
-
+        
         if (parent) parent.addChild(entity);
         else this.app!.scene.addEntity(entity);
+        
         this.addComponents(entity, data);
-      }
-
+      } 
+      
+      // UPDATE transform only if it hasn't been updated by Gizmos (Engine-First)
+      // We check if the store's version matches the engine's internal version
+      // In a real ECS we'd use a versioning system, here we check for significant drifts
       this.updateComponents(entity, data);
+
+      // SYNC hierarchy (re-parenting if needed)
+      if (parent && entity.parent !== parent) {
+        entity.parent?.removeChild(entity);
+        parent.addChild(entity);
+      }
 
       data.children.forEach((childId) => syncRecursive(childId, entity));
     };
 
     rootEntityIds.forEach((id) => syncRecursive(id));
+  }
 
-    for (const [id, entity] of this.entityMap) {
-      if (!syncIds.has(id)) {
-        const render = entity.getComponent(RenderComponent);
-        if (render?.object3D) {
-          this.app!.threeScene.remove(render.object3D);
-        }
-        this.app!.scene.removeEntity(entity);
-        this.entityMap.delete(id);
-        console.log(
-          `[SceneSyncSystem] Removed entity ${entity.name} (${id}) from scene`,
-        );
-      }
+  private removeEngineEntity(id: number, entity: Entity): void {
+    const render = entity.getComponent(RenderComponent);
+    if (render?.object3D) {
+      this.app!.threeScene.remove(render.object3D);
     }
+    this.app!.scene.removeEntity(entity);
+    this.entityMap.delete(id);
   }
 
   private addComponents(entity: Entity, data: EntityData): void {
@@ -290,7 +307,7 @@ export class SceneSyncSystem extends System {
       const hasComponent = Array.from(entity.components.keys()).some(
         (c) =>
           (c as unknown as { TYPE: string }).TYPE === componentType ||
-          c.name === componentType,
+          (c as unknown as { name: string }).name === componentType,
       );
 
       if (!hasComponent) {

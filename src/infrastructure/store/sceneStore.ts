@@ -296,7 +296,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       rootEntityIds: [],
       nextEntityId: 1,
       sceneName: "Untitled Scene",
-      isDirty: false,
+      isDirty: true,
     }),
 
   markDirty: () => set({ isDirty: true }),

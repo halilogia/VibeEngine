@@ -6,3 +6,4 @@ export * from './System';
 export * from './Application';
 export type { ApplicationOptions } from './types';
 export * from './StorageManager';
+export * from './EngineBridge';

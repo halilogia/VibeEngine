@@ -7,7 +7,9 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { SAOPass } from "three/examples/jsm/postprocessing/SAOPass.js";
 import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import type { ApplicationOptions } from "./types";
 
@@ -20,6 +22,8 @@ export class Application {
   readonly canvas: HTMLCanvasElement;
   readonly composer: EffectComposer;
   readonly bloomPass: UnrealBloomPass;
+  readonly saoPass: SAOPass;
+  readonly outlinePass: OutlinePass;
   readonly fxaaPass: ShaderPass;
 
   readonly scene: Scene;
@@ -48,9 +52,14 @@ export class Application {
       options.backgroundColor ?? 0x11111a,
     );
 
-    // 💡 Add a default ambient light for editor visibility
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // 💡 Add default lighting for editor visibility
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     this.threeScene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    sunLight.position.set(5, 10, 7.5);
+    sunLight.castShadow = true;
+    this.threeScene.add(sunLight);
 
     this.editorScene = new THREE.Scene();
     this.editorScene.background = null;
@@ -94,6 +103,14 @@ export class Application {
     const renderPass = new RenderPass(this.threeScene, this.camera);
     this.composer.addPass(renderPass);
 
+    // 🌑 ELITE SAO (Ambient Occlusion) - Adds realistic depth and contact shadows
+    this.saoPass = new SAOPass(this.threeScene, this.camera, false);
+    this.saoPass.params.saoIntensity = 0.5;
+    this.saoPass.params.saoScale = 5.0;
+    this.saoPass.params.saoKernelRadius = 25;
+    this.saoPass.params.saoBias = 0.5;
+    this.composer.addPass(this.saoPass);
+
     // ✨ ELITE Bloom (Cinema Effect)
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -104,7 +121,20 @@ export class Application {
     this.bloomPass.enabled = false;
     this.composer.addPass(this.bloomPass);
 
-    // 🕊️ ELITE Antialiasing (FXAA) - Universal standard for high compatibility
+    // 🟠 Selection Outline (Unity/Godot Standard)
+    this.outlinePass = new OutlinePass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        this.threeScene,
+        this.camera
+    );
+    this.outlinePass.edgeStrength = 4.0;
+    this.outlinePass.edgeGlow = 1.0;
+    this.outlinePass.edgeThickness = 2.0;
+    this.outlinePass.visibleEdgeColor.set('#f59e0b'); // Vibe Orange
+    this.outlinePass.hiddenEdgeColor.set('#78350f');
+    this.composer.addPass(this.outlinePass);
+
+    // 🕊️ ELITE Antialiasing (FXAA)
     this.fxaaPass = new ShaderPass(FXAAShader);
     this.fxaaPass.renderToScreen = true;
     this.composer.addPass(this.fxaaPass);
@@ -264,10 +294,10 @@ export class Application {
     this.renderer.autoClear = false;
     this.renderer.clear();
 
-    // Use Composer for main scene (Bloom, etc.)
+    // 1. Render Main Scene via Composer (Bloom, FXAA, Grid, Sky)
     this.composer.render();
 
-    // Render World-Space UI
+    // 2. Render World-Space UI (CSS2D)
     this.uiRenderer.render(this.threeScene, this.camera);
   };
 
@@ -289,8 +319,8 @@ export class Application {
 
   public onResize(overrideWidth?: number, overrideHeight?: number): void {
     const parent = this.canvas.parentElement;
-    const width = overrideWidth ?? (parent ? parent.clientWidth : window.innerWidth);
-    const height = overrideHeight ?? (parent ? parent.clientHeight : window.innerHeight);
+    const width = Math.max(1, overrideWidth ?? (parent ? parent.clientWidth : window.innerWidth));
+    const height = Math.max(1, overrideHeight ?? (parent ? parent.clientHeight : window.innerHeight));
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();

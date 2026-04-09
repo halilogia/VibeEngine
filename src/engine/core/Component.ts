@@ -38,9 +38,7 @@ export abstract class Component {
   }
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export type ComponentClass<T extends Component = Component> = {
   new (...args: any[]): T;
   readonly TYPE: string;
 };
-/* eslint-enable @typescript-eslint/no-explicit-any */

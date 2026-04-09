@@ -98,7 +98,7 @@ export const useLauncherViewModel = () => {
 
         await ProjectScanner.setActiveProject(selectedProject.path);
 
-        const sceneName = selectedProject.mainScene || "main";
+        const sceneName = selectedProject.mainScene || 'main';
         const baseFolder = selectedProject.path;
         const sceneFile = `${baseFolder}/src/levels/${sceneName}.json`;
 
@@ -218,19 +218,26 @@ export const useLauncherViewModel = () => {
           JSON.stringify(defaultScene, null, 2),
         );
 
-        // Create project-data.json
-        const projectData = {
+        // Create project.vibe — the VibeEngine native project manifest
+        const vibeManifest = {
+          vibeEngineVersion: '1.1.0',
+          id: name.toLowerCase().replace(/\s+/g, '-'),
           name,
-          version: "0.1.0",
-          engine: "vibe-engine",
-          mainScene: "main",
-          author: "Developer",
-          description: "A new VibeEngine project",
+          version: '0.1.0',
+          engine: 'vibe-engine',
+          mainScene: 'main',
+          author: 'Developer',
+          description: 'A new VibeEngine project',
+          createdAt: new Date().toISOString(),
+          scenes: [
+            { id: 'main', name: 'Main Scene', path: 'src/levels/main.json' }
+          ],
+          assetsDir: 'assets'
         };
 
         await ProjectScanner.createFile(
-          `${projectPath}/project-data.json`,
-          JSON.stringify(projectData, null, 2),
+          `${projectPath}/project.vibe`,
+          JSON.stringify(vibeManifest, null, 2),
         );
 
         const newProject: ProjectInfo = {

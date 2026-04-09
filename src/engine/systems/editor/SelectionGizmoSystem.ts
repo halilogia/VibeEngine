@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
-import { System, Entity, RenderComponent } from "@engine";
+import { System, Entity, RenderComponent, TransformComponent } from "@engine";
 import { useEditorStore, useSceneStore } from "@infrastructure/store";
 import { EditorCameraSystem } from "./EditorCameraSystem";
 
@@ -43,18 +43,38 @@ export class SelectionGizmoSystem extends System {
     this.gizmo.addEventListener("objectChange", () => {
       if (this.selectedEntity && this.gizmo?.object) {
         const mesh = this.gizmo.object;
-        const id = this.selectedEntity.id;
-
-        useSceneStore.getState().updateComponent(id, "Transform", {
-          position: [mesh.position.x, mesh.position.y, mesh.position.z],
-          rotation: [
-            THREE.MathUtils.radToDeg(mesh.rotation.x),
-            THREE.MathUtils.radToDeg(mesh.rotation.y),
-            THREE.MathUtils.radToDeg(mesh.rotation.z),
-          ],
-          scale: [mesh.scale.x, mesh.scale.y, mesh.scale.z],
-        });
+        
+        // 🚀 ENGINE-FIRST: Update the engine internal state immediately
+        // This makes the movement perfectly smooth regardless of React's speed
+        const transform = this.selectedEntity.getComponent(TransformComponent);
+        if (transform) {
+          transform.position.copy(mesh.position);
+          transform.rotation.copy(mesh.rotation);
+          transform.scale.copy(mesh.scale);
+        }
       }
+    });
+
+    // Sync back to store only when dragging is FINISHED (Efficiency)
+    this.gizmo.addEventListener("mouseDown", () => {
+        this.app!.getSystem(EditorCameraSystem)?.setDraggingState(true);
+    });
+
+    this.gizmo.addEventListener("mouseUp", () => {
+        this.app!.getSystem(EditorCameraSystem)?.setDraggingState(false);
+        
+        if (this.selectedEntity && this.gizmo?.object) {
+            const mesh = this.gizmo.object;
+            useSceneStore.getState().updateComponent(this.selectedEntity.id, "Transform", {
+                position: [mesh.position.x, mesh.position.y, mesh.position.z],
+                rotation: [
+                  THREE.MathUtils.radToDeg(mesh.rotation.x),
+                  THREE.MathUtils.radToDeg(mesh.rotation.y),
+                  THREE.MathUtils.radToDeg(mesh.rotation.z),
+                ],
+                scale: [mesh.scale.x, mesh.scale.y, mesh.scale.z],
+            });
+        }
     });
 
     this.unsubscribe = useEditorStore.subscribe((state) => {

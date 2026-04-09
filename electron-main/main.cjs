@@ -19,44 +19,57 @@ if (process.env.NODE_ENV !== 'production') {
 let activeProjectPath = '';
 
 function readProjectInfo(projectPath) {
-    const projectDataPath = path.join(projectPath, 'project-data.json');
-    const packageJsonPath = path.join(projectPath, 'package.json');
-    const hasProjectData = fs.existsSync(projectDataPath);
-    const hasPackageJson = fs.existsSync(packageJsonPath);
-    const hasDomain = fs.existsSync(path.join(projectPath, 'src', 'domain'));
+    // Primary: project.vibe (VibeEngine native format)
+    const vibeFilePath = path.join(projectPath, 'project.vibe');
     const name = path.basename(projectPath);
 
-    if (hasProjectData) {
+    if (fs.existsSync(vibeFilePath)) {
         try {
-            const raw = fs.readFileSync(projectDataPath, 'utf-8');
-            const projectData = JSON.parse(raw);
+            const raw = fs.readFileSync(vibeFilePath, 'utf-8');
+            const vibe = JSON.parse(raw);
             return {
-                name: projectData.name || name,
-                version: projectData.version || '0.0.0',
-                engine: projectData.engine || 'vibe-engine',
-                description: projectData.description || '',
-                author: projectData.author || '',
-                mainScene: projectData.mainScene || 'index',
+                name: vibe.name || name,
+                version: vibe.version || '0.1.0',
+                engine: 'vibe-engine',
+                description: vibe.description || '',
+                author: vibe.author || '',
+                mainScene: vibe.mainScene || 'main',
                 path: projectPath,
-                hasPackageJson,
-                hasDomain
+                hasPackageJson: fs.existsSync(path.join(projectPath, 'package.json')),
+                hasDomain: fs.existsSync(path.join(projectPath, 'src', 'domain')),
+                vibeVersion: vibe.vibeEngineVersion || '1.0.0',
+                scenes: vibe.scenes || []
             };
         } catch (error) {
-            console.error('Project data parse error:', error);
+            console.error('VibeEngine: .vibe parse error:', error);
         }
     }
 
-    return {
-        name,
-        version: hasPackageJson ? 'package.json' : '0.0.0',
-        engine: hasDomain ? 'vibe-engine' : 'unknown',
-        description: '',
-        author: '',
-        mainScene: 'index',
-        path: projectPath,
-        hasPackageJson,
-        hasDomain
-    };
+    // Legacy fallback: project-data.json
+    const legacyPath = path.join(projectPath, 'project-data.json');
+    if (fs.existsSync(legacyPath)) {
+        try {
+            const raw = fs.readFileSync(legacyPath, 'utf-8');
+            const data = JSON.parse(raw);
+            return {
+                name: data.name || name,
+                version: data.version || '0.0.0',
+                engine: 'vibe-engine',
+                description: data.description || '',
+                author: data.author || '',
+                mainScene: data.mainScene || 'main',
+                path: projectPath,
+                hasPackageJson: fs.existsSync(path.join(projectPath, 'package.json')),
+                hasDomain: fs.existsSync(path.join(projectPath, 'src', 'domain')),
+                vibeVersion: '1.0.0',
+                scenes: []
+            };
+        } catch (error) {
+            console.error('VibeEngine: project-data.json parse error:', error);
+        }
+    }
+
+    return null; // Not a valid VibeEngine project
 }
 
 // ─── FileSystem Operations ───────────────────────────────────────────────────
@@ -223,19 +236,20 @@ ipcMain.handle('list-projects', async (event, projectsPath) => {
         const projects = [];
 
         for (const entry of entries) {
-            if (entry.isDirectory()) {
-                const fullPath = path.join(projectsPath, entry.name);
-                // Basic validation: must have project-data.json or package.json
-                const hasProjectData = fs.existsSync(path.join(fullPath, 'project-data.json'));
-                const hasPackageJson = fs.existsSync(path.join(fullPath, 'package.json'));
-                const hasDomain = fs.existsSync(path.join(fullPath, 'src', 'domain'));
+            if (!entry.isDirectory()) continue;
+            const fullPath = path.join(projectsPath, entry.name);
 
-                if (hasProjectData || hasPackageJson || hasDomain) {
-                    projects.push(readProjectInfo(fullPath));
-                }
+            // A VibeEngine project MUST have a project.vibe file (or legacy project-data.json)
+            const hasVibe = fs.existsSync(path.join(fullPath, 'project.vibe'));
+            const hasLegacy = fs.existsSync(path.join(fullPath, 'project-data.json'));
+
+            if (hasVibe || hasLegacy) {
+                const info = readProjectInfo(fullPath);
+                if (info) projects.push(info);
             }
         }
 
+        console.log(`💎 VibeEngine: Found ${projects.length} project(s) in ${projectsPath}`);
         return projects;
     } catch (e) {
         console.error('List projects error:', e);
@@ -276,10 +290,12 @@ ipcMain.handle('scan-project-assets', async (event, projectPath) => {
                 let type = 'other';
                 if (['.glb', '.gltf', '.obj'].includes(ext)) type = 'model';
                 else if (['.ts', '.tsx', '.js'].includes(ext)) type = 'script';
-                else if (['.png', '.jpg', '.jpeg'].includes(ext)) type = 'texture';
+                else if (['.png', '.jpg', '.jpeg', '.webp'].includes(ext)) type = 'texture';
                 else if (['.mp3', '.wav', '.ogg'].includes(ext)) type = 'audio';
+                else if (ext === '.vibe') type = 'project';
+                else if (ext === '.json') type = 'scene';
                 
-                if (type === 'other' && !['.json', '.md', '.txt'].includes(ext)) continue;
+                if (type === 'other') continue;
 
                 assets.push({
                     id,

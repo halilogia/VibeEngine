@@ -20,3 +20,5 @@ export * from './editor/EditorCameraSystem';
 export * from './editor/EditorGridSystem';
 export * from './editor/SelectionGizmoSystem';
 export * from './editor/SceneSyncSystem';
+export * from './editor/SelectionSystem';
+export * from './editor/StoreSyncSystem';

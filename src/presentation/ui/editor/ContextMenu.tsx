@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { VibeTheme, createVibeStyles } from '@themes/VibeStyles';
 
 export interface ContextMenuItem {
-    label: string;
+    label?: string;
     icon?: React.ReactNode;
     onClick?: () => void;
     danger?: boolean;

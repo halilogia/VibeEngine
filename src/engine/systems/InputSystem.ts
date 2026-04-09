@@ -58,20 +58,26 @@ export class InputSystem extends System {
     initialize(): void {
         window.addEventListener('keydown', this.handleKeyDown);
         window.addEventListener('keyup', this.handleKeyUp);
-        window.addEventListener('mousedown', this.onPointerDown);
-        window.addEventListener('mouseup', this.onPointerUp);
-        window.addEventListener('mousemove', this.onMouseMove);
-        window.addEventListener('touchstart', this.onTouchStart, { passive: false });
-        window.addEventListener('touchend', this.onTouchEnd);
-        window.addEventListener('touchmove', this.onTouchMove, { passive: false });
+        
+        // 🚀 ENGINE-FIRST: Bind input to the canvas, not the global window
+        // This prevents "input leakage" when typing in other editor panels
+        const canvas = this.app?.canvas;
+        if (canvas) {
+            canvas.addEventListener('mousedown', this.onPointerDown);
+            canvas.addEventListener('mouseup', this.onPointerUp);
+            canvas.addEventListener('mousemove', this.onMouseMove);
+            canvas.addEventListener('touchstart', this.onTouchStart, { passive: false });
+            canvas.addEventListener('touchend', this.onTouchEnd);
+            canvas.addEventListener('touchmove', this.onTouchMove, { passive: false });
+        }
 
         // Default ELITE Mappings
-        this.registerAction({ name: 'Horizontal', type: 'Axis', keys: [], positiveKeys: ['d', 'ArrowRight'], negativeKeys: ['a', 'ArrowLeft'] });
-        this.registerAction({ name: 'Vertical', type: 'Axis', keys: [], positiveKeys: ['w', 'ArrowUp'], negativeKeys: ['s', 'ArrowDown'] });
+        this.registerAction({ name: 'Horizontal', type: 'Axis', keys: [], positiveKeys: ['d', 'ArrowRight', 'D'], negativeKeys: ['a', 'ArrowLeft', 'A'] });
+        this.registerAction({ name: 'Vertical', type: 'Axis', keys: [], positiveKeys: ['w', 'ArrowUp', 'W'], negativeKeys: ['s', 'ArrowDown', 'S'] });
         this.registerAction({ name: 'Jump', type: 'Button', keys: [' ', 'Spacebar'] });
         this.registerAction({ name: 'Fire', type: 'Button', keys: ['f', 'F', 'Control'] });
 
-        console.log('🎮 InputSystem: Action-Based Mapping Core Online');
+        console.log('🎮 InputSystem: Localized Viewport Input Active');
     }
 
     update(_deltaTime: number, _entities: Entity[]): void {
